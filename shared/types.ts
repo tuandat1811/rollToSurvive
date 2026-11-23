@@ -222,16 +222,6 @@ export interface WeatherView {
   effects: { text: string; good: boolean }[];
 }
 
-export interface TutorialStepView {
-  id: string;
-  phase: string;
-  title: string;
-  hint: string;
-  done: boolean;
-  /** action key the guide points at right now, if any */
-  action?: string;
-}
-
 export interface GameView {
   id: string;
   name: string;
@@ -258,7 +248,6 @@ export interface GameView {
   water: { carried: number; cap: number; stored: number; storeCap: number };
   raft?: { stage: number; integrity: number; stages: string[] };
   traps: { kind: string; region: string; ready: boolean }[];
-  tutorial: TutorialStepView[];
   knowledge: { currents: number; shipNext?: { day: number; slot: number }; shipKnown: boolean; recipes: string[] };
   map: { regions: RegionView[]; routes: RouteView[] };
   actions: ActionView[];

@@ -156,8 +156,38 @@ const SLIDES: Slide[] = [
             <span>Ôm khúc gỗ lao ra biển ngay hôm nay. Cơ hội cực thấp.</span>
           </div>
         </div>
-        <p className="muted small" style={{ marginTop: 10 }}>
-          Bảng <b>🎯 Việc cần làm</b> phía trên danh sách hành động sẽ dẫn bạn từng bước. Bấm <b>📖 Hướng dẫn</b> trên thanh trên cùng để xem lại trang này.
+      </>
+    ),
+  },
+  {
+    icon: '🧭',
+    title: 'Màn hình chơi gồm những gì?',
+    body: (
+      <>
+        <div className="guide-goals">
+          <div>
+            <b>❤️ Sinh lực & Ăn uống nhanh</b>
+            <span>4 chỉ số sinh tồn, các trạng thái đang mắc, và nút ăn/uống đồ đang mang theo — không tốn thời gian.</span>
+          </div>
+          <div>
+            <b>🌤️ Thời tiết hôm nay</b>
+            <span>Mỗi loại thời tiết có buff ▲ và nerf ▼ riêng. Hãy lên kế hoạch theo trời.</span>
+          </div>
+          <div>
+            <b>🎲 Bảng hành động</b>
+            <span>Các việc làm được ở nơi bạn đứng, chia theo nhóm. Mỗi thẻ ghi số buổi, năng lượng và điểm cần tung (ví dụ "d20 ≥ 8").</span>
+          </div>
+          <div>
+            <b>🗺️ Bản đồ · 🎒 Hành trang · ⛺ Căn cứ · 📓 Nhật ký</b>
+            <span>Đường đi và vùng đã khám phá; đồ mang theo và kho; công trình, bè, lịch tàu; mọi điều đã xảy ra.</span>
+          </div>
+          <div>
+            <b>⭐ Nhân vật</b>
+            <span>Thuộc tính và kỹ năng. Điểm thuộc tính mới nhận được khi sống sót qua các mốc ngày.</span>
+          </div>
+        </div>
+        <p className="muted small">
+          Bấm <b>📖 Hướng dẫn</b> trên thanh trên cùng để xem lại các trang này bất cứ lúc nào.
         </p>
       </>
     ),

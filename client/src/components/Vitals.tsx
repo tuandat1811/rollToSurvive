@@ -9,7 +9,7 @@ const VITALS = [
   { id: 'energy', name: 'Năng lượng', icon: '⚡', color: 'var(--energy)', hint: 'Tiêu hao theo hành động. Hồi khi nghỉ và ngủ. Thấp: kiểm tra bị trừ điểm.' },
 ] as const;
 
-export default function Vitals({ view, act, guideConsume }: { view: GameView; act: Act; guideConsume?: boolean }) {
+export default function Vitals({ view, act }: { view: GameView; act: Act }) {
   const atBase = view.baseRegion === view.location.id;
   const consumables: (ItemView & { from: 'inv' | 'storage' })[] = [
     ...view.inventory.filter((i) => i.usable).map((i) => ({ ...i, from: 'inv' as const })),
@@ -48,7 +48,7 @@ export default function Vitals({ view, act, guideConsume }: { view: GameView; ac
         )}
       </div>
 
-      <div className={`card panel ${guideConsume ? 'guided-panel' : ''}`}>
+      <div className="card panel">
         <div className="row" style={{ marginBottom: 6 }}>
           <div className="section-title" style={{ margin: 0 }}>Ăn uống nhanh</div>
           <div className="spacer" />

@@ -6,7 +6,6 @@ import { RAFT_STAGES, RECIPES, STRUCTURES } from '../content/crafting.js';
 import { ATTR_DEFS, LOCATION_DEFS, REGION_DEFS, ROUTE_DEFS, SKILL_DEFS, SLOT_NAMES, WEATHER_DEFS } from '../content/defs.js';
 import { EVENTS } from '../content/events.js';
 import { ITEMS } from '../content/items.js';
-import { TUTORIAL } from '../content/tutorial.js';
 import { bands, odds, resolveCheck, successFace } from './check.js';
 import { absSlot, carryMax, containerCap, storageWaterCap, waterCount, weightOf } from './ctx.js';
 import { journey, stageCheck } from './escape.js';
@@ -217,14 +216,6 @@ export function buildView(id: string, s: GameState): GameView {
     water: { carried: waterCount(s.inventory), cap: containerCap(s.inventory), stored: waterCount(s.storage), storeCap: storageWaterCap(s) },
     raft: raft ? { stage: raft.stage, integrity: raft.integrity, stages: RAFT_STAGES.map((x) => x.name) } : undefined,
     traps: s.traps.map((t) => ({ kind: t.kind, region: REGION_DEFS[t.region].name, ready: t.readyAt <= now })),
-    tutorial: TUTORIAL.map((t) => ({
-      id: t.id,
-      phase: t.phase,
-      title: t.title,
-      hint: t.hint,
-      done: t.done(s),
-      action: t.action?.(s),
-    })),
     knowledge: {
       currents: s.world.currents,
       shipKnown: s.world.shipKnown,

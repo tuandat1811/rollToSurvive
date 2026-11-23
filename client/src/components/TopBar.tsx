@@ -45,7 +45,7 @@ export default function TopBar({ view, onExit, onHelp }: { view: GameView; onExi
         📍 {view.location.icon} {view.location.name}
         {view.baseRegion === view.location.id && <span className="badge good">⚑ Căn cứ</span>}
       </div>
-      <button className="btn ghost sm" onClick={onHelp} title="Xem lại hướng dẫn và bật bảng Việc cần làm">
+      <button className="btn ghost sm" onClick={onHelp} title="Xem hướng dẫn về cách chơi và các tính năng">
         📖 Hướng dẫn
       </button>
       <button className="btn ghost sm" onClick={onExit} title="Về trang chủ (ván chơi được tự động lưu)">

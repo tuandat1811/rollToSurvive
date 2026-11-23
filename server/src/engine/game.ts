@@ -362,7 +362,6 @@ export function consume(prev: GameState, itemId: string, from: 'inv' | 'storage'
     (itemId === 'berries' && s.skills.survival.lvl >= 2 ? 0 : def.food?.risk ?? 0);
   stack.qty--;
   ctx.prune(src);
-  s.flags['done:consume'] = true;
   if (def.food) {
     ctx.vital('hunger', def.food.hunger);
     if (def.food.thirst) ctx.vital('thirst', def.food.thirst);

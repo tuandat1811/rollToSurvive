@@ -10,7 +10,6 @@ import EscapeModal from './EscapeModal.tsx';
 import EventModal from './EventModal.tsx';
 import IntroGuide from './IntroGuide.tsx';
 import InventoryPanel from './InventoryPanel.tsx';
-import TutorialPanel from './TutorialPanel.tsx';
 import WeatherCard from './WeatherCard.tsx';
 import JournalPanel from './JournalPanel.tsx';
 import MapPanel from './MapPanel.tsx';
@@ -50,17 +49,11 @@ export default function Game({ initial, onExit, onNew }: { initial: GameView; on
   const [showEnd, setShowEnd] = useState(true);
   const isFresh = initial.day === 1 && initial.slot === 0 && initial.version === 0;
   const [introOpen, setIntroOpen] = useState(() => isFresh && !readPref('rts.introSeen'));
-  const [tutorialHidden, setTutorialHidden] = useState(() => !!readPref(`rts.tutorialHidden.${initial.id}`));
 
   const closeIntro = () => {
     writePref('rts.introSeen', '1');
     setIntroOpen(false);
   };
-  const setHidden = (hidden: boolean) => {
-    writePref(`rts.tutorialHidden.${view.id}`, hidden ? '1' : null);
-    setTutorialHidden(hidden);
-  };
-  const guideKey = tutorialHidden ? undefined : view.tutorial.find((t) => !t.done)?.action;
 
   useEffect(() => {
     if (!toast) return;
@@ -115,20 +108,16 @@ export default function Game({ initial, onExit, onNew }: { initial: GameView; on
       <TopBar
         view={view}
         onExit={onExit}
-        onHelp={() => {
-          setHidden(false);
-          setIntroOpen(true);
-        }}
+        onHelp={() => setIntroOpen(true)}
       />
       <div className="layout">
         <div className="col" data-hidden={mobile !== 'status'}>
-          <Vitals view={view} act={act} guideConsume={!tutorialHidden && view.tutorial.find((t) => !t.done)?.id === 'consume'} />
+          <Vitals view={view} act={act} />
           <CharacterPanel view={view} act={act} />
         </div>
         <div className="col" data-hidden={mobile !== 'actions'}>
-          {!tutorialHidden && view.status === 'playing' && <TutorialPanel view={view} onPick={setSelected} onHide={() => setHidden(true)} act={act} />}
           <WeatherCard view={view} />
-          <ActionBoard view={view} onPick={setSelected} guideKey={guideKey} />
+          <ActionBoard view={view} onPick={setSelected} />
         </div>
         <div className="col" data-hidden={mobile === 'actions' || mobile === 'status'}>
           <div className="tabs">

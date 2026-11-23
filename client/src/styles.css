@@ -415,22 +415,7 @@ p { margin: 0 0 8px; }
   .slots span:not(.now) .sn { display: none; }
 }
 
-/* ---------------------------------------------------------- tutorial */
-.guide-panel { padding: 14px 16px; border-color: rgba(233, 196, 106, 0.55); background: linear-gradient(135deg, rgba(233, 196, 106, 0.1), var(--panel)); }
-.guide-panel.done { border-color: rgba(143, 209, 106, 0.5); background: linear-gradient(135deg, rgba(143, 209, 106, 0.1), var(--panel)); }
-.guide-title { font-size: 18px; margin-top: 8px; }
-.guide-steps { margin: 10px 0 0; padding-left: 4px; list-style: none; font-size: 13px; }
-.guide-steps li { padding: 3px 0; color: var(--text-dim); }
-.guide-steps li.done { color: var(--good); text-decoration: line-through; text-decoration-color: rgba(143, 209, 106, 0.5); }
-.guide-steps li.now { color: var(--sand); font-weight: 700; }
-.action.guided, .card.guided-panel {
-  border-color: var(--sand);
-  box-shadow: 0 0 0 2px rgba(233, 196, 106, 0.35), 0 0 22px rgba(233, 196, 106, 0.18);
-  animation: guidePulse 1.8s ease-in-out infinite;
-}
-@keyframes guidePulse { 50% { box-shadow: 0 0 0 4px rgba(233, 196, 106, 0.15), 0 0 30px rgba(233, 196, 106, 0.3); } }
-.action { position: relative; }
-.guide-tag { position: absolute; top: -9px; right: 10px; background: var(--sand); color: #2a2111; font-size: 10.5px; font-weight: 800; padding: 1px 8px; border-radius: 99px; }
+/* ---------------------------------------------------------- help popup */
 .guide-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px 0; }
 .guide-dots { display: flex; gap: 6px; }
 .guide-dots button { width: 9px; height: 9px; border-radius: 50%; border: 0; padding: 0; background: var(--panel-3); }
