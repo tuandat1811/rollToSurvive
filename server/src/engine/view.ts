@@ -7,7 +7,7 @@ import { ATTR_DEFS, LOCATION_DEFS, REGION_DEFS, ROUTE_DEFS, SKILL_DEFS, SLOT_NAM
 import { EVENTS } from '../content/events.ts';
 import { ITEMS } from '../content/items.ts';
 import { TUTORIAL } from '../content/tutorial.ts';
-import { odds, resolveCheck } from './check.ts';
+import { bands, odds, resolveCheck, successFace } from './check.ts';
 import { absSlot, carryMax, containerCap, storageWaterCap, waterCount, weightOf } from './ctx.ts';
 import { journey, stageCheck } from './escape.ts';
 import { eventChoices, instances, materialStatus, unmetReasons } from './game.ts';
@@ -15,6 +15,7 @@ import { ATTRS, REGIONS, SKILLS, type CheckSpec, type GameState, type ItemStack 
 
 function checkView(s: GameState, spec: CheckSpec): CheckView {
   const rc = resolveCheck(s, spec);
+  const b = bands(rc.totalMod, rc.dc, spec.crit);
   return {
     label: spec.label ?? '',
     attr: spec.attr,
@@ -29,6 +30,10 @@ function checkView(s: GameState, spec: CheckSpec): CheckView {
     dcLabel: dcLabel(rc.dc),
     adv: rc.adv,
     odds: odds(rc),
+    dice: rc.adv === 0 ? 1 : 2,
+    bands: b,
+    successFace: successFace(b),
+    crit: spec.crit ?? 'standard',
   };
 }
 

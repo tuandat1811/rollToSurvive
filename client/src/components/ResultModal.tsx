@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { TurnResult } from '../../../shared/types.ts';
-import { Changes, D20, Formula, Modal, NoticeCard, TIER_NAMES } from './ui.tsx';
+import { Changes, D20, Formula, Modal, NoticeCard, ThresholdTable, TIER_NAMES, diceText } from './ui.tsx';
 
 const ATTR_NAMES: Record<string, string> = { STR: 'Sức mạnh', AGI: 'Nhanh nhẹn', END: 'Sức bền', INT: 'Trí tuệ', PER: 'Quan sát' };
 const SKILL_NAMES: Record<string, string> = {
@@ -63,11 +63,9 @@ export default function ResultModal({ result, onClose }: { result: TurnResult; o
                 );
               })}
             </div>
-            {roll.dice.length > 1 && (
-              <div className="tiny faint" style={{ textAlign: 'center' }}>
-                {roll.adv > 0 ? 'Lợi thế: lấy kết quả cao hơn' : 'Bất lợi: lấy kết quả thấp hơn'}
-              </div>
-            )}
+            <div className="tiny faint" style={{ textAlign: 'center' }}>
+              Tung {diceText(roll.dice.length, roll.adv)}
+            </div>
             {done && (
               <>
                 <div style={{ marginTop: 10 }}>
@@ -82,6 +80,11 @@ export default function ResultModal({ result, onClose }: { result: TurnResult; o
                   {roll.natural === 1 && <span className="badge bad">Natural 1!</span>}
                 </div>
                 <div className={`tier-banner t-${roll.tier}`}>{TIER_NAMES[roll.tier]}</div>
+                {roll.bands && (
+                  <div style={{ marginTop: 10 }}>
+                    <ThresholdTable bands={roll.bands} crit={roll.crit} highlight={roll.tier} compact />
+                  </div>
+                )}
               </>
             )}
           </div>

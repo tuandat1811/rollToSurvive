@@ -108,7 +108,9 @@ const SLIDES: Slide[] = [
           <span className="t-crit_failure">Thảm hại</span>
         </div>
         <ul className="guide-list">
-          <li>Trước khi xác nhận, bạn luôn thấy <b>xác suất từng kết quả</b>.</li>
+          <li>
+            Trước khi xác nhận, bạn luôn thấy <b>tung mấy viên xúc xắc</b> và <b>cần ra bao nhiêu điểm</b> cho từng mức kết quả.
+          </li>
           <li>Công cụ tốt và kỹ năng cao giúp tăng cơ hội — nhưng rủi ro không bao giờ biến mất.</li>
           <li>Thất bại vẫn cho kinh nghiệm. Kỹ năng tăng khi bạn dùng nó; thuộc tính tăng khi sống sót đủ lâu.</li>
         </ul>

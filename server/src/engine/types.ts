@@ -137,6 +137,17 @@ export interface RollInfo {
   natural: number;
   total: number;
   tier: Tier;
+  /** score thresholds at the time of the roll (absent on saves made before this field existed) */
+  bands?: Band[];
+  crit?: CritPolicy;
+}
+
+export interface Band {
+  tier: Tier;
+  faceMin: number;
+  faceMax: number;
+  totalMin: number;
+  totalMax: number;
 }
 
 export interface Notice {

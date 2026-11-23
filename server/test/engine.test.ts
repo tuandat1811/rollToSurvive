@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.ts';
 import { Store } from '../src/db.ts';
-import { tierFor } from '../src/engine/check.ts';
+import { bands, successFace, tierFor } from '../src/engine/check.ts';
 import { GameError, chooseEvent, consume, escapeStep, findInstance, newGame, performAction } from '../src/engine/game.ts';
 import type { GameState } from '../src/engine/types.ts';
 import { buildView } from '../src/engine/view.ts';
@@ -42,6 +42,21 @@ describe('D20 resolution', () => {
     expect(tierFor(10, 4, 12)).toBe('failure');
     expect(tierFor(5, 1, 12)).toBe('crit_failure');
   });
+  it('lists readable score bands per tier (die face and total)', () => {
+    // +2 modifier vs DC 10, standard crit rules
+    expect(bands(2, 10, 'standard')).toEqual([
+      { tier: 'crit_success', faceMin: 18, faceMax: 20, totalMin: 20, totalMax: 22 },
+      { tier: 'success', faceMin: 8, faceMax: 17, totalMin: 10, totalMax: 19 },
+      { tier: 'partial', faceMin: 4, faceMax: 7, totalMin: 6, totalMax: 9 },
+      { tier: 'failure', faceMin: 2, faceMax: 3, totalMin: 4, totalMax: 5 },
+      { tier: 'crit_failure', faceMin: 1, faceMax: 1, totalMin: 3, totalMax: 3 },
+    ]);
+    expect(successFace(bands(2, 10, 'standard'))).toBe(8);
+    // very hard: only a natural 20 can lift a partial into a success
+    expect(successFace(bands(0, 23, 'standard'))).toBe(20);
+    expect(successFace(bands(0, 30, 'standard'))).toBeNull();
+  });
+
   it('natural 20 / 1 shift one tier, safe actions never critically fail', () => {
     expect(tierFor(20, 27, 30)).toBe('success'); // partial -> success, does not skip to crit
     expect(tierFor(1, 13, 12)).toBe('partial');

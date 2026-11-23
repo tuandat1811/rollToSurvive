@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
-import type { Change, CheckView, Notice, Tier } from '../../../shared/types.ts';
+import type { Band, Change, CheckView, CritPolicy, Notice, Tier } from '../../../shared/types.ts';
 
 export const TIER_NAMES: Record<Tier, string> = {
   crit_success: 'Thành công vang dội',
@@ -44,33 +44,62 @@ export function Bar({ value, max = 100, color }: { value: number; max?: number; 
   );
 }
 
-export const pct = (x: number) => `${Math.round(x * 100)}%`;
+const sign = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
 
-export function successChance(c: CheckView) {
-  return c.odds.success + c.odds.crit_success;
+/** short "what do I need to roll" label for cards and badges */
+export function needLabel(c: CheckView): string {
+  if (c.successFace === null) return 'Không thể thành công';
+  if (c.successFace <= 1) return 'Chắc chắn thành công';
+  return `${c.dice === 2 ? '2d20' : 'd20'} ≥ ${c.successFace}`;
 }
 
-export function OddsBar({ check }: { check: CheckView }) {
+export function diceText(dice: number, adv: number): string {
+  if (dice <= 1) return '1 viên d20';
+  return adv > 0 ? '2 viên d20, lấy viên CAO hơn (lợi thế)' : '2 viên d20, lấy viên THẤP hơn (bất lợi)';
+}
+
+function critNote(crit: CritPolicy | undefined): string {
+  if (crit === 'none') return 'Không áp dụng quy tắc tung ra 20/1.';
+  if (crit === 'safe') return 'Việc an toàn: không có Thất bại thảm hại. Tung ra 20 thì kết quả tăng 1 bậc.';
+  return 'Tung ra 20: kết quả tăng 1 bậc. Tung ra 1: kết quả giảm 1 bậc.';
+}
+
+const range = (a: number, b: number) => (a === b ? `${a}` : `${a} – ${b}`);
+
+/** score thresholds per outcome tier: total needed and die face needed */
+export function ThresholdTable({ bands, crit, highlight, compact }: { bands: Band[]; crit?: CritPolicy; highlight?: Tier; compact?: boolean }) {
   return (
-    <>
-      <div className="odds" aria-label="Xác suất kết quả">
-        {TIER_ORDER.map((t) => (check.odds[t] > 0 ? <span key={t} className={`t-${t}`} style={{ width: pct(check.odds[t]) }} title={`${TIER_NAMES[t]}: ${pct(check.odds[t])}`} /> : null))}
-      </div>
-      <div className="odds-legend">
-        {TIER_ORDER.map((t) =>
-          check.odds[t] >= 0.005 ? (
-            <span key={t}>
-              <i className={`t-${t}`} />
-              {TIER_NAMES[t]} {pct(check.odds[t])}
-            </span>
-          ) : null,
-        )}
-      </div>
-    </>
+    <div className={`thresholds ${compact ? 'compact' : ''}`}>
+      <table>
+        <thead>
+          <tr>
+            <th>Kết quả</th>
+            <th>Tổng điểm</th>
+            <th>Mặt xúc xắc cần ra</th>
+          </tr>
+        </thead>
+        <tbody>
+          {TIER_ORDER.map((t) => {
+            const b = bands.find((x) => x.tier === t);
+            const top = b && b.faceMax === 20;
+            const bottom = b && b.faceMin === 1;
+            return (
+              <tr key={t} className={`${b ? '' : 'impossible'} ${highlight === t ? 'hit' : ''}`}>
+                <td>
+                  <i className={`dot t-${t}`} />
+                  {TIER_NAMES[t]}
+                </td>
+                <td>{!b ? '—' : top && b.faceMin < 20 ? `${b.totalMin} trở lên` : bottom && b.faceMax > 1 ? `${b.totalMax} trở xuống` : range(b.totalMin, b.totalMax)}</td>
+                <td>{!b ? 'Không thể xảy ra' : range(b.faceMin, b.faceMax)}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      <div className="tiny faint">{critNote(crit)}</div>
+    </div>
   );
 }
-
-const sign = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
 
 export function Formula({ check, natural }: { check: { attr: string; attrName?: string; attrMod: number; skillName?: string; skill?: string; skillMod: number; mods: { label: string; value: number }[]; dc: number; adv: number }; natural?: number }) {
   return (
@@ -95,17 +124,55 @@ export function Formula({ check, natural }: { check: { attr: string; attrName?: 
   );
 }
 
-export function CheckBox({ check }: { check: CheckView }) {
+/** modifier terms only, with their sum */
+export function ModList({ check }: { check: CheckView }) {
   return (
-    <div className="box">
-      <div className="row" style={{ justifyContent: 'space-between', marginBottom: 8 }}>
-        <b>🎲 {check.label || 'Kiểm tra D20'}</b>
-        <span className="badge dice">
-          Độ khó: {check.dcLabel} · Thành công {pct(successChance(check))}
+    <div className="formula">
+      <span className="term">
+        {sign(check.attrMod)} {check.attrName}
+      </span>
+      {check.skill && (
+        <span className="term">
+          {sign(check.skillMod)} {check.skillName}
         </span>
-      </div>
-      <Formula check={check} />
-      <OddsBar check={check} />
+      )}
+      {check.mods.map((m, i) => (
+        <span key={i} className={`term ${m.value < 0 ? 'neg' : 'pos'}`}>
+          {sign(m.value)} {m.label}
+        </span>
+      ))}
+      <span className="faint">=</span>
+      <span className="term dc">{sign(check.totalMod)}</span>
+    </div>
+  );
+}
+
+export function CheckBox({ check, compact }: { check: CheckView; compact?: boolean }) {
+  return (
+    <div className={compact ? 'check-compact' : 'box'}>
+      {!compact && (
+        <div className="row wrap" style={{ justifyContent: 'space-between', marginBottom: 8 }}>
+          <b>🎲 {check.label || 'Kiểm tra D20'}</b>
+          <span className="badge dice">
+            Độ khó: {check.dcLabel} · DC {check.dc}
+          </span>
+        </div>
+      )}
+      <dl className="check-lines">
+        <dt>Tung</dt>
+        <dd>
+          <b>{diceText(check.dice, check.adv)}</b>
+        </dd>
+        <dt>Cộng điểm</dt>
+        <dd>
+          <ModList check={check} />
+        </dd>
+        <dt>Tổng điểm</dt>
+        <dd>
+          Mặt xúc xắc <b>{sign(check.totalMod)}</b>, so với <b>DC {check.dc}</b>
+        </dd>
+      </dl>
+      <ThresholdTable bands={check.bands} crit={check.crit} compact={compact} />
     </div>
   );
 }

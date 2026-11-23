@@ -450,3 +450,23 @@ p { margin: 0 0 8px; }
 .guide-tiers { display: flex; border-radius: 10px; overflow: hidden; margin-bottom: 10px; }
 .guide-tiers span { flex: 1; text-align: center; font-size: 12px; font-weight: 700; padding: 6px 2px; color: #1b1409; }
 @media (max-width: 560px) { .guide-vitals { grid-template-columns: 1fr; } .guide-tiers span { font-size: 10px; } }
+
+/* ---------------------------------------------------------- D20 thresholds */
+.check-lines { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; align-items: center; margin: 0 0 10px; font-size: 13px; }
+.check-lines dt { color: var(--text-faint); font-size: 12px; }
+.check-lines dd { margin: 0; }
+.check-compact { margin-top: 4px; }
+.thresholds table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.thresholds th { text-align: left; font-size: 11px; font-weight: 700; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 8px; border-bottom: 1px solid var(--line-soft); }
+.thresholds td { padding: 5px 8px; border-bottom: 1px solid var(--line-soft); font-variant-numeric: tabular-nums; }
+.thresholds td:first-child { font-weight: 600; white-space: nowrap; }
+.thresholds td:nth-child(2), .thresholds td:nth-child(3) { font-weight: 700; }
+.thresholds tr.impossible td { color: var(--text-faint); font-weight: 400; }
+.thresholds tr.hit td { background: rgba(233, 196, 106, 0.16); }
+.thresholds tr.hit td:first-child { box-shadow: inset 3px 0 0 var(--sand); }
+.thresholds .dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 7px; vertical-align: -1px; }
+.thresholds .tiny { margin-top: 6px; }
+.thresholds.compact table { font-size: 12px; }
+.thresholds.compact td, .thresholds.compact th { padding: 3px 6px; }
+.choice.off { opacity: 0.55; }
+@media (max-width: 560px) { .thresholds th:nth-child(3) { font-size: 10px; } .check-lines { grid-template-columns: 1fr; gap: 2px; } .check-lines dt { margin-top: 4px; } }

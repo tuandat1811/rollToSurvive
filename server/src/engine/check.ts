@@ -1,7 +1,7 @@
 import { BALANCE } from '../content/balance.ts';
 import { CONDITIONS } from '../content/conditions.ts';
 import { Ctx } from './ctx.ts';
-import type { CheckSpec, GameState, RollInfo, SkillId, Tier } from './types.ts';
+import type { Band, CheckSpec, GameState, RollInfo, SkillId, Tier } from './types.ts';
 
 export const TIER_ORDER: Tier[] = ['crit_failure', 'failure', 'partial', 'success', 'crit_success'];
 
@@ -77,6 +77,30 @@ export function odds(rc: ResolvedCheck): Record<Tier, number> {
   return out;
 }
 
+/**
+ * Readable thresholds: which kept-die faces (and totals) lead to each tier.
+ * Derived by evaluating every face with the real rules, so natural 20/1 effects
+ * are included. Tiers are monotonic in the die face, so each band is contiguous.
+ */
+export function bands(totalMod: number, dc: number, crit: CheckSpec['crit']): Band[] {
+  const out: Band[] = [];
+  for (let face = 1; face <= 20; face++) {
+    const tier = tierFor(face, face + totalMod, dc, crit);
+    const last = out[out.length - 1];
+    if (last && last.tier === tier) {
+      last.faceMax = face;
+      last.totalMax = face + totalMod;
+    } else out.push({ tier, faceMin: face, faceMax: face, totalMin: face + totalMod, totalMax: face + totalMod });
+  }
+  return out.reverse(); // best first
+}
+
+/** lowest kept-die face that gives Success or better; null if impossible */
+export function successFace(b: Band[]): number | null {
+  const ok = b.filter((x) => x.tier === 'success' || x.tier === 'crit_success');
+  return ok.length ? Math.min(...ok.map((x) => x.faceMin)) : null;
+}
+
 export function roll(ctx: Ctx, spec: CheckSpec): RollInfo {
   const rc = resolveCheck(ctx.s, spec);
   const dice = rc.adv === 0 ? [ctx.rng.d20()] : [ctx.rng.d20(), ctx.rng.d20()];
@@ -100,6 +124,8 @@ export function roll(ctx: Ctx, spec: CheckSpec): RollInfo {
     natural,
     total,
     tier,
+    bands: bands(rc.totalMod, rc.dc, spec.crit),
+    crit: spec.crit ?? 'standard',
   };
 }
 

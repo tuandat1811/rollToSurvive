@@ -27,6 +27,19 @@ export interface RollInfo {
   natural: number;
   total: number;
   tier: Tier;
+  bands?: Band[];
+  crit?: CritPolicy;
+}
+
+export type CritPolicy = 'standard' | 'safe' | 'none';
+
+/** which kept-die faces / totals give a tier (best tier first) */
+export interface Band {
+  tier: Tier;
+  faceMin: number;
+  faceMax: number;
+  totalMin: number;
+  totalMax: number;
 }
 
 export interface Notice {
@@ -60,6 +73,12 @@ export interface CheckView {
   dcLabel: string;
   adv: number;
   odds: Record<Tier, number>;
+  /** number of d20 rolled (2 = advantage/disadvantage, keep higher/lower) */
+  dice: number;
+  bands: Band[];
+  /** lowest kept-die face for Success or better; null = impossible */
+  successFace: number | null;
+  crit: CritPolicy;
 }
 
 export interface MaterialView {

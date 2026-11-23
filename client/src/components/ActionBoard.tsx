@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { ActionView, GameView } from '../../../shared/types.ts';
-import { pct, successChance } from './ui.tsx';
+import { needLabel } from './ui.tsx';
 
 const GROUP_ORDER = ['survival', 'food', 'explore', 'travel', 'craft', 'base', 'medical', 'escape'];
 const SCENE: Record<string, string> = { coast: '🏖️', jungle: '🌴', river: '🏞️', mountain: '⛰️', cape: '🗼' };
@@ -20,7 +20,7 @@ export function ActionCard({ a, onPick, guided }: { a: ActionView; onPick: (a: A
         {a.energy > 0 && <span className="badge energy">⚡ {a.energy}</span>}
         {a.check && (
           <span className="badge dice" title={`${a.check.attrName}${a.check.skillName ? ' + ' + a.check.skillName : ''} · DC ${a.check.dc}`}>
-            🎲 {pct(successChance(a.check))}
+            🎲 {needLabel(a.check)}
           </span>
         )}
         {a.materials.length > 0 && <span className={`badge ${a.materials.every((m) => m.have >= m.qty) ? '' : 'bad'}`}>🧰 vật liệu</span>}
