@@ -1,8 +1,6 @@
-name: CI build app
+name: CI - Pull Request Check
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
 
