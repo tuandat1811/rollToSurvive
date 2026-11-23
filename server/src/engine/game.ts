@@ -1,13 +1,13 @@
-import { ACTIONS, type ActionDef, type Material } from '../content/actions.ts';
-import { BALANCE } from '../content/balance.ts';
-import { ATTR_DEFS, ROUTE_DEFS, SECONDARY_POOLS, WEATHER_DEFS, WEATHER_MARKOV } from '../content/defs.ts';
-import { EVENTS } from '../content/events.ts';
-import { ITEMS } from '../content/items.ts';
-import { awardXp, roll } from './check.ts';
-import { Ctx, absSlot, count, countBoth, storageWaterCap, waterCount, containerCap, carryMax, weightOf } from './ctx.ts';
-import { escapeDecision } from './escape.ts';
-import { Rng } from './rng.ts';
-import { advanceSlots, checkDeath } from './time.ts';
+import { ACTIONS, type ActionDef, type Material } from '../content/actions.js';
+import { BALANCE } from '../content/balance.js';
+import { ATTR_DEFS, ROUTE_DEFS, SECONDARY_POOLS, WEATHER_DEFS, WEATHER_MARKOV } from '../content/defs.js';
+import { EVENTS } from '../content/events.js';
+import { ITEMS } from '../content/items.js';
+import { awardXp, roll } from './check.js';
+import { Ctx, absSlot, count, countBoth, storageWaterCap, waterCount, containerCap, carryMax, weightOf } from './ctx.js';
+import { escapeDecision } from './escape.js';
+import { Rng } from './rng.js';
+import { advanceSlots, checkDeath } from './time.js';
 import {
   ATTRS,
   REGIONS,
@@ -19,7 +19,7 @@ import {
   type ResourceKind,
   type Tier,
   type TurnResult,
-} from './types.ts';
+} from './types.js';
 
 export class GameError extends Error {}
 

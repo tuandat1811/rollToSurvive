@@ -1,4 +1,4 @@
-import type { AttrId, GameState, RegionId, SkillId } from '../engine/types.ts';
+import type { AttrId, GameState, RegionId, SkillId } from '../engine/types.js';
 
 export interface RecipeDef {
   id: string;

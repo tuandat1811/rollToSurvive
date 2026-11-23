@@ -1,8 +1,8 @@
-import { BALANCE } from '../content/balance.ts';
-import { CONDITIONS } from '../content/conditions.ts';
-import { LOCATION_DEFS, REGION_DEFS, ROUTE_DEFS, SKILL_DEFS } from '../content/defs.ts';
-import { ITEMS, item, itemName } from '../content/items.ts';
-import { Rng } from './rng.ts';
+import { BALANCE } from '../content/balance.js';
+import { CONDITIONS } from '../content/conditions.js';
+import { LOCATION_DEFS, REGION_DEFS, ROUTE_DEFS, SKILL_DEFS } from '../content/defs.js';
+import { ITEMS, item, itemName } from '../content/items.js';
+import { Rng } from './rng.js';
 import type {
   ChangeKind,
   GameState,
@@ -13,7 +13,7 @@ import type {
   SkillId,
   TurnResult,
   VitalId,
-} from './types.ts';
+} from './types.js';
 
 // ---------------------------------------------------------------- pure helpers
 

@@ -1,10 +1,10 @@
-import { ITEMS } from '../content/items.ts';
-import { WEATHER_DEFS } from '../content/weather.ts';
-import { awardXp, roll } from './check.ts';
-import { isSuccess, loseCarried, victory } from './common.ts';
-import { Ctx, waterCount } from './ctx.ts';
-import { advanceSlots, checkDeath } from './time.ts';
-import type { AttrId, CheckSpec, GameState, SkillId } from './types.ts';
+import { ITEMS } from '../content/items.js';
+import { WEATHER_DEFS } from '../content/weather.js';
+import { awardXp, roll } from './check.js';
+import { isSuccess, loseCarried, victory } from './common.js';
+import { Ctx, waterCount } from './ctx.js';
+import { advanceSlots, checkDeath } from './time.js';
+import type { AttrId, CheckSpec, GameState, SkillId } from './types.js';
 
 export interface EscapeStageDef {
   name: string;

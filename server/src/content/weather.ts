@@ -1,4 +1,4 @@
-import type { AttrId, WeatherId } from '../engine/types.ts';
+import type { AttrId, WeatherId } from '../engine/types.js';
 
 /**
  * A check modifier applied while this weather lasts. A rule matches when every

@@ -1,7 +1,7 @@
-import { BALANCE } from '../content/balance.ts';
-import { REGION_DEFS } from '../content/defs.ts';
-import { EVENTS, type EventDef, type EventTrigger } from '../content/events.ts';
-import type { Ctx } from './ctx.ts';
+import { BALANCE } from '../content/balance.js';
+import { REGION_DEFS } from '../content/defs.js';
+import { EVENTS, type EventDef, type EventTrigger } from '../content/events.js';
+import type { Ctx } from './ctx.js';
 
 /**
  * Event Director: picks events from trigger context (time, region, world state,

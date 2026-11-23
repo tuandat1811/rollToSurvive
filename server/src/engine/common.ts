@@ -1,7 +1,7 @@
-import { REGION_DEFS } from '../content/defs.ts';
-import { ITEMS } from '../content/items.ts';
-import { Ctx, countBoth } from './ctx.ts';
-import type { GameState, RegionId, ResourceKind, Tier } from './types.ts';
+import { REGION_DEFS } from '../content/defs.js';
+import { ITEMS } from '../content/items.js';
+import { Ctx, countBoth } from './ctx.js';
+import type { GameState, RegionId, ResourceKind, Tier } from './types.js';
 
 export const isSuccess = (t: Tier) => t === 'success' || t === 'crit_success';
 export const atLeastPartial = (t: Tier) => t !== 'failure' && t !== 'crit_failure';

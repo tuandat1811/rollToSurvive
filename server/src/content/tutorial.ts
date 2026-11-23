@@ -1,5 +1,5 @@
-import { hasStructure } from '../engine/ctx.ts';
-import type { GameState } from '../engine/types.ts';
+import { hasStructure } from '../engine/ctx.js';
+import type { GameState } from '../engine/types.js';
 
 // Guided first steps. Completion is derived from durable state (flags, structures,
 // discoveries) so it survives reloads and never regresses.

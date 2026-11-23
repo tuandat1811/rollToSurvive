@@ -5,7 +5,7 @@ import {
   isSuccess,
   rawCookable,
   snakeBite,
-} from '../engine/common.ts';
+} from '../engine/common.js';
 import {
   Ctx,
   condSev,
@@ -20,12 +20,12 @@ import {
   shelterAt,
   structuresAt,
   waterCount,
-} from '../engine/ctx.ts';
-import type { CheckSpec, GameState, Req, RegionId, Tier } from '../engine/types.ts';
-import { RAFT_REGION, RAFT_STAGES, RECIPES, STRUCTURES } from './crafting.ts';
-import { CONDITIONS } from './conditions.ts';
-import { LOCATION_DEFS, REGION_DEFS, ROUTE_DEFS, SLOT_NAMES, WEATHER_DEFS } from './defs.ts';
-import { ITEMS, itemName } from './items.ts';
+} from '../engine/ctx.js';
+import type { CheckSpec, GameState, Req, RegionId, Tier } from '../engine/types.js';
+import { RAFT_REGION, RAFT_STAGES, RECIPES, STRUCTURES } from './crafting.js';
+import { CONDITIONS } from './conditions.js';
+import { LOCATION_DEFS, REGION_DEFS, ROUTE_DEFS, SLOT_NAMES, WEATHER_DEFS } from './defs.js';
+import { ITEMS, itemName } from './items.js';
 
 export type ActionGroup = 'survival' | 'explore' | 'food' | 'craft' | 'base' | 'medical' | 'escape' | 'travel';
 

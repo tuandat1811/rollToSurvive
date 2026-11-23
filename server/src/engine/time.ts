@@ -1,9 +1,9 @@
-import { BALANCE } from '../content/balance.ts';
-import { REGION_DEFS, WEATHER_DEFS, WEATHER_MARKOV } from '../content/defs.ts';
-import { ITEMS } from '../content/items.ts';
-import { Ctx, fireLit, hasCondition, hasStructure, shelterAt, structuresAt } from './ctx.ts';
-import { runTrigger } from './director.ts';
-import type { ItemStack, Pacing, WeatherId } from './types.ts';
+import { BALANCE } from '../content/balance.js';
+import { REGION_DEFS, WEATHER_DEFS, WEATHER_MARKOV } from '../content/defs.js';
+import { ITEMS } from '../content/items.js';
+import { Ctx, fireLit, hasCondition, hasStructure, shelterAt, structuresAt } from './ctx.js';
+import { runTrigger } from './director.js';
+import type { ItemStack, Pacing, WeatherId } from './types.js';
 
 const D = BALANCE.decay;
 const T = BALANCE.thresholds;

@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { buildApp } from '../src/app.ts';
-import { Store } from '../src/db.ts';
-import { WEATHER_DEFS, WEATHER_MARKOV } from '../src/content/weather.ts';
-import { bands, resolveCheck, successFace, tierFor } from '../src/engine/check.ts';
-import { GameError, actionEnergy, chooseEvent, consume, escapeStep, findInstance, newGame, performAction } from '../src/engine/game.ts';
-import type { GameState } from '../src/engine/types.ts';
-import { buildView } from '../src/engine/view.ts';
+import { buildApp } from '../src/app.js';
+import { Store } from '../src/db.js';
+import { WEATHER_DEFS, WEATHER_MARKOV } from '../src/content/weather.js';
+import { bands, resolveCheck, successFace, tierFor } from '../src/engine/check.js';
+import { GameError, actionEnergy, chooseEvent, consume, escapeStep, findInstance, newGame, performAction } from '../src/engine/game.js';
+import type { GameState } from '../src/engine/types.js';
+import { buildView } from '../src/engine/view.js';
 
 const ATTRS = { STR: 2, AGI: 2, END: 2, INT: 2, PER: 2 };
 const fresh = (seed = 42) => newGame('Test', ATTRS, seed);

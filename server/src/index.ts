@@ -1,4 +1,4 @@
-import { buildApp } from './app.ts';
+import { buildApp } from './app.js';
 
 // In dev the Vite client proxies /api to 3001 (PORT may be set for the client by tooling).
 const port = Number(process.env.RTS_PORT ?? (process.env.NODE_ENV === 'production' ? (process.env.PORT ?? 3001) : 3001));

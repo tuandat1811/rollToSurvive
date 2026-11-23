@@ -1,17 +1,17 @@
-import type { ActionView, CheckView, ChoiceView, GameView, ItemView } from '../../../shared/types.ts';
-import { GROUP_NAMES, raftRiskNotes } from '../content/actions.ts';
-import { BALANCE, dcLabel } from '../content/balance.ts';
-import { CONDITIONS } from '../content/conditions.ts';
-import { RAFT_STAGES, RECIPES, STRUCTURES } from '../content/crafting.ts';
-import { ATTR_DEFS, LOCATION_DEFS, REGION_DEFS, ROUTE_DEFS, SKILL_DEFS, SLOT_NAMES, WEATHER_DEFS } from '../content/defs.ts';
-import { EVENTS } from '../content/events.ts';
-import { ITEMS } from '../content/items.ts';
-import { TUTORIAL } from '../content/tutorial.ts';
-import { bands, odds, resolveCheck, successFace } from './check.ts';
-import { absSlot, carryMax, containerCap, storageWaterCap, waterCount, weightOf } from './ctx.ts';
-import { journey, stageCheck } from './escape.ts';
-import { actionEnergy, eventChoices, instances, materialStatus, unmetReasons } from './game.ts';
-import { ATTRS, REGIONS, SKILLS, type CheckSpec, type GameState, type ItemStack } from './types.ts';
+import type { ActionView, CheckView, ChoiceView, GameView, ItemView } from '../../../shared/types.js';
+import { GROUP_NAMES, raftRiskNotes } from '../content/actions.js';
+import { BALANCE, dcLabel } from '../content/balance.js';
+import { CONDITIONS } from '../content/conditions.js';
+import { RAFT_STAGES, RECIPES, STRUCTURES } from '../content/crafting.js';
+import { ATTR_DEFS, LOCATION_DEFS, REGION_DEFS, ROUTE_DEFS, SKILL_DEFS, SLOT_NAMES, WEATHER_DEFS } from '../content/defs.js';
+import { EVENTS } from '../content/events.js';
+import { ITEMS } from '../content/items.js';
+import { TUTORIAL } from '../content/tutorial.js';
+import { bands, odds, resolveCheck, successFace } from './check.js';
+import { absSlot, carryMax, containerCap, storageWaterCap, waterCount, weightOf } from './ctx.js';
+import { journey, stageCheck } from './escape.js';
+import { actionEnergy, eventChoices, instances, materialStatus, unmetReasons } from './game.js';
+import { ATTRS, REGIONS, SKILLS, type CheckSpec, type GameState, type ItemStack } from './types.js';
 
 function checkView(s: GameState, spec: CheckSpec): CheckView {
   const rc = resolveCheck(s, spec);

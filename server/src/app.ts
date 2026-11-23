@@ -4,9 +4,9 @@ import { resolve } from 'node:path';
 import fastifyStatic from '@fastify/static';
 import Fastify, { type FastifyReply } from 'fastify';
 import { z } from 'zod';
-import { BALANCE } from './content/balance.ts';
-import { ATTR_DEFS } from './content/defs.ts';
-import { Store } from './db.ts';
+import { BALANCE } from './content/balance.js';
+import { ATTR_DEFS } from './content/defs.js';
+import { Store } from './db.js';
 import {
   GameError,
   allocateAttr,
@@ -17,10 +17,10 @@ import {
   newGame,
   performAction,
   transfer,
-} from './engine/game.ts';
-import { newSeed } from './engine/rng.ts';
-import { ATTRS, type AttrId, type GameState, type TurnResult } from './engine/types.ts';
-import { buildView } from './engine/view.ts';
+} from './engine/game.js';
+import { newSeed } from './engine/rng.js';
+import { ATTRS, type AttrId, type GameState, type TurnResult } from './engine/types.js';
+import { buildView } from './engine/view.js';
 
 const ID = z.string().uuid();
 const attrSchema = z.enum(['STR', 'AGI', 'END', 'INT', 'PER']);
@@ -28,12 +28,12 @@ const attrSchema = z.enum(['STR', 'AGI', 'END', 'INT', 'PER']);
 export function buildApp(store = new Store()) {
   const app = Fastify({ logger: process.env.NODE_ENV === 'production' ? { level: 'warn' } : false });
 
-  const load = (id: string, reply: FastifyReply): GameState | null => {
+  const load = async (id: string, reply: FastifyReply): Promise<GameState | null> => {
     if (!ID.safeParse(id).success) {
       reply.code(400).send({ error: 'Mã ván chơi không hợp lệ' });
       return null;
     }
-    const s = store.get(id);
+    const s = await store.get(id);
     if (!s) {
       reply.code(404).send({ error: 'Không tìm thấy ván chơi' });
       return null;
@@ -48,13 +48,13 @@ export function buildApp(store = new Store()) {
     reply: FastifyReply,
     fn: (s: GameState) => { state: GameState; result: TurnResult },
   ) => {
-    const s = load(id, reply);
+    const s = await load(id, reply);
     if (!s) return;
     if (s.version !== version) return reply.code(409).send({ error: 'Trạng thái đã thay đổi, đang tải lại…', view: buildView(id, s) });
     try {
       const { state } = fn(s);
-      if (!store.commit(id, state, version)) {
-        const cur = store.get(id)!;
+      if (!(await store.commit(id, state, version))) {
+        const cur = (await store.get(id))!;
         return reply.code(409).send({ error: 'Trạng thái đã thay đổi, đang tải lại…', view: buildView(id, cur) });
       }
       return { view: buildView(id, state) };
@@ -79,7 +79,7 @@ export function buildApp(store = new Store()) {
     try {
       const s = newGame(body.data.name, body.data.attrs as Record<AttrId, number>, newSeed());
       const id = randomUUID();
-      store.create(id, s);
+      await store.create(id, s);
       return { view: buildView(id, s) };
     } catch (e) {
       if (e instanceof GameError) return reply.code(422).send({ error: e.message });
@@ -92,12 +92,12 @@ export function buildApp(store = new Store()) {
       .split(',')
       .filter((x) => ID.safeParse(x).success)
       .slice(0, 50);
-    return { runs: store.summaries(ids) };
+    return { runs: await store.summaries(ids) };
   });
 
   app.get('/api/runs/:id', async (req, reply) => {
     const { id } = req.params as { id: string };
-    const s = load(id, reply);
+    const s = await load(id, reply);
     if (!s) return;
     return { view: buildView(id, s) };
   });
@@ -105,7 +105,7 @@ export function buildApp(store = new Store()) {
   app.delete('/api/runs/:id', async (req, reply) => {
     const { id } = req.params as { id: string };
     if (!ID.safeParse(id).success) return reply.code(400).send({ error: 'Mã ván chơi không hợp lệ' });
-    store.delete(id);
+    await store.delete(id);
     return { ok: true };
   });
 

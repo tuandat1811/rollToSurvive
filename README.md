@@ -4,7 +4,7 @@ Game sinh tồn theo lượt trên web, mọi hành động giải quyết bằn
 
 ## Chạy game
 
-Yêu cầu: **Node.js 22.13+** (dùng SQLite có sẵn trong Node, không cần cài database).
+Yêu cầu: **Node.js 22+**. Không cần cài database: khi chạy trên máy, ván chơi được lưu vào file SQLite qua thư viện libSQL.
 
 ```powershell
 npm install
@@ -22,6 +22,27 @@ npm start
 
 Mặc định cổng 3001 (đổi bằng biến `PORT`), dữ liệu lưu ở `data/rts.db` (đổi bằng `RTS_DB`).
 
+## Deploy lên Vercel
+
+Vercel chạy API dưới dạng Vercel Function. Function không giữ được file giữa các lần chạy, nên **bắt buộc** dùng database Turso (SQLite trên cloud, có sẵn trong Vercel Marketplace, gói miễn phí đủ dùng).
+
+Cấu hình đã có sẵn trong repo:
+
+- `vercel.json`: build giao diện (`npm run build` → `client/dist`), chuyển mọi request `/api/*` vào function.
+- `api/index.ts`: function bọc lại đúng server Fastify dùng khi chạy local.
+- `server/src/db.ts`: dùng Turso khi có biến `TURSO_DATABASE_URL` (+ `TURSO_AUTH_TOKEN`), còn lại dùng file SQLite local.
+
+Các bước:
+
+1. Đăng nhập https://vercel.com → **Add New… → Project** → chọn repo `rollToSurvive` trên GitHub → **Import**.
+2. Ở màn hình cấu hình: Framework Preset để **Other**, Root Directory để trống (thư mục gốc). Không cần sửa Build/Output — Vercel đọc từ `vercel.json`. Bấm **Deploy**.
+3. Sau khi project được tạo: tab **Storage → Create Database → Turso** → tạo database và **Connect** vào project (chọn cả Production và Preview).
+4. Vào **Settings → Environment Variables**, kiểm tra đã có `TURSO_DATABASE_URL` và `TURSO_AUTH_TOKEN`. Nếu integration đặt tên khác, thêm 2 biến này bằng tay, lấy giá trị từ trang quản lý database Turso.
+5. Tab **Deployments** → bản deploy mới nhất → **⋯ → Redeploy** để function nhận biến môi trường.
+6. Mở địa chỉ `https://<tên-project>.vercel.app`, kiểm tra `/api/meta` trả về JSON rồi tạo ván mới.
+
+Từ đó, mỗi lần push lên nhánh `main` Vercel sẽ tự deploy lại. Ván chơi lưu trên Turso, không mất khi deploy.
+
 Kiểm thử và mô phỏng cân bằng:
 
 ```powershell
@@ -35,7 +56,8 @@ npm run sim -- 300 60
 | --- | --- |
 | `server/src/engine/` | Luật game: D20 (`check.ts`), dòng thời gian & đêm (`time.ts`), Event Director (`director.ts`), thoát đảo (`escape.ts`), giao dịch hành động (`game.ts`), chiếu dữ liệu cho client (`view.ts`) |
 | `server/src/content/` | **Dữ liệu nội dung**: hành động, sự kiện, vật phẩm, công thức, công trình, vùng đất, và `balance.ts` chứa toàn bộ con số cân bằng |
-| `server/src/app.ts` | API Fastify + lưu ván SQLite (`db.ts`) |
+| `server/src/app.ts` | API Fastify + lưu ván libSQL: file local hoặc Turso (`db.ts`) |
+| `api/index.ts`, `vercel.json` | Entry cho Vercel Function và cấu hình deploy |
 | `client/src/` | Giao diện React (tiếng Việt) |
 | `shared/types.ts` | Kiểu dữ liệu API dùng chung |
 

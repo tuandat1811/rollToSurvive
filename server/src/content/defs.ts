@@ -1,4 +1,4 @@
-import type { AttrId, RegionId, SkillId } from '../engine/types.ts';
+import type { AttrId, RegionId, SkillId } from '../engine/types.js';
 
 export const SLOT_NAMES = ['Sáng', 'Trưa', 'Chiều', 'Tối'];
 
@@ -49,7 +49,7 @@ export const SKILL_DEFS: Record<SkillId, { name: string; icon: string; desc: str
   },
 };
 
-export { WEATHER_DEFS, WEATHER_MARKOV } from './weather.ts';
+export { WEATHER_DEFS, WEATHER_MARKOV } from './weather.js';
 
 export interface RegionDef {
   id: RegionId;

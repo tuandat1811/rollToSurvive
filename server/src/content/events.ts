@@ -4,11 +4,11 @@ import {
   isSuccess,
   signalLocationMod,
   victory,
-} from '../engine/common.ts';
-import { Ctx, count, countBoth, hasStructure, regionName, shelterAt, structuresAt } from '../engine/ctx.ts';
-import type { CheckSpec, GameState, Req, Tier } from '../engine/types.ts';
-import { REGION_DEFS, SLOT_NAMES } from './defs.ts';
-import { ITEMS } from './items.ts';
+} from '../engine/common.js';
+import { Ctx, count, countBoth, hasStructure, regionName, shelterAt, structuresAt } from '../engine/ctx.js';
+import type { CheckSpec, GameState, Req, Tier } from '../engine/types.js';
+import { REGION_DEFS, SLOT_NAMES } from './defs.js';
+import { ITEMS } from './items.js';
 
 export type EventTrigger = 'day_start' | 'slot_start' | 'night';
 export type EventCategory =

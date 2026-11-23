@@ -1,8 +1,8 @@
-import { BALANCE } from '../content/balance.ts';
-import { CONDITIONS } from '../content/conditions.ts';
-import { WEATHER_DEFS } from '../content/weather.ts';
-import { Ctx } from './ctx.ts';
-import type { Band, CheckSpec, GameState, RollInfo, SkillId, Tier } from './types.ts';
+import { BALANCE } from '../content/balance.js';
+import { CONDITIONS } from '../content/conditions.js';
+import { WEATHER_DEFS } from '../content/weather.js';
+import { Ctx } from './ctx.js';
+import type { Band, CheckSpec, GameState, RollInfo, SkillId, Tier } from './types.js';
 
 export const TIER_ORDER: Tier[] = ['crit_failure', 'failure', 'partial', 'success', 'crit_success'];
 

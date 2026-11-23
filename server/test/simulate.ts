@@ -1,6 +1,6 @@
 // Balance & robustness simulation: a heuristic bot plays many runs directly
 // against the engine. Usage: npm run sim -- [runs] [maxDays]
-import { ITEMS } from '../src/content/items.ts';
+import { ITEMS } from '../src/content/items.js';
 import {
   allocateAttr,
   chooseEvent,
@@ -8,10 +8,10 @@ import {
   escapeStep,
   newGame,
   performAction,
-} from '../src/engine/game.ts';
-import { Rng } from '../src/engine/rng.ts';
-import type { GameState } from '../src/engine/types.ts';
-import { buildView } from '../src/engine/view.ts';
+} from '../src/engine/game.js';
+import { Rng } from '../src/engine/rng.js';
+import type { GameState } from '../src/engine/types.js';
+import { buildView } from '../src/engine/view.js';
 
 const RUNS = Number(process.argv[2] ?? 300);
 const MAX_DAYS = Number(process.argv[3] ?? 60);

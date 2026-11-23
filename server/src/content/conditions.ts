@@ -1,4 +1,4 @@
-import type { AttrId } from '../engine/types.ts';
+import type { AttrId } from '../engine/types.js';
 
 export type StackPolicy = 'reject' | 'refresh' | 'add' | 'replace' | 'highest';
 
