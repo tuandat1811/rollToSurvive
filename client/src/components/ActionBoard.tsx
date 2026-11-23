@@ -30,7 +30,7 @@ export function ActionCard({ a, onPick }: { a: ActionView; onPick: (a: ActionVie
 
 export default function ActionBoard({ view, onPick }: { view: GameView; onPick: (a: ActionView) => void }) {
   const [group, setGroup] = useState<string>('suggest');
-  const [showLocked, setShowLocked] = useState(false);
+  const [showLocked, setShowLocked] = useState(true);
 
   const groups = useMemo(() => {
     const m = new Map<string, { name: string; items: ActionView[] }>();
@@ -51,7 +51,11 @@ export default function ActionBoard({ view, onPick }: { view: GameView; onPick: 
     return [...follow.sort((a, b) => b.priority - a.priority), ...rest];
   }, [view.actions]);
 
-  const current = group === 'suggest' ? suggested : groups.find((g) => g.id === group)?.items ?? [];
+  // in a group tab: doable actions first, then the ones still missing something (dimmed, with the reason)
+  const current =
+    group === 'suggest'
+      ? suggested
+      : [...(groups.find((g) => g.id === group)?.items ?? [])].sort((a, b) => Number(b.available) - Number(a.available));
   const list = group === 'suggest' || showLocked ? current : current.filter((a) => a.available);
   const lockedCount = current.length - current.filter((a) => a.available).length;
   const region = view.map.regions.find((r) => r.here)!;

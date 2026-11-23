@@ -182,6 +182,32 @@ describe('weather', () => {
   });
 });
 
+describe('fire, cooking and boiling', () => {
+  it('lets the player light a fire anywhere, and shows cooking/boiling with a clear reason until then', () => {
+    let s = fresh(3);
+    s.inventory.push({ id: 'wood', qty: 6 }, { id: 'fish_raw', qty: 2, exp: 99 }, { id: 'tin_can', qty: 1 }, { id: 'water_raw', qty: 1, risk: 0.1 });
+    s.inventory.push({ id: 'flint', qty: 1 });
+    expect(s.baseRegion).toBeNull();
+    const v = buildView('x', s);
+    expect(v.actions.find((a) => a.key === 'make_fire')?.available).toBe(true);
+    const cook = v.actions.find((a) => a.key === 'cook')!;
+    expect(cook.available).toBe(false);
+    expect(cook.reasons[0]).toMatch(/lửa trại/);
+    expect(v.actions.find((a) => a.key === 'boil_water')?.available).toBe(false);
+
+    // keep trying until the fire catches (flint makes it easy)
+    for (let i = 0; i < 6 && !s.structures.some((x) => x.id === 'campfire'); i++) {
+      s = performAction(s, 'make_fire').state;
+      s.pending = null;
+    }
+    expect(s.structures.some((x) => x.id === 'campfire' && x.region === 'coast' && x.lit)).toBe(true);
+    const after = buildView('x', s);
+    expect(after.actions.find((a) => a.key === 'cook')?.available).toBe(true);
+    expect(after.actions.find((a) => a.key === 'boil_water')?.available).toBe(true);
+    expect(after.actions.some((a) => a.key === 'make_fire')).toBe(false);
+  });
+});
+
 describe('escape planner', () => {
   it('lists three ways off the island with difficulty and penalties', () => {
     const s = fresh();

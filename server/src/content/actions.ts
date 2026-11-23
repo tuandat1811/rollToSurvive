@@ -509,7 +509,8 @@ const actions: ActionDef[] = [
     desc: k('Nướng chín đồ ăn sống bên lửa trại (tối đa 6 phần). Đồ chín no hơn và an toàn.'),
     hint: (s) => `Nấu: ${rawCookable(s).map(itemName).join(', ') || 'không có gì'}`,
     energy: k(4),
-    visible: (s) => fireLit(s) && rawCookable(s).length > 0,
+    visible: (s) => rawCookable(s).length > 0,
+    reqs: (s) => [{ label: 'Cần lửa trại đang cháy tại đây — dùng "Nhóm lửa trại" (nhóm Sinh tồn)', met: fireLit(s) }],
     check: (s) => ({ label: 'Nấu ăn', attr: 'INT', skill: 'survival', dc: 8, crit: 'safe', mods: mods(tool(s, 'pot', 2, 'Có nồi')) }),
     priority: (s) => 60 + (s.inventory.some((x) => x.id === 'fish_raw' || x.id === 'meat_raw') ? 20 : 0),
     resolve: (ctx, tier) => {
@@ -541,10 +542,8 @@ const actions: ActionDef[] = [
     energy: k(5),
     materials: k([{ id: 'wood', qty: 2 }]),
     visible: (s) =>
-      s.baseRegion === here(s) &&
-      hasStructure(s, 'storage_rack') &&
-      fireLit(s) &&
-      (countBoth(s, 'fish_raw') > 0 || countBoth(s, 'meat_raw') > 0),
+      s.baseRegion === here(s) && hasStructure(s, 'storage_rack') && (countBoth(s, 'fish_raw') > 0 || countBoth(s, 'meat_raw') > 0),
+    reqs: (s) => [{ label: 'Cần lửa trại đang cháy tại đây — dùng "Nhóm lửa trại" (nhóm Sinh tồn)', met: fireLit(s) }],
     check: k({ label: 'Hun khói', attr: 'INT', skill: 'survival', dc: 10, crit: 'safe' }),
     priority: k(50),
     resolve: (ctx, tier) => {
@@ -570,8 +569,11 @@ const actions: ActionDef[] = [
     desc: k('Đun sôi toàn bộ nước chưa xử lý (cả trong kho nếu ở căn cứ) thành nước sạch. Cần lửa trại và nồi/lon thiếc.'),
     hint: (s) => `${countBoth(s, 'water_raw')} phần nước → nước sạch`,
     energy: k(3),
-    visible: (s) => fireLit(s) && countBoth(s, 'water_raw') > 0,
-    reqs: (s) => [{ label: 'Có nồi hoặc lon thiếc', met: hasTag(s, 'pot') || (s.baseRegion === here(s) && s.storage.some((x) => ITEMS[x.id]?.tags?.includes('pot'))) }],
+    visible: (s) => countBoth(s, 'water_raw') > 0,
+    reqs: (s) => [
+      { label: 'Cần lửa trại đang cháy tại đây — dùng "Nhóm lửa trại" (nhóm Sinh tồn)', met: fireLit(s) },
+      { label: 'Cần nồi hoặc lon thiếc (tìm trong xác tàu)', met: hasTag(s, 'pot') || (s.baseRegion === here(s) && s.storage.some((x) => ITEMS[x.id]?.tags?.includes('pot'))) },
+    ],
     priority: (s) => (needWater(s) ? 88 : 55),
     resolve: (ctx) => {
       const s = ctx.s;
@@ -1164,9 +1166,9 @@ const actions: ActionDef[] = [
       const loc = here(s);
       if (d.where === 'signal') return REGION_DEFS[loc].seaView && !hasStructure(s, 'signal_pyre');
       if (d.where === 'shelter') return !shelterAtBase(s) && (!s.baseRegion || s.baseRegion === loc);
+      if (p === 'campfire') return false; // see make_fire: a fire can be lit anywhere
       if (!s.baseRegion || s.baseRegion !== loc) return false;
       if (d.replaces) return hasStructure(s, d.replaces);
-      if (p === 'campfire') return !structuresAt(s, loc, 'campfire').length;
       return !hasStructure(s, p);
     },
     reqs: (s, p) => {
@@ -1219,8 +1221,45 @@ const actions: ActionDef[] = [
     },
   },
   {
+    id: 'make_fire',
+    group: 'survival',
+    icon: k('🔥'),
+    name: k('Nhóm lửa trại'),
+    desc: (s) =>
+      `Nhóm một đống lửa ngay tại ${REGION_DEFS[here(s)].name} để nướng đồ ăn, đun sôi nước và sưởi ấm khi ngủ. ${
+        countBoth(s, 'flint') ? 'Có đá lửa — nhóm dễ hơn nhiều.' : 'Không có đá lửa, phải dùi gỗ — khá khó (đá lửa nhặt được ở Dòng suối, Núi đá).'
+      } Mưa, gió lớn có thể làm lửa tắt.`,
+    hint: k('Mở: nấu ăn, đun sôi nước; ngủ ấm hơn'),
+    energy: k(6),
+    visible: (s) => !structuresAt(s, here(s), 'campfire').length,
+    materials: k([{ id: 'wood', qty: 3 }]),
+    check: (s) => ({
+      label: 'Nhóm lửa',
+      tags: ['fire'],
+      attr: 'INT',
+      skill: 'survival',
+      dc: 13,
+      outdoor: true,
+      crit: 'safe',
+      mods: mods(countBoth(s, 'flint') > 0 && { label: 'Đá lửa', value: 5 }, hasTag(s, 'fire') && { label: 'Đuốc', value: 5 }),
+    }),
+    priority: (s) => (rawCookable(s).length > 0 || countBoth(s, 'water_raw') > 0 ? 78 : 40),
+    resolve: (ctx, tier) => {
+      const s = ctx.s;
+      if (!atLeastPartial(tier)) {
+        ctx.say('Bạn cọ xát mãi mà ngọn lửa không chịu bén.');
+        ctx.addItem('wood', 2, { quiet: true });
+        ctx.change('info', 'Thu hồi lại 2 gỗ');
+        return;
+      }
+      s.structures.push({ uid: ctx.nextUid(), id: 'campfire', region: here(s), integrity: tier === 'partial' ? 60 : 100, lit: true });
+      ctx.change('good', `🔥 Lửa trại đã cháy tại ${REGION_DEFS[here(s)].name}`);
+      ctx.say('Ngọn lửa bén vào củi, tí tách cháy đều. Giờ bạn có thể nướng đồ ăn và đun nước.');
+    },
+  },
+  {
     id: 'relight_fire',
-    group: 'base',
+    group: 'survival',
     icon: k('🔥'),
     name: k('Nhóm lại lửa trại'),
     desc: (s) => `Lửa trại đã tắt. ${countBoth(s, 'flint') ? 'Có đá lửa — dễ dàng.' : 'Không có đá lửa, phải dùi gỗ.'}`,
