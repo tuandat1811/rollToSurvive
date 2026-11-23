@@ -60,7 +60,7 @@ const ignore = (label = 'Bỏ qua', text = 'Bạn quyết định không can d�
 
 // ---------------------------------------------------------------- signalling (ships, planes)
 
-function signalChoices(s: GameState, opts: { bonus: number; plane?: boolean; onPartial: (ctx: Ctx) => void; win: [string, string, string] }): EventChoice[] {
+export function signalChoices(s: GameState, opts: { bonus: number; plane?: boolean; onPartial: (ctx: Ctx) => void; win: [string, string, string] }): EventChoice[] {
   const loc = signalLocationMod(s.location);
   const bonus = opts.bonus ? { label: 'Họ đã để ý tới bạn', value: opts.bonus } : null;
   // weather effects on signalling come from the 'signal' check tag

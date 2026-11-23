@@ -26,8 +26,58 @@ export const DESPERATE_JOURNEY: EscapeStageDef[] = [
   { name: 'Cầu may', desc: 'Hy vọng dòng nước đưa bạn tới một con tàu.', attr: 'PER', skill: 'navigation', dc: 21 },
 ];
 
+/** penalties, shared by the rules below and the player-facing escape planner */
+export const ESCAPE_PENALTY = {
+  ashoreEnergy: 25,
+  desperate: { firstStageDamage: 20, laterStageDamage: 30, critExtra: 15, lossFrac: 0.6 },
+  raft: {
+    partial: { integrity: 15, health: 5 },
+    failure: { integrity: 25, health: 8 },
+    critFailure: { integrity: 45, health: 15 },
+    retryPenalty: 2,
+    wreck: { dc: 14, luckyDamage: 12, luckyLoss: 0.4, badDamage: 30, badLoss: 0.7 },
+  },
+  openSea: { hunger: 10, thirst: 15 },
+};
+const P = ESCAPE_PENALTY;
+
 export function journey(method: 'raft' | 'desperate') {
   return method === 'raft' ? RAFT_JOURNEY : DESPERATE_JOURNEY;
+}
+
+/**
+ * The checks each stage would use if the player set off right now — for the
+ * planner. Without a raft, the raft route is previewed as a fresh crude raft.
+ */
+export function previewStages(s: GameState, method: 'raft' | 'desperate'): CheckSpec[] {
+  const projects = method === 'raft' && !s.projects.some((p) => p.id === 'raft')
+    ? [...s.projects, { id: 'raft' as const, region: 'coast' as const, stage: 1, integrity: 70 }]
+    : s.projects;
+  return journey(method).map((_, stage) =>
+    stageCheck({ ...s, projects, escape: { method, stage, adv: 0, dcPenalty: 0, canReturn: false, log: [] } }),
+  );
+}
+
+export function penaltyText(method: 'raft' | 'desperate'): string[] {
+  if (method === 'desperate') {
+    const d = P.desperate;
+    return [
+      `Mọi kết quả kém hơn "Thành công" ở bất kỳ chặng nào: bị sóng đánh dạt về Bãi biển.`,
+      `Mất ${d.firstStageDamage} Sức khỏe nếu thất bại ở chặng 1, ${d.laterStageDamage} ở chặng 2–3 (thêm ${d.critExtra} nếu thất bại thảm hại).`,
+      `Mất ${P.ashoreEnergy} Năng lượng và khoảng ${d.lossFrac * 100}% đồ đang mang theo (trôi mất).`,
+      `Khúc gỗ/thùng phuy làm phao bị mất ngay khi xuất phát.`,
+      `Nếu Sức khỏe về 0: kết thúc ván chơi.`,
+    ];
+  }
+  const r = P.raft;
+  return [
+    `Thành công một phần: vẫn qua chặng, nhưng bè -${r.partial.integrity} độ bền và Sức khỏe -${r.partial.health}.`,
+    `Thất bại: bè -${r.failure.integrity} độ bền, Sức khỏe -${r.failure.health}. Có thể thử lại (khó hơn ${r.retryPenalty} điểm mỗi lần) hoặc quay về đảo.`,
+    `Thất bại thảm hại: bè -${r.critFailure.integrity} độ bền, Sức khỏe -${r.critFailure.health}.`,
+    `Bè vỡ (độ bền về 0): mất bè; tung thêm Sức bền + Sinh tồn (DC ${r.wreck.dc}) — đạt: mất ${r.wreck.luckyDamage} Sức khỏe và ~${r.wreck.luckyLoss * 100}% đồ; trượt: mất ${r.wreck.badDamage} Sức khỏe và ~${r.wreck.badLoss * 100}% đồ. Kèm -${P.ashoreEnergy} Năng lượng.`,
+    `Chặng 2 lênh đênh trên biển: No bụng -${P.openSea.hunger}, Nước -${P.openSea.thirst}.`,
+    `Nếu Sức khỏe về 0: kết thúc ván chơi.`,
+  ];
 }
 
 export function stageCheck(s: GameState): CheckSpec {
@@ -74,7 +124,7 @@ function castAshore(ctx: Ctx, damage: number, lossFrac: number, text: string) {
   const s = ctx.s;
   ctx.say(text);
   ctx.vital('health', -damage, 'Bị sóng đánh dạt');
-  ctx.vital('energy', -25, 'Kiệt sức trên biển');
+  ctx.vital('energy', -P.ashoreEnergy, 'Kiệt sức trên biển');
   loseCarried(ctx, lossFrac);
   s.location = 'coast';
   s.escape = null;
@@ -87,8 +137,9 @@ function wreckRaft(ctx: Ctx) {
   ctx.change('loss', '🛶 Chiếc bè đã vỡ tan');
   const nat = ctx.rng.d20();
   const total = nat + s.attrs.END + s.skills.survival.lvl;
-  if (total >= 14) castAshore(ctx, 12, 0.4, 'Bè vỡ tan giữa sóng. Bạn bám vào một mảnh gỗ và may mắn trôi dạt về bãi biển.');
-  else castAshore(ctx, 30, 0.7, 'Bè vỡ tan. Bạn chìm nổi giữa sóng hàng giờ liền trước khi bị đánh dạt vào bờ, thương tích đầy mình.');
+  const W = P.raft.wreck;
+  if (total >= W.dc) castAshore(ctx, W.luckyDamage, W.luckyLoss, 'Bè vỡ tan giữa sóng. Bạn bám vào một mảnh gỗ và may mắn trôi dạt về bãi biển.');
+  else castAshore(ctx, W.badDamage, W.badLoss, 'Bè vỡ tan. Bạn chìm nổi giữa sóng hàng giờ liền trước khi bị đánh dạt vào bờ, thương tích đầy mình.');
 }
 
 export function escapeDecision(ctx: Ctx, decision: 'roll' | 'return') {
@@ -120,8 +171,8 @@ export function escapeDecision(ctx: Ctx, decision: 'roll' | 'return') {
 
   // the sea takes its toll on every stage
   if (e.stage === 1) {
-    ctx.vital('hunger', -10, 'Lênh đênh trên biển');
-    ctx.vital('thirst', -15, 'Lênh đênh trên biển');
+    ctx.vital('hunger', -P.openSea.hunger, 'Lênh đênh trên biển');
+    ctx.vital('thirst', -P.openSea.thirst, 'Lênh đênh trên biển');
   }
 
   if (e.method === 'desperate') {
@@ -129,8 +180,9 @@ export function escapeDecision(ctx: Ctx, decision: 'roll' | 'return') {
       ctx.say(tier === 'crit_success' ? 'Một phép màu! Mọi thứ diễn ra suôn sẻ đến khó tin.' : 'Bạn vượt qua được — bằng ý chí và may mắn.');
       return advanceStage(ctx);
     }
-    const dmg = (e.stage === 0 ? 20 : 30) + (tier === 'crit_failure' ? 15 : 0);
-    castAshore(ctx, dmg, 0.6, 'Biển cả quá khắc nghiệt. Sóng nhấn chìm bạn hết lần này tới lần khác, rồi quăng bạn trở lại bờ cát.');
+    const D = P.desperate;
+    const dmg = (e.stage === 0 ? D.firstStageDamage : D.laterStageDamage) + (tier === 'crit_failure' ? D.critExtra : 0);
+    castAshore(ctx, dmg, D.lossFrac,'Biển cả quá khắc nghiệt. Sóng nhấn chìm bạn hết lần này tới lần khác, rồi quăng bạn trở lại bờ cát.');
     advanceSlots(ctx, 1);
     checkDeath(ctx);
     return;
@@ -148,9 +200,9 @@ export function escapeDecision(ctx: Ctx, decision: 'roll' | 'return') {
       return advanceStage(ctx);
     case 'partial':
       ctx.say('Bạn vượt qua được, nhưng phải trả giá.');
-      raft.integrity -= 15;
+      raft.integrity -= P.raft.partial.integrity;
       ctx.change('bad', `Bè hư hại (độ bền ${Math.max(0, raft.integrity)}%)`);
-      ctx.vital('health', -5, 'Sóng đánh');
+      ctx.vital('health', -P.raft.partial.health, 'Sóng đánh');
       if (raft.integrity <= 0) {
         wreckRaft(ctx);
         advanceSlots(ctx, 1);
@@ -159,9 +211,9 @@ export function escapeDecision(ctx: Ctx, decision: 'roll' | 'return') {
       return advanceStage(ctx);
     case 'failure':
     case 'crit_failure': {
-      const dmg = tier === 'crit_failure' ? 45 : 25;
-      raft.integrity -= dmg;
-      ctx.vital('health', tier === 'crit_failure' ? -15 : -8, 'Sóng đánh');
+      const pen = tier === 'crit_failure' ? P.raft.critFailure : P.raft.failure;
+      raft.integrity -= pen.integrity;
+      ctx.vital('health', -pen.health, 'Sóng đánh');
       if (raft.integrity <= 0) {
         wreckRaft(ctx);
         advanceSlots(ctx, 1);
@@ -174,7 +226,7 @@ export function escapeDecision(ctx: Ctx, decision: 'roll' | 'return') {
           : 'Bạn bị dòng nước cuốn lệch hướng. Có thể cố gắng tiếp — hoặc quay về đảo khi còn kịp.',
       );
       e.canReturn = true;
-      e.dcPenalty += 2;
+      e.dcPenalty += P.raft.retryPenalty;
       advanceSlots(ctx, 1, { atSea: true });
       if (checkDeath(ctx)) s.escape = null;
       return;

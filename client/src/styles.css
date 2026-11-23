@@ -470,3 +470,34 @@ p { margin: 0 0 8px; }
 
 /* cards in a column must not shrink (they scroll instead) */
 .col > * { flex-shrink: 0; }
+
+/* ---------------------------------------------------------- escape planner */
+.escape-btn {
+  background: linear-gradient(135deg, #2a9d8f, #1d6f8f);
+  border-color: #4fc3b1;
+  color: #fff;
+  font-weight: 800;
+  padding: 7px 16px;
+  box-shadow: 0 0 0 0 rgba(79, 195, 177, 0.5);
+}
+.escape-btn:hover:not(:disabled) { background: linear-gradient(135deg, #34b3a3, #2380a3); border-color: #8be3d6; }
+.escape-btn.ready { animation: escapeGlow 2s ease-in-out infinite; }
+@keyframes escapeGlow { 50% { box-shadow: 0 0 0 5px rgba(79, 195, 177, 0.25); } }
+.esc-tabs { margin-bottom: 14px; }
+.esc-rows { display: flex; flex-direction: column; gap: 6px; }
+.esc-row { border: 1px solid var(--line-soft); border-radius: 10px; background: var(--bg-2); }
+.esc-row-head {
+  width: 100%; display: grid; grid-template-columns: 1fr auto auto auto; gap: 10px; align-items: center;
+  text-align: left; background: none; border: 0; padding: 9px 12px;
+}
+.esc-row-head:hover { background: rgba(255, 255, 255, 0.03); }
+.esc-row-title { font-weight: 700; font-size: 13.5px; }
+.esc-row .check-compact { padding: 4px 12px 10px; }
+.esc-penalty { margin-top: 12px; padding: 12px 14px; border-radius: 12px; background: rgba(239, 107, 91, 0.08); border: 1px solid rgba(239, 107, 91, 0.35); }
+.esc-penalty ul { margin: 0; padding-left: 18px; font-size: 13px; }
+.esc-penalty li { margin-bottom: 4px; }
+@media (max-width: 560px) {
+  .esc-row-head { grid-template-columns: 1fr auto; }
+  .esc-row-head .tiny { display: none; }
+}
+.esc-row-title .tiny { display: block; font-weight: 400; margin-top: 2px; }

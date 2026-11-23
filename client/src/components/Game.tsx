@@ -8,6 +8,7 @@ import CharacterPanel from './CharacterPanel.tsx';
 import EndScreen from './EndScreen.tsx';
 import EscapeModal from './EscapeModal.tsx';
 import EventModal from './EventModal.tsx';
+import EscapePlanner from './EscapePlanner.tsx';
 import IntroGuide from './IntroGuide.tsx';
 import InventoryPanel from './InventoryPanel.tsx';
 import WeatherCard from './WeatherCard.tsx';
@@ -49,6 +50,13 @@ export default function Game({ initial, onExit, onNew }: { initial: GameView; on
   const [showEnd, setShowEnd] = useState(true);
   const isFresh = initial.day === 1 && initial.slot === 0 && initial.version === 0;
   const [introOpen, setIntroOpen] = useState(() => isFresh && !readPref('rts.introSeen'));
+  const [planner, setPlanner] = useState<{ method?: 'raft' | 'desperate' | 'signal' } | null>(null);
+  // escape actions open the escape planner (difficulty + penalties) instead of a bare confirm
+  const pickAction = (a: ActionView) => {
+    if (a.id === 'escape_raft') return setPlanner({ method: 'raft' });
+    if (a.id === 'escape_desperate') return setPlanner({ method: 'desperate' });
+    setSelected(a);
+  };
 
   const closeIntro = () => {
     writePref('rts.introSeen', '1');
@@ -109,6 +117,7 @@ export default function Game({ initial, onExit, onNew }: { initial: GameView; on
         view={view}
         onExit={onExit}
         onHelp={() => setIntroOpen(true)}
+        onEscape={() => setPlanner({})}
       />
       <div className="layout">
         <div className="col" data-hidden={mobile !== 'status'}>
@@ -117,7 +126,7 @@ export default function Game({ initial, onExit, onNew }: { initial: GameView; on
         </div>
         <div className="col" data-hidden={mobile !== 'actions'}>
           <WeatherCard view={view} />
-          <ActionBoard view={view} onPick={setSelected} />
+          <ActionBoard view={view} onPick={pickAction} />
         </div>
         <div className="col" data-hidden={mobile === 'actions' || mobile === 'status'}>
           <div className="tabs">
@@ -185,6 +194,19 @@ export default function Game({ initial, onExit, onNew }: { initial: GameView; on
         />
       )}
       {introOpen && <IntroGuide onClose={closeIntro} />}
+      {planner && !result && !selected && (
+        <EscapePlanner
+          view={view}
+          busy={busy}
+          act={act}
+          initial={planner.method}
+          onClose={() => setPlanner(null)}
+          onPickAction={(a) => {
+            setPlanner(null);
+            setSelected(a);
+          }}
+        />
+      )}
       {!introOpen && result && <ResultModal result={result} onClose={() => setResult(null)} />}
       {!introOpen && !result && !ended && view.escape && <EscapeModal view={view} busy={busy} act={act} />}
       {!introOpen && !result && !ended && !view.escape && view.pending && <EventModal event={view.pending} busy={busy} act={act} />}

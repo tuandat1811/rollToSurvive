@@ -182,6 +182,24 @@ describe('weather', () => {
   });
 });
 
+describe('escape planner', () => {
+  it('lists three ways off the island with difficulty and penalties', () => {
+    const s = fresh();
+    const plan = buildView('x', s).escapePlan;
+    expect(plan.methods.map((m) => m.id)).toEqual(['raft', 'desperate', 'signal']);
+    const raft = plan.methods[0];
+    expect(raft.status).toBe('locked'); // no raft yet
+    expect(raft.stages?.map((x) => x.check.dc)).toEqual([13, 14, 15]);
+    expect(raft.penalties.some((p) => p.includes('Bè vỡ'))).toBe(true);
+    const desperate = plan.methods[1];
+    expect(desperate.stages?.map((x) => x.check.dc)).toEqual([19, 20, 21]);
+    expect(desperate.status).toBe('locked'); // standing at the coast but no wood yet
+    s.inventory.push({ id: 'wood', qty: 2 });
+    expect(buildView('x', s).escapePlan.methods[1].actionKey).toBe('escape_desperate');
+    expect(plan.methods[2].signals?.length).toBe(4);
+  });
+});
+
 describe('escape', () => {
   it('a prepared raft can reach victory', () => {
     let wins = 0;

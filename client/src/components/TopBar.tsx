@@ -1,7 +1,8 @@
 import type { GameView } from '../../../shared/types.ts';
 import { SLOT_ICONS } from './ui.tsx';
 
-export default function TopBar({ view, onExit, onHelp }: { view: GameView; onExit: () => void; onHelp: () => void }) {
+export default function TopBar({ view, onExit, onHelp, onEscape }: { view: GameView; onExit: () => void; onHelp: () => void; onEscape: () => void }) {
+  const ready = view.escapePlan.methods.some((m) => m.status === 'ready' && m.id === 'raft');
   return (
     <header className="topbar">
       <div className="brand">🎲 Roll To Survive</div>
@@ -45,6 +46,11 @@ export default function TopBar({ view, onExit, onHelp }: { view: GameView; onExi
         📍 {view.location.icon} {view.location.name}
         {view.baseRegion === view.location.id && <span className="badge good">⚑ Căn cứ</span>}
       </div>
+      {view.status === 'playing' && !view.escape && (
+        <button className={`btn escape-btn ${ready ? 'ready' : ''}`} onClick={onEscape} title="Xem các cách thoát đảo, độ khó và hình phạt nếu thất bại">
+          ⛵ Thoát đảo
+        </button>
+      )}
       <button className="btn ghost sm" onClick={onHelp} title="Xem hướng dẫn về cách chơi và các tính năng">
         📖 Hướng dẫn
       </button>

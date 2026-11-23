@@ -212,6 +212,31 @@ export interface SkillView {
   perks: { lvl: number; text: string; unlocked: boolean }[];
 }
 
+export interface EscapeMethodView {
+  id: 'raft' | 'desperate' | 'signal';
+  name: string;
+  icon: string;
+  summary: string;
+  /** ready = can start here now; not_here = go to the right place; locked = missing something; waiting = needs a ship/plane */
+  status: 'ready' | 'not_here' | 'locked' | 'waiting';
+  statusText: string;
+  /** action key to start right now, when possible */
+  actionKey?: string;
+  /** action key to travel towards the departure point */
+  travelKey?: string;
+  reqs: { label: string; met: boolean }[];
+  stages?: { name: string; desc: string; check: CheckView }[];
+  signals?: { id: string; name: string; icon: string; desc: string; owned: boolean; check: CheckView }[];
+  info: string[];
+  timeCost: string;
+  penalties: string[];
+}
+
+export interface EscapePlanView {
+  methods: EscapeMethodView[];
+  atSea: boolean;
+}
+
 export interface WeatherView {
   id: string;
   name: string;
@@ -248,6 +273,7 @@ export interface GameView {
   water: { carried: number; cap: number; stored: number; storeCap: number };
   raft?: { stage: number; integrity: number; stages: string[] };
   traps: { kind: string; region: string; ready: boolean }[];
+  escapePlan: EscapePlanView;
   knowledge: { currents: number; shipNext?: { day: number; slot: number }; shipKnown: boolean; recipes: string[] };
   map: { regions: RegionView[]; routes: RouteView[] };
   actions: ActionView[];
