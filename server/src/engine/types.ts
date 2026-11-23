@@ -176,6 +176,8 @@ export interface GameState {
   createdAt: number;
   status: 'playing' | 'victory' | 'dead';
   ending?: { kind: string; title: string; text: string; day: number };
+  /** island traits rolled for this run (absent on saves made before traits existed) */
+  traits?: string[];
   day: number;
   slot: number;
   attrs: Record<AttrId, number>;
@@ -200,6 +202,7 @@ export interface GameState {
     pacing: Pacing;
     notableToday: number;
     ships: number[]; // absolute slots of upcoming ship passes
+    shipGap?: [number, number]; // days between ships (island trait); default from balance
     shipKnown: boolean;
     currents: number; // sea-current knowledge 0..3
     lastRainDay: number;

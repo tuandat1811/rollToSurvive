@@ -26,6 +26,7 @@ import { RAFT_REGION, RAFT_STAGES, RECIPES, STRUCTURES } from './crafting.js';
 import { CONDITIONS } from './conditions.js';
 import { LOCATION_DEFS, REGION_DEFS, ROUTE_DEFS, SLOT_NAMES, WEATHER_DEFS } from './defs.js';
 import { ITEMS, itemName } from './items.js';
+import { traitDefs } from './traits.js';
 
 export type ActionGroup = 'survival' | 'explore' | 'food' | 'craft' | 'base' | 'medical' | 'escape' | 'travel';
 
@@ -138,13 +139,22 @@ const actions: ActionDef[] = [
   {
     id: 'collect_water',
     group: 'survival',
-    icon: (s, p) => (p === 'vine' ? '🌿' : p === 'pool' ? '🪨' : p === 'waterfall' ? '💦' : '💧'),
+    icon: (s, p) => (p === 'vine' ? '🌿' : p === 'pool' ? '🪨' : p === 'waterfall' ? '💦' : p === 'seep' ? '⛲' : '💧'),
     name: (s, p) =>
-      p === 'vine' ? 'Lấy nước từ dây leo' : p === 'pool' ? 'Lấy nước ở hốc đá' : p === 'waterfall' ? 'Lấy nước ở thác' : 'Lấy nước suối',
+      p === 'vine'
+        ? 'Lấy nước từ dây leo'
+        : p === 'pool'
+          ? 'Lấy nước ở hốc đá'
+          : p === 'waterfall'
+            ? 'Lấy nước ở thác'
+            : p === 'seep'
+              ? 'Lấy nước ở mạch nước rỉ'
+              : 'Lấy nước suối',
     desc: (s, p) => {
       if (p === 'vine') return 'Chặt dây leo nước lấy nước sạch uống được ngay. Mỗi ngày chỉ lấy được một lần.';
       if (p === 'pool') return 'Hốc đá giữ nước mưa sạch trong 2 ngày sau mưa.';
       if (p === 'waterfall') return 'Nước thác trong và sạch hơn nước suối, rủi ro rất thấp — nhưng tốt nhất vẫn nên đun sôi.';
+      if (p === 'seep') return 'Mạch nước ngọt rỉ ra dưới cát ở Bãi biển: ít (2 phần mỗi ngày) nhưng khá sạch, không cần đi tới suối.';
       const r = s.regions.river;
       return `Đổ đầy các bình chứa bằng nước suối. Nước chưa xử lý có thể gây ngộ độc — nên đun sôi.${
         r.waterKnown && r.water === 'contaminated' ? ' ⚠️ Nước suối đang bị ô nhiễm!' : r.water === 'muddy' ? ' Nước đang đục sau mưa.' : ''
@@ -158,6 +168,7 @@ const actions: ActionDef[] = [
       if (here(s) === 'river' && found(s, 'waterfall')) v.push('waterfall');
       if (here(s) === 'jungle' && found(s, 'water_vine')) v.push('vine');
       if (here(s) === 'coast' && found(s, 'rain_pool')) v.push('pool');
+      if (here(s) === 'coast' && found(s, 'seep')) v.push('seep');
       return v;
     },
     visible: k(true),
@@ -166,6 +177,7 @@ const actions: ActionDef[] = [
       const r: Req[] = [{ label: 'Còn chỗ trong bình chứa nước', met: free > 0 }];
       if (p === 'vine') r.push({ label: 'Dây leo đã hồi nước (mỗi ngày 1 lần)', met: s.flags.vineDay !== s.day });
       if (p === 'pool') r.push({ label: 'Có mưa trong 2 ngày qua', met: s.world.lastRainDay >= s.day - 2 && s.flags.poolDay !== s.day });
+      if (p === 'seep') r.push({ label: 'Mạch nước đã rỉ đầy lại (mỗi ngày 1 lần)', met: s.flags.seepDay !== s.day });
       return r;
     },
     priority: (s, p) => (needWater(s) ? 85 : 35) + (p === 'vine' || p === 'pool' || p === 'waterfall' ? 5 : 0),
@@ -184,8 +196,17 @@ const actions: ActionDef[] = [
         ctx.say('Nước mưa đọng trong hốc đá mát lạnh và sạch sẽ.');
         return;
       }
+      if (p === 'seep') {
+        ctx.flag('seepDay', s.day);
+        ctx.addItem('water_raw', Math.min(free, 2), { risk: 0.06 });
+        ctx.say('Bạn đào sâu thêm, nước ngọt rỉ ra từ lớp cát ẩm.');
+        return;
+      }
       const r = s.regions.river;
-      const risk = p === 'waterfall' ? (r.water === 'contaminated' ? 0.15 : 0.04) : r.water === 'contaminated' ? 0.65 : r.water === 'muddy' ? 0.3 : 0.12;
+      const mineral = traitDefs(s).reduce((a, t) => a + (t.riverRisk ?? 0), 0);
+      const risk =
+        (p === 'waterfall' ? (r.water === 'contaminated' ? 0.15 : 0.04) : r.water === 'contaminated' ? 0.65 : r.water === 'muddy' ? 0.3 : 0.12) +
+        (p === 'waterfall' ? mineral / 3 : mineral);
       ctx.addItem('water_raw', free, { risk });
       ctx.say(p === 'waterfall' ? 'Bạn hứng nước dưới chân thác.' : 'Bạn ngồi xuống bờ suối và đổ đầy các bình chứa.');
       if (r.water === 'contaminated' && !r.waterKnown) {
@@ -205,9 +226,9 @@ const actions: ActionDef[] = [
     name: k('Tìm kiếm thức ăn'),
     desc: (s) => {
       const r = here(s);
-      if (r === 'coast') return 'Nhặt dừa và mò sò ốc trên bãi đá. Sò ốc nên nấu chín.';
+      if (r === 'coast') return 'Nhặt dừa, mò sò ốc, bắt cua, vớt rong biển trên bãi đá. Đồ sống nên nấu chín.';
       if (r === 'mountain') return 'Trèo vách đá tìm trứng chim biển.';
-      return `Hái trái cây và quả mọng trong rừng.${found(s, 'banana_grove') ? ' Lùm chuối dại cho thêm trái cây.' : ''} Quả mọng lạ có thể gây ngộ độc.`;
+      return `Hái trái cây, quả mọng, đào củ, hái nấm trong rừng (sau mưa nhiều nấm hơn).${found(s, 'banana_grove') ? ' Lùm chuối dại cho thêm trái cây.' : ''} Quả mọng lạ và nấm có thể gây ngộ độc.`;
     },
     hint: (s) => `2–4 phần thức ăn (trữ lượng khu vực: ${Math.round(s.regions[here(s)].abundance.forage)}%)`,
     energy: k(8),
@@ -227,17 +248,21 @@ const actions: ActionDef[] = [
       const base = tierYield(tier, { crit_success: 5, success: 4, partial: 2 });
       const n = base ? Math.max(1, ctx.rng.round(base * abundanceMult(s, r, 'forage'))) : 0;
       deplete(s, r, 'forage', tier === 'crit_success' ? 13 : 10);
-      if (r === 'coast') {
-        let c = 0;
-        for (let i = 0; i < n; i++) if (ctx.rng.chance(0.5)) c++;
-        ctx.addItem('coconut', c);
-        ctx.addItem('shellfish', n - c);
-      } else if (r === 'jungle') {
-        let f = 0;
-        for (let i = 0; i < n; i++) if (ctx.rng.chance(0.6)) f++;
-        ctx.addItem('fruit', f + (found(s, 'banana_grove') && base ? 1 : 0));
-        ctx.addItem('berries', n - f);
-      } else ctx.addItem('eggs', n);
+      // what turns up varies from search to search (and with the weather)
+      const wet = s.world.lastRainDay >= s.day - 1;
+      const table: [string, number][] =
+        r === 'coast'
+          ? [['coconut', 40], ['shellfish', 32], ['crab', 16], ['kelp', 12]]
+          : r === 'jungle'
+            ? [['fruit', 48], ['berries', 24], ['mushroom', wet ? 22 : 6], ['yam', 10]]
+            : [['eggs', 100]];
+      const got: Record<string, number> = {};
+      for (let i = 0; i < n; i++) {
+        const id = ctx.rng.weighted(table)!;
+        got[id] = (got[id] ?? 0) + 1;
+      }
+      if (r === 'jungle' && found(s, 'banana_grove') && base) got.fruit = (got.fruit ?? 0) + 1;
+      for (const [id, q] of Object.entries(got)) ctx.addItem(id, q);
       if (!n) ctx.say(tier === 'crit_failure' ? 'Bạn chẳng tìm được gì, lại còn gặp rắc rối.' : 'Bạn lục lọi cả buổi mà không tìm được gì ăn được.');
       else if (s.regions[r].abundance.forage < 30) ctx.say('Khu vực này đã bị khai thác nhiều, thức ăn ngày càng khan hiếm.');
       if (tier === 'crit_failure') {
@@ -318,6 +343,46 @@ const actions: ActionDef[] = [
       if (tier === 'crit_failure') {
         ctx.say('Một cành cây gãy đập trúng người bạn.');
         ctx.addCondition('injury', 1);
+      }
+    },
+  },
+  {
+    id: 'beachcomb',
+    group: 'survival',
+    icon: k('🐚'),
+    name: k('Dạo bờ nhặt đồ trôi dạt'),
+    desc: (s) =>
+      `Đi dọc mép nước xem sóng đánh dạt vào những gì — mỗi lần một khác: gỗ, dây, chai lọ, cua, rong biển, thỉnh thoảng có món quý.${
+        Number(s.flags[`comb${s.day}`] ?? 0) ? ' Hôm nay bạn đã dạo một lượt — lần sau khó tìm hơn.' : ''
+      }`,
+    hint: k('1–3 món ngẫu nhiên'),
+    energy: k(7),
+    visible: (s) => here(s) === 'coast',
+    check: (s) => ({
+      label: 'Dạo bờ biển',
+      attr: 'PER',
+      skill: 'survival',
+      dc: 11 + 2 * Number(s.flags[`comb${s.day}`] ?? 0),
+      outdoor: true,
+      tags: ['gather'],
+    }),
+    priority: (s) => (s.day <= 3 ? 40 : 25),
+    resolve: (ctx, tier) => {
+      const s = ctx.s;
+      ctx.flag(`comb${s.day}`, Number(s.flags[`comb${s.day}`] ?? 0) + 1);
+      const n = tierYield(tier, { crit_success: 3, success: 2, partial: 1 });
+      const table: [string, number][] = [
+        ['wood', 20], ['palm', 12], ['fiber', 10], ['kelp', 12], ['crab', 10], ['coconut', 8],
+        ['scrap', 8], ['glass_bottle', 7], ['rope', 5], ['canvas', 4], ['canned', 3],
+        ['barrel', 2], ['compass', 0.8], ['flare', 0.6],
+      ];
+      if (tier === 'crit_success') table.push(['gourd', 4], ['first_aid', 2]);
+      for (let i = 0; i < n; i++) ctx.addItem(ctx.rng.weighted(table)!, 1);
+      if (!n) ctx.say('Sóng chỉ đánh dạt vào toàn rác và bọt biển.');
+      else ctx.say('Bạn lom khom nhặt nhạnh dọc mép nước.');
+      if (tier === 'crit_failure') {
+        ctx.say('Một con sứa dạt bờ chích vào chân bạn.');
+        ctx.addCondition('poisoned', 1, 2);
       }
     },
   },
@@ -1038,7 +1103,14 @@ const actions: ActionDef[] = [
     followUp: true,
     variants: (s) => s.routes.filter((r) => r.known && r.status === 'blocked' && (r.a === here(s) || r.b === here(s))).map((r) => r.id),
     visible: k(true),
-    check: k({ label: 'Tìm đường vòng', attr: 'PER', skill: 'navigation', dc: 14, outdoor: true }),
+    check: (s) => ({
+      label: 'Tìm đường vòng',
+      attr: 'PER',
+      skill: 'navigation',
+      dc: 14,
+      outdoor: true,
+      mods: mods(s.inventory.some((x) => x.id === 'compass') && { label: '🧭 La bàn', value: 2 }),
+    }),
     priority: k(50),
     resolve: (ctx, tier, p) => {
       const r = ctx.s.routes.find((x) => x.id === p)!;
@@ -1241,7 +1313,11 @@ const actions: ActionDef[] = [
       dc: 13,
       outdoor: true,
       crit: 'safe',
-      mods: mods(countBoth(s, 'flint') > 0 && { label: 'Đá lửa', value: 5 }, hasTag(s, 'fire') && { label: 'Đuốc', value: 5 }),
+      mods: mods(
+        countBoth(s, 'flint') > 0 && { label: 'Đá lửa', value: 5 },
+        hasTag(s, 'fire') && { label: 'Đuốc', value: 5 },
+        s.flags.dampDay === s.day && { label: 'Củi ẩm', value: -3 },
+      ),
     }),
     priority: (s) => (rawCookable(s).length > 0 || countBoth(s, 'water_raw') > 0 ? 78 : 40),
     resolve: (ctx, tier) => {
@@ -1275,7 +1351,11 @@ const actions: ActionDef[] = [
       dc: 12,
       outdoor: true,
       crit: 'safe',
-      mods: mods(countBoth(s, 'flint') > 0 && { label: 'Đá lửa', value: 5 }, hasTag(s, 'fire') && { label: 'Đuốc', value: 5 }),
+      mods: mods(
+        countBoth(s, 'flint') > 0 && { label: 'Đá lửa', value: 5 },
+        hasTag(s, 'fire') && { label: 'Đuốc', value: 5 },
+        s.flags.dampDay === s.day && { label: 'Củi ẩm', value: -3 },
+      ),
     }),
     priority: k(66),
     resolve: (ctx, tier) => {

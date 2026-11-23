@@ -3,7 +3,9 @@ import { REGION_DEFS, WEATHER_DEFS, WEATHER_MARKOV } from '../content/defs.js';
 import { ITEMS } from '../content/items.js';
 import { Ctx, fireLit, hasCondition, hasStructure, shelterAt, structuresAt } from './ctx.js';
 import { runTrigger } from './director.js';
-import type { ItemStack, Pacing, WeatherId } from './types.js';
+import { traitWeatherMult } from '../content/traits.js';
+import type { Rng } from './rng.js';
+import type { GameState, ItemStack, Pacing, WeatherId } from './types.js';
 
 const D = BALANCE.decay;
 const T = BALANCE.thresholds;
@@ -182,10 +184,16 @@ function regenerate(ctx: Ctx) {
   }
 }
 
-function nextWeather(ctx: Ctx, from: WeatherId, day: number): WeatherId {
-  let w = ctx.rng.weighted(WEATHER_MARKOV[from]) ?? 'clear';
+/** tomorrow's weather: Markov transition shaped by the island's traits; no storm before day 4 */
+export function rollWeather(rng: Rng, from: WeatherId, day: number, s: GameState): WeatherId {
+  const row = WEATHER_MARKOV[from].map(([w, p]) => [w, p * traitWeatherMult(s, w)] as const);
+  let w = rng.weighted(row) ?? 'clear';
   if (w === 'storm' && day <= 3) w = 'rain';
   return w;
+}
+
+function nextWeather(ctx: Ctx, from: WeatherId, day: number): WeatherId {
+  return rollWeather(ctx.rng, from, day, ctx.s);
 }
 
 function dayStart(ctx: Ctx) {

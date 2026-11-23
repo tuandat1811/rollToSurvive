@@ -10,6 +10,7 @@ import { bands, odds, resolveCheck, successFace } from './check.js';
 import { absSlot, carryMax, containerCap, storageWaterCap, waterCount, weightOf } from './ctx.js';
 import { journey, stageCheck } from './escape.js';
 import { buildEscapePlan } from './escapePlan.js';
+import { traitDefs } from '../content/traits.js';
 import { actionEnergy, eventChoices, instances, materialStatus, unmetReasons } from './game.js';
 import { ATTRS, REGIONS, SKILLS, type CheckSpec, type GameState, type ItemStack } from './types.js';
 
@@ -218,6 +219,7 @@ export function buildView(id: string, s: GameState): GameView {
     raft: raft ? { stage: raft.stage, integrity: raft.integrity, stages: RAFT_STAGES.map((x) => x.name) } : undefined,
     traps: s.traps.map((t) => ({ kind: t.kind, region: REGION_DEFS[t.region].name, ready: t.readyAt <= now })),
     escapePlan: buildEscapePlan(s, checkView),
+    traits: traitDefs(s).map((t) => ({ id: t.id, name: t.name, icon: t.icon, desc: t.desc, mood: t.mood })),
     knowledge: {
       currents: s.world.currents,
       shipKnown: s.world.shipKnown,

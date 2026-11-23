@@ -1,6 +1,7 @@
 import { BALANCE } from '../content/balance.js';
 import { REGION_DEFS } from '../content/defs.js';
 import { EVENTS, type EventDef, type EventTrigger } from '../content/events.js';
+import { traitEventMult } from '../content/traits.js';
 import type { Ctx } from './ctx.js';
 
 /**
@@ -41,7 +42,7 @@ export function runTrigger(ctx: Ctx, trigger: EventTrigger) {
   if (!ctx.rng.chance(p)) return;
   const pool = Object.values(EVENTS)
     .filter((d) => d.trigger === trigger && !d.forced && d.weight && available(ctx, d))
-    .map((d) => [d, d.weight!(s)] as const)
+    .map((d) => [d, d.weight!(s) * traitEventMult(s, d.id)] as const)
     .filter(([, w]) => w > 0);
   const pick = ctx.rng.weighted(pool);
   if (pick) fire(ctx, pick);
@@ -85,7 +86,8 @@ function handleShips(ctx: Ctx) {
   if (!W.ships.length || W.ships[0] > ctx.now) return;
   W.ships.shift();
   const B = BALANCE.ships;
-  const gap = ctx.rng.int(B.gapMinDays, B.gapMaxDays) * 4;
+  const [gMin, gMax] = W.shipGap ?? [B.gapMinDays, B.gapMaxDays];
+  const gap = ctx.rng.int(gMin, gMax) * 4;
   const nextDayStart = Math.floor((ctx.now + gap) / 4) * 4;
   W.ships.push(nextDayStart + ctx.rng.int(0, 3));
 

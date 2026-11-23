@@ -47,7 +47,7 @@ export const BALANCE = {
   milestones: [3, 6, 10, 15, 21, 28, 36, 45],
   ships: { firstMin: 5, firstMax: 8, gapMinDays: 4, gapMaxDays: 7 },
   events: {
-    pacingChance: { calm: 0.1, normal: 0.22, tense: 0.36 },
+    pacingChance: { calm: 0.12, normal: 0.26, tense: 0.4 },
     softCap: 2,
     overCapMult: 0.25,
   },

@@ -1,4 +1,5 @@
 import { ITEMS } from '../content/items.js';
+import { traitSea } from '../content/traits.js';
 import { WEATHER_DEFS } from '../content/weather.js';
 import { awardXp, roll } from './check.js';
 import { isSuccess, loseCarried, victory } from './common.js';
@@ -89,6 +90,10 @@ export function stageCheck(s: GameState): CheckSpec {
   if (wd.sea) mods.push({ label: `${wd.icon} ${wd.name}`, value: wd.sea });
   if ((w === 'hot' || w === 'humid') && e.stage === 1) mods.push({ label: `${wd.icon} Nóng bức giữa biển`, value: -1 });
   if (s.flags.calmSeaDay === s.day) mods.push({ label: 'Biển lặng', value: 2 });
+  mods.push(...traitSea(s));
+  if (e.stage === 2 && s.inventory.some((x) => x.id === 'compass')) mods.push({ label: '🧭 La bàn', value: 1 });
+  if (e.stage === 2 && s.flags.landSighted) mods.push({ label: 'Biết hướng đất liền', value: 2 });
+  if (e.stage === 0 && s.flags.dolphinSaved) mods.push({ label: '🐬 Đàn cá heo dẫn đường', value: 1 });
   if (e.method === 'raft') {
     const raft = s.projects.find((p) => p.id === 'raft');
     const q = raft?.stage ?? 1;

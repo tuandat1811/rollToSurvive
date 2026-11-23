@@ -8,6 +8,7 @@ import {
 import { Ctx, count, countBoth, hasStructure, regionName, shelterAt, structuresAt } from '../engine/ctx.js';
 import type { CheckSpec, GameState, Req, Tier } from '../engine/types.js';
 import { REGION_DEFS, SLOT_NAMES } from './defs.js';
+import { EXTRA_EVENTS } from './events-extra.js';
 import { ITEMS } from './items.js';
 
 export type EventTrigger = 'day_start' | 'slot_start' | 'night';
@@ -335,7 +336,7 @@ const list: EventDef[] = [
     trigger: 'day_start',
     once: true,
     eligible: (s) => s.day >= 3 && s.regions.river.water !== 'contaminated',
-    weight: () => 2.5,
+    weight: () => 1.2,
     text: (s) =>
       s.location === 'river'
         ? 'Sáng nay nước suối có màu đục lạ và thoang thoảng mùi hôi. Có gì đó không ổn ở thượng nguồn.'
@@ -751,5 +752,5 @@ const STRUCT_NAMES: Record<string, string> = {
   signal_pyre: 'Đống lửa tín hiệu',
 };
 
-export const EVENTS: Record<string, EventDef> = Object.fromEntries(list.map((e) => [e.id, e]));
+export const EVENTS: Record<string, EventDef> = Object.fromEntries([...list, ...EXTRA_EVENTS].map((e) => [e.id, e]));
 export { SLOT_NAMES };

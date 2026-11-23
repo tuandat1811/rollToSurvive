@@ -7,18 +7,21 @@ import { awardXp, roll } from './check.js';
 import { Ctx, absSlot, count, countBoth, storageWaterCap, waterCount, containerCap, carryMax, weightOf } from './ctx.js';
 import { escapeDecision } from './escape.js';
 import { Rng } from './rng.js';
-import { advanceSlots, checkDeath } from './time.js';
+import { advanceSlots, checkDeath, rollWeather } from './time.js';
+import { pickTraits, traitDefs, traitWeatherMult } from '../content/traits.js';
 import {
   ATTRS,
   REGIONS,
   SKILLS,
   type AttrId,
   type GameState,
+  type ItemStack,
   type RegionId,
   type RegionState,
   type ResourceKind,
   type Tier,
   type TurnResult,
+  type WeatherId,
 } from './types.js';
 
 export class GameError extends Error {}
@@ -44,6 +47,8 @@ export function newGame(name: string, attrs: Record<AttrId, number>, seed: numbe
   if (spent !== B.attrPoints) throw new GameError(`Cần phân bổ đúng ${B.attrPoints} điểm thuộc tính`);
 
   const rng = new Rng(seed);
+  const traits = pickTraits(() => rng.next(), 2);
+  const tdefs = traitDefs({ traits });
 
   const regions = {} as Record<RegionId, RegionState>;
   const pick = (arr: string[], n: number) => rng.shuffle([...arr]).slice(0, n);
@@ -54,6 +59,12 @@ export function newGame(name: string, attrs: Record<AttrId, number>, seed: numbe
     mountain: rng.chance(0.5) ? ['bird_cliff', 'cave'] : pick(SECONDARY_POOLS.mountain, 1),
     cape: [],
   };
+  for (const t of tdefs) {
+    const loc = t.guaranteeLocation;
+    if (!loc) continue;
+    const reg = (Object.keys(SECONDARY_POOLS) as RegionId[]).find((r) => SECONDARY_POOLS[r].includes(loc));
+    if (reg && !secondary[reg].includes(loc)) secondary[reg][0] = loc;
+  }
   const pools: Record<RegionId, string[]> = {
     coast: [...secondary.coast.map((l) => `loc:${l}`)],
     jungle: [...secondary.jungle.map((l) => `loc:${l}`)],
@@ -69,7 +80,10 @@ export function newGame(name: string, attrs: Record<AttrId, number>, seed: numbe
 
   for (const id of REGIONS) {
     const abundance = {} as Record<ResourceKind, number>;
-    for (const kk of ['forage', 'fish', 'game', 'wood'] as ResourceKind[]) abundance[kk] = Math.round(ABUNDANCE[id][kk] * (0.8 + rng.next() * 0.35));
+    for (const kk of ['forage', 'fish', 'game', 'wood'] as ResourceKind[]) {
+      const mult = tdefs.reduce((m, t) => m * (t.abundance?.[id]?.[kk] ?? 1) * (t.abundance?.['*']?.[kk] ?? 1), 1);
+      abundance[kk] = Math.round(ABUNDANCE[id][kk] * mult * (0.75 + rng.next() * 0.45));
+    }
     regions[id] = {
       discovery: id === 'coast' || id === 'jungle' || id === 'river' ? 'discovered' : id === 'mountain' ? 'clued' : 'unknown',
       surveyed: false,
@@ -95,6 +109,9 @@ export function newGame(name: string, attrs: Record<AttrId, number>, seed: numbe
   if (rng.chance(0.4)) wreck.push('flare');
   if (rng.chance(0.5)) wreck.push('chart');
   if (rng.chance(0.5)) wreck.push('pot');
+  // a couple of random odds and ends so no two wrecks hold the same things
+  for (const extra of pick(['glass_bottle', 'scrap', 'rope', 'canned', 'compass', 'bandage', 'fiber', 'glass_bottle'], 2)) wreck.push(extra);
+  for (const t of tdefs) wreck.push(...(t.wreck ?? []));
   rng.shuffle(wreck);
   // the knife and a pot-like container should not be buried at the very bottom
   for (const must of ['knife', 'tin_can']) {
@@ -112,8 +129,36 @@ export function newGame(name: string, attrs: Record<AttrId, number>, seed: numbe
     camp.unshift('journal');
   }
 
-  const firstShipDay = rng.int(BALANCE.ships.firstMin, BALANCE.ships.firstMax);
-  const tomorrow = (rng.weighted(WEATHER_MARKOV.clear) ?? 'clear') === 'storm' ? 'cloudy' : (rng.weighted(WEATHER_MARKOV.clear) ?? 'clear');
+  const shipTrait = tdefs.find((t) => t.shipGap);
+  const firstRange = tdefs.find((t) => t.firstShip)?.firstShip ?? [BALANCE.ships.firstMin, BALANCE.ships.firstMax];
+  const firstShipDay = rng.int(firstRange[0], firstRange[1]);
+
+  // first day: a random, non-dangerous weather shaped by the island traits
+  const startOptions: WeatherId[] = ['clear', 'cloudy', 'breezy', 'drizzle', 'fog', 'hot', 'windy'];
+  const startWeather = rng.weighted(startOptions.map((w) => [w, traitWeatherMult({ traits } as GameState, w)] as const)) ?? 'clear';
+  const tomorrow = rollWeather(rng, startWeather, 2, { traits } as GameState);
+
+  // what the survivor managed to hold on to, and how the wreck left them
+  const KITS: { id: string; qty: number; text: string }[] = [
+    { id: 'knife', qty: 1, text: 'Con dao gấp vẫn nằm trong túi quần bạn.' },
+    { id: 'rope', qty: 2, text: 'Trên vai bạn vẫn quấn hai cuộn dây thừng từ boong tàu.' },
+    { id: 'canned', qty: 2, text: 'Hai hộp đồ ăn còn nằm nguyên trong túi áo khoác.' },
+    { id: 'first_aid', qty: 1, text: 'Bạn ôm chặt được hộp sơ cứu của tàu.' },
+    { id: 'tin_can', qty: 1, text: 'Một chiếc lon thiếc rỗng lăn cạnh chân bạn — đun nước được đấy.' },
+    { id: 'bandage', qty: 2, text: 'Túi áo bạn còn vài cuộn băng gạc.' },
+    { id: 'coconut', qty: 2, text: 'Mấy trái dừa trôi dạt nằm ngay cạnh bạn.' },
+    { id: 'compass', qty: 1, text: 'Chiếc la bàn của thuyền trưởng mắc trong túi áo bạn.' },
+    { id: 'flint', qty: 1, text: 'Bạn mò thấy một hòn đá lửa trong túi — có thể nhóm lửa dễ dàng.' },
+  ];
+  const kit = rng.pick(KITS);
+  const injured = rng.chance(0.35);
+  const jitter = (v: number, d: number) => Math.max(40, Math.min(100, v + rng.int(-d, d)));
+  const OPENINGS = [
+    'Cơn bão đêm qua đã đánh chìm con tàu chở bạn. Bạn tỉnh dậy trên bãi cát, người ướt sũng, xung quanh là xác tàu và những mảnh vỡ.',
+    'Tiếng sóng vỗ đánh thức bạn. Miệng đầy cát mặn, con tàu chỉ còn là một khối sắt vụn mắc cạn ngoài mỏm đá.',
+    'Bạn không nhớ mình đã bám vào mảnh gỗ bao lâu. Khi mở mắt, bạn đang nằm trên bờ cát của một hòn đảo lạ, bên cạnh xác con tàu.',
+    'Chiếc xuồng cứu sinh lật úp trên bãi biển. Không còn ai khác. Chỉ có bạn, xác tàu và hòn đảo im lặng đến rợn người.',
+  ];
 
   const s: GameState = {
     schema: 1,
@@ -128,8 +173,14 @@ export function newGame(name: string, attrs: Record<AttrId, number>, seed: numbe
     attrs: { ...attrs },
     attrPoints: 0,
     skills: Object.fromEntries(SKILLS.map((k) => [k, { lvl: 0, xp: 0 }])) as GameState['skills'],
-    vitals: { ...B.vitals },
-    conditions: [],
+    vitals: {
+      health: injured ? 92 : B.vitals.health,
+      hunger: jitter(B.vitals.hunger, 8),
+      thirst: jitter(B.vitals.thirst, 8),
+      energy: jitter(B.vitals.energy, 8),
+    },
+    conditions: injured ? [{ id: 'injury', sev: 1 }] : [],
+    traits,
     knowledge: [],
     location: 'coast',
     baseRegion: null,
@@ -138,6 +189,7 @@ export function newGame(name: string, attrs: Record<AttrId, number>, seed: numbe
       { id: 'water_safe', qty: 1 },
       { id: 'coconut', qty: 1, exp: 40 },
     ],
+    // (the random kit item is added below so it stacks/expires like any other item)
     storage: [],
     structures: [],
     projects: [],
@@ -145,8 +197,9 @@ export function newGame(name: string, attrs: Record<AttrId, number>, seed: numbe
     regions,
     routes,
     world: {
-      weather: 'clear',
-      tomorrow: tomorrow === 'storm' ? 'cloudy' : tomorrow,
+      weather: startWeather,
+      tomorrow,
+      shipGap: shipTrait?.shipGap,
       forecastUntil: 1,
       pacing: 'calm',
       notableToday: 0,
@@ -170,19 +223,41 @@ export function newGame(name: string, attrs: Record<AttrId, number>, seed: numbe
     uid: 0,
     last: null,
   };
+  // the random kit item (stacked/expiring like any other)
+  const kitDef = ITEMS[kit.id];
+  for (let i = 0; i < kit.qty; i++) {
+    const st: ItemStack = { id: kit.id, qty: 1 };
+    if (kitDef.dur !== undefined) st.dur = kitDef.dur;
+    if (kitDef.spoilDays) st.exp = kitDef.spoilDays * 4;
+    const ex = kitDef.dur === undefined ? s.inventory.find((x) => x.id === kit.id && x.exp === st.exp) : undefined;
+    if (ex) ex.qty++;
+    else s.inventory.push(st);
+  }
   s.rng = rng.state;
-  const intro =
-    'Cơn bão đêm qua đã đánh chìm con tàu chở bạn. Bạn tỉnh dậy trên bãi cát, người ướt sũng, xung quanh là xác tàu và những mảnh vỡ. Hòn đảo im lặng đến rợn người.';
-  s.journal.push({ day: 1, slot: 0, kind: 'event', text: intro });
+
+  const intro = rng.pick(OPENINGS);
+  const traitLines = tdefs.map((t) => `${t.icon} ${t.name}: ${t.desc}`);
+  s.journal.push({ day: 1, slot: 0, kind: 'event', text: `${intro} ${kit.text}` });
+  s.journal.push({ day: 1, slot: 0, kind: 'discovery', text: `Đặc điểm hòn đảo lần này — ${traitLines.join(' · ')}` });
   s.last = {
     title: 'Ngày 1 — Tỉnh dậy trên đảo hoang',
     icon: '🏝️',
     narrative: [
-      intro,
+      `${intro} ${kit.text}${injured ? ' Chân tay bạn trầy xước vì va vào đá ngầm.' : ''}`,
       'Ưu tiên trước mắt: nước uống, thức ăn và một chỗ trú qua đêm. Xác tàu có thể còn đồ dùng được. Và bạn có thể thử rời đảo bất cứ lúc nào — nếu dám.',
     ],
-    changes: [],
-    notices: [],
+    changes: [
+      { kind: 'gain', text: `+${kit.qty} ${kitDef.icon} ${kitDef.name}` },
+      ...(injured ? [{ kind: 'bad' as const, text: '🤕 Trầy xước sau vụ đắm tàu' }] : []),
+    ],
+    notices: [
+      {
+        title: 'Hòn đảo lần này',
+        icon: '🎲',
+        text: 'Mỗi ván, hòn đảo có 2 đặc điểm ngẫu nhiên. Xem lại bất cứ lúc nào ở tab Bản đồ.',
+        changes: tdefs.map((t) => ({ kind: t.mood === 'good' ? ('good' as const) : t.mood === 'bad' ? ('bad' as const) : ('info' as const), text: `${t.icon} ${t.name} — ${t.desc}` })),
+      },
+    ],
     timeAdvanced: 0,
   };
   return s;

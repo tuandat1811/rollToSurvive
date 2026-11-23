@@ -2,6 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { Store } from '../src/db.js';
 import { WEATHER_DEFS, WEATHER_MARKOV } from '../src/content/weather.js';
+import { LOCATION_DEFS } from '../src/content/defs.js';
+import { EVENTS } from '../src/content/events.js';
+import { ITEMS } from '../src/content/items.js';
+import { TRAITS, traitDefs, traitSea } from '../src/content/traits.js';
 import { bands, resolveCheck, successFace, tierFor } from '../src/engine/check.js';
 import { GameError, actionEnergy, chooseEvent, consume, escapeStep, findInstance, newGame, performAction } from '../src/engine/game.js';
 import type { GameState } from '../src/engine/types.js';
@@ -179,6 +183,52 @@ describe('weather', () => {
       }
     }
     expect(seen.size).toBe(10);
+  });
+});
+
+describe('run variety', () => {
+  it('rolls different islands: traits, first weather, starting kit and story', () => {
+    const traitSets = new Set<string>();
+    const weathers = new Set<string>();
+    const kits = new Set<string>();
+    const stories = new Set<string>();
+    for (let seed = 0; seed < 60; seed++) {
+      const s = fresh(seed);
+      expect(s.traits?.length).toBe(2);
+      const defs = traitDefs(s);
+      expect(defs[0].conflicts?.includes(defs[1].id)).not.toBe(true);
+      traitSets.add([...s.traits!].sort().join('+'));
+      weathers.add(s.world.weather);
+      kits.add(s.inventory.map((x) => x.id).sort().join(','));
+      stories.add(s.last!.narrative[0].slice(0, 40));
+    }
+    expect(traitSets.size).toBeGreaterThan(20);
+    expect(weathers.size).toBeGreaterThan(4);
+    expect(kits.size).toBeGreaterThan(5);
+    expect(stories.size).toBeGreaterThan(2);
+  });
+
+  it('only references items, events and locations that exist', () => {
+    for (const t of TRAITS) {
+      for (const id of Object.keys(t.events ?? {})) expect(EVENTS[id], `trait ${t.id} → event ${id}`).toBeDefined();
+      for (const id of t.wreck ?? []) expect(ITEMS[id], `trait ${t.id} → item ${id}`).toBeDefined();
+      if (t.guaranteeLocation) expect(LOCATION_DEFS[t.guaranteeLocation]).toBeDefined();
+    }
+    for (let seed = 0; seed < 40; seed++) {
+      const s = fresh(seed);
+      for (const id of [...s.world.wreckPool, ...s.world.ruinsPool, ...s.inventory.map((x) => x.id)])
+        if (id !== 'logbook' && id !== 'journal') expect(ITEMS[id], `item ${id}`).toBeDefined();
+    }
+    expect(Object.keys(EVENTS).length).toBeGreaterThanOrEqual(40);
+  });
+
+  it('traits change the rules: ship traffic and sea difficulty', () => {
+    const s = fresh(1);
+    s.traits = ['busy_lane', 'stormy'];
+    const sea = traitSea(s);
+    expect(sea.some((m) => m.value === -1)).toBe(true);
+    s.traits = ['calm'];
+    expect(traitSea(s)[0].value).toBe(1);
   });
 });
 

@@ -123,7 +123,7 @@ const SLIDES: Slide[] = [
     body: (
       <ul className="guide-list">
         <li>
-          <b>Khám phá</b> để mở vùng mới, địa điểm và đường đi. Mỗi ván, hòn đảo được sắp xếp khác nhau.
+          <b>Khám phá</b> để mở vùng mới, địa điểm và đường đi. Mỗi ván, hòn đảo được sắp xếp khác nhau và có <b>2 đặc điểm ngẫu nhiên</b> (mưa nhiều, mùa khô, thú dữ, tàu qua lại thường xuyên…) — xem ở tab Bản đồ.
         </li>
         <li>
           <b>Thời tiết</b> thay đổi mỗi ngày. Bão rất nguy hiểm nhưng luôn có dấu hiệu báo trước.

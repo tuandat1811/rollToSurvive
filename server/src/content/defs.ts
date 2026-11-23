@@ -128,6 +128,8 @@ export const LOCATION_DEFS: Record<string, LocationDef> = {
   lagoon: { id: 'lagoon', name: 'Đầm phá', icon: '🐠', region: 'coast', desc: 'Vùng nước lặng sau rạn san hô. Đánh cá dễ hơn (+2).' },
   rain_pool: { id: 'rain_pool', name: 'Hốc đá trữ mưa', icon: '🪨', region: 'coast', desc: 'Hốc đá giữ lại nước mưa sạch. Lấy được nước trong 2 ngày sau mưa.' },
   turtle_beach: { id: 'turtle_beach', name: 'Bãi rùa', icon: '🐢', region: 'coast', desc: 'Rùa biển lên đây đẻ trứng vào buổi tối.' },
+  seep: { id: 'seep', name: 'Mạch nước rỉ', icon: '⛲', region: 'coast', desc: 'Nước ngọt rỉ ra dưới lớp cát ẩm. Lấy được 2 phần nước mỗi ngày ngay tại Bãi biển.' },
+  bee_tree: { id: 'bee_tree', name: 'Cây có tổ ong', icon: '🐝', region: 'jungle', desc: 'Một tổ ong rừng trong hốc cây cổ thụ.' },
   banana_grove: { id: 'banana_grove', name: 'Lùm chuối dại', icon: '🍌', region: 'jungle', desc: 'Một lùm chuối dại. Tìm thức ăn ở rừng hiệu quả hơn.' },
   water_vine: { id: 'water_vine', name: 'Dây leo nước', icon: '🌿', region: 'jungle', desc: 'Loại dây leo chứa nước sạch bên trong. Lấy được 1–2 phần nước an toàn.' },
   herb_patch: { id: 'herb_patch', name: 'Bãi thảo dược', icon: '🌱', region: 'jungle', desc: 'Nhiều cây thuốc mọc dưới tán rừng. Tìm thảo dược dễ hơn.' },

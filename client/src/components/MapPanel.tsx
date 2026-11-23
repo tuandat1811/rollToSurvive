@@ -15,6 +15,19 @@ export default function MapPanel({ view, onTravel }: { view: GameView; onTravel:
 
   return (
     <div className="card panel">
+      {view.traits.length > 0 && (
+        <div className="island-traits">
+          <div className="section-title">🎲 Hòn đảo lần này</div>
+          {view.traits.map((t) => (
+            <div key={t.id} className={`trait trait-${t.mood}`}>
+              <b>
+                {t.icon} {t.name}
+              </b>
+              <span>{t.desc}</span>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="map-wrap">
         <svg viewBox="0 0 960 720" role="img" aria-label="Bản đồ hòn đảo">
           <defs>

@@ -501,3 +501,11 @@ p { margin: 0 0 8px; }
   .esc-row-head .tiny { display: none; }
 }
 .esc-row-title .tiny { display: block; font-weight: 400; margin-top: 2px; }
+
+/* ---------------------------------------------------------- island traits */
+.island-traits { margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px; }
+.trait { padding: 8px 10px; border-radius: 10px; background: var(--bg-2); border-left: 3px solid var(--line); display: flex; flex-direction: column; gap: 2px; }
+.trait span { font-size: 12px; color: var(--text-dim); }
+.trait-good { border-left-color: var(--good); }
+.trait-bad { border-left-color: var(--bad); }
+.trait-mixed { border-left-color: var(--sand); }

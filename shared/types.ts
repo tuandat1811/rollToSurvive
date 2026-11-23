@@ -274,6 +274,8 @@ export interface GameView {
   raft?: { stage: number; integrity: number; stages: string[] };
   traps: { kind: string; region: string; ready: boolean }[];
   escapePlan: EscapePlanView;
+  /** island traits rolled for this run */
+  traits: { id: string; name: string; icon: string; desc: string; mood: 'good' | 'bad' | 'mixed' }[];
   knowledge: { currents: number; shipNext?: { day: number; slot: number }; shipKnown: boolean; recipes: string[] };
   map: { regions: RegionView[]; routes: RouteView[] };
   actions: ActionView[];
