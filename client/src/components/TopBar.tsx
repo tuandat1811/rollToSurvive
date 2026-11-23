@@ -1,7 +1,7 @@
 import type { GameView } from '../../../shared/types.ts';
 import { SLOT_ICONS } from './ui.tsx';
 
-export default function TopBar({ view, onExit }: { view: GameView; onExit: () => void }) {
+export default function TopBar({ view, onExit, onHelp }: { view: GameView; onExit: () => void; onHelp: () => void }) {
   return (
     <header className="topbar">
       <div className="brand">🎲 Roll To Survive</div>
@@ -45,6 +45,9 @@ export default function TopBar({ view, onExit }: { view: GameView; onExit: () =>
         📍 {view.location.icon} {view.location.name}
         {view.baseRegion === view.location.id && <span className="badge good">⚑ Căn cứ</span>}
       </div>
+      <button className="btn ghost sm" onClick={onHelp} title="Xem lại hướng dẫn và bật bảng Việc cần làm">
+        📖 Hướng dẫn
+      </button>
       <button className="btn ghost sm" onClick={onExit} title="Về trang chủ (ván chơi được tự động lưu)">
         🏠 Thoát
       </button>

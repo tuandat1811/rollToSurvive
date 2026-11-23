@@ -5,9 +5,10 @@ import { pct, successChance } from './ui.tsx';
 const GROUP_ORDER = ['survival', 'food', 'explore', 'travel', 'craft', 'base', 'medical', 'escape'];
 const SCENE: Record<string, string> = { coast: '🏖️', jungle: '🌴', river: '🏞️', mountain: '⛰️', cape: '🗼' };
 
-export function ActionCard({ a, onPick }: { a: ActionView; onPick: (a: ActionView) => void }) {
+export function ActionCard({ a, onPick, guided }: { a: ActionView; onPick: (a: ActionView) => void; guided?: boolean }) {
   return (
-    <button className={`action ${a.available ? '' : 'off'} ${a.followUp ? 'followup' : ''}`} onClick={() => onPick(a)}>
+    <button className={`action ${a.available ? '' : 'off'} ${a.followUp ? 'followup' : ''} ${guided ? 'guided' : ''}`} onClick={() => onPick(a)}>
+      {guided && <span className="guide-tag">🎯 Hướng dẫn</span>}
       <div className="head">
         <span className="icon">{a.icon}</span>
         <span className="name">{a.name}</span>
@@ -28,7 +29,7 @@ export function ActionCard({ a, onPick }: { a: ActionView; onPick: (a: ActionVie
   );
 }
 
-export default function ActionBoard({ view, onPick }: { view: GameView; onPick: (a: ActionView) => void }) {
+export default function ActionBoard({ view, onPick, guideKey }: { view: GameView; onPick: (a: ActionView) => void; guideKey?: string }) {
   const [group, setGroup] = useState<string>('suggest');
   const [showLocked, setShowLocked] = useState(false);
 
@@ -48,8 +49,11 @@ export default function ActionBoard({ view, onPick }: { view: GameView; onPick: 
       .filter((a) => !a.followUp)
       .sort((a, b) => b.priority - a.priority)
       .slice(0, Math.max(3, 6 - follow.length));
-    return [...follow.sort((a, b) => b.priority - a.priority), ...rest];
-  }, [view.actions]);
+    const list = [...follow.sort((a, b) => b.priority - a.priority), ...rest];
+    // the tutorial's current target always leads the suggestions
+    const guided = guideKey ? view.actions.find((a) => a.key === guideKey) : undefined;
+    return guided ? [guided, ...list.filter((a) => a.key !== guideKey)] : list;
+  }, [view.actions, guideKey]);
 
   const current = group === 'suggest' ? suggested : groups.find((g) => g.id === group)?.items ?? [];
   const list = group === 'suggest' || showLocked ? current : current.filter((a) => a.available);
@@ -99,7 +103,7 @@ export default function ActionBoard({ view, onPick }: { view: GameView; onPick: 
         )}
         <div className="actions-grid">
           {list.map((a) => (
-            <ActionCard key={a.key} a={a} onPick={onPick} />
+            <ActionCard key={a.key} a={a} onPick={onPick} guided={a.key === guideKey} />
           ))}
         </div>
         {group !== 'suggest' && lockedCount > 0 && (

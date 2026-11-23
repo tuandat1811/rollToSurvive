@@ -8,7 +8,9 @@ import CharacterPanel from './CharacterPanel.tsx';
 import EndScreen from './EndScreen.tsx';
 import EscapeModal from './EscapeModal.tsx';
 import EventModal from './EventModal.tsx';
+import IntroGuide from './IntroGuide.tsx';
 import InventoryPanel from './InventoryPanel.tsx';
+import TutorialPanel from './TutorialPanel.tsx';
 import JournalPanel from './JournalPanel.tsx';
 import MapPanel from './MapPanel.tsx';
 import ResultModal from './ResultModal.tsx';
@@ -18,7 +20,23 @@ import Vitals from './Vitals.tsx';
 type SideTab = 'map' | 'inv' | 'base' | 'journal';
 type MobileTab = 'actions' | 'status' | 'map' | 'inv' | 'journal';
 
-export type Act = (path: string, body: Record<string, unknown>, opts?: { quiet?: boolean }) => Promise<boolean>;
+function readPref(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+function writePref(key: string, value: string | null) {
+  try {
+    if (value === null) localStorage.removeItem(key);
+    else localStorage.setItem(key, value);
+  } catch {
+    /* storage unavailable */
+  }
+}
+
+export type Act =(path: string, body: Record<string, unknown>, opts?: { quiet?: boolean }) => Promise<boolean>;
 
 export default function Game({ initial, onExit, onNew }: { initial: GameView; onExit: () => void; onNew: () => void }) {
   const [view, setView] = useState(initial);
@@ -29,6 +47,19 @@ export default function Game({ initial, onExit, onNew }: { initial: GameView; on
   const [side, setSide] = useState<SideTab>('map');
   const [mobile, setMobile] = useState<MobileTab>('actions');
   const [showEnd, setShowEnd] = useState(true);
+  const isFresh = initial.day === 1 && initial.slot === 0 && initial.version === 0;
+  const [introOpen, setIntroOpen] = useState(() => isFresh && !readPref('rts.introSeen'));
+  const [tutorialHidden, setTutorialHidden] = useState(() => !!readPref(`rts.tutorialHidden.${initial.id}`));
+
+  const closeIntro = () => {
+    writePref('rts.introSeen', '1');
+    setIntroOpen(false);
+  };
+  const setHidden = (hidden: boolean) => {
+    writePref(`rts.tutorialHidden.${view.id}`, hidden ? '1' : null);
+    setTutorialHidden(hidden);
+  };
+  const guideKey = tutorialHidden ? undefined : view.tutorial.find((t) => !t.done)?.action;
 
   useEffect(() => {
     if (!toast) return;
@@ -80,14 +111,22 @@ export default function Game({ initial, onExit, onNew }: { initial: GameView; on
 
   return (
     <div className="game">
-      <TopBar view={view} onExit={onExit} />
+      <TopBar
+        view={view}
+        onExit={onExit}
+        onHelp={() => {
+          setHidden(false);
+          setIntroOpen(true);
+        }}
+      />
       <div className="layout">
         <div className="col" data-hidden={mobile !== 'status'}>
-          <Vitals view={view} act={act} />
+          <Vitals view={view} act={act} guideConsume={!tutorialHidden && view.tutorial.find((t) => !t.done)?.id === 'consume'} />
           <CharacterPanel view={view} act={act} />
         </div>
         <div className="col" data-hidden={mobile !== 'actions'}>
-          <ActionBoard view={view} onPick={setSelected} />
+          {!tutorialHidden && view.status === 'playing' && <TutorialPanel view={view} onPick={setSelected} onHide={() => setHidden(true)} act={act} />}
+          <ActionBoard view={view} onPick={setSelected} guideKey={guideKey} />
         </div>
         <div className="col" data-hidden={mobile === 'actions' || mobile === 'status'}>
           <div className="tabs">
@@ -154,9 +193,10 @@ export default function Game({ initial, onExit, onNew }: { initial: GameView; on
           }}
         />
       )}
-      {result && <ResultModal result={result} onClose={() => setResult(null)} />}
-      {!result && !ended && view.escape && <EscapeModal view={view} busy={busy} act={act} />}
-      {!result && !ended && !view.escape && view.pending && <EventModal event={view.pending} busy={busy} act={act} />}
+      {introOpen && <IntroGuide onClose={closeIntro} />}
+      {!introOpen && result && <ResultModal result={result} onClose={() => setResult(null)} />}
+      {!introOpen && !result && !ended && view.escape && <EscapeModal view={view} busy={busy} act={act} />}
+      {!introOpen && !result && !ended && !view.escape && view.pending && <EventModal event={view.pending} busy={busy} act={act} />}
       {!result && ended && showEnd && <EndScreen view={view} onExit={onExit} onNew={onNew} onClose={() => setShowEnd(false)} />}
       {toast && (
         <div className="toast" style={toast.kind === 'ok' ? { background: '#16342b', borderColor: 'var(--good)', color: '#d9f5cf' } : undefined}>
