@@ -4,7 +4,6 @@ import {
   isSuccess,
   signalLocationMod,
   victory,
-  weatherSignalMod,
 } from '../engine/common.ts';
 import { Ctx, count, countBoth, hasStructure, regionName, shelterAt, structuresAt } from '../engine/ctx.ts';
 import type { CheckSpec, GameState, Req, Tier } from '../engine/types.ts';
@@ -63,10 +62,11 @@ const ignore = (label = 'Bỏ qua', text = 'Bạn quyết định không can d�
 
 function signalChoices(s: GameState, opts: { bonus: number; plane?: boolean; onPartial: (ctx: Ctx) => void; win: [string, string, string] }): EventChoice[] {
   const loc = signalLocationMod(s.location);
-  const wmod = weatherSignalMod(s);
   const bonus = opts.bonus ? { label: 'Họ đã để ý tới bạn', value: opts.bonus } : null;
+  // weather effects on signalling come from the 'signal' check tag
   const mods = (extra: ({ label: string; value: number } | null)[]) =>
-    [loc, wmod, bonus, ...extra].filter((x): x is { label: string; value: number } => !!x);
+    [loc, bonus, ...extra].filter((x): x is { label: string; value: number } => !!x);
+  const tags = ['signal'];
   const out: EventChoice[] = [];
 
   const onResult = (ctx: Ctx, tier: Tier, what: string) => {
@@ -102,6 +102,7 @@ function signalChoices(s: GameState, opts: { bonus: number; plane?: boolean; onP
       attr: 'PER',
       skill: 'survival',
       dc: 16,
+      tags,
       mods: mods([oil ? { label: 'Dầu đèn', value: 3 } : null, opts.plane ? { label: 'Máy bay bay nhanh', value: -1 } : null]),
     },
     resolve: (ctx, tier) => {
@@ -126,7 +127,7 @@ function signalChoices(s: GameState, opts: { bonus: number; plane?: boolean; onP
       desc: 'Pháo sáng cứu hộ — rất khó bị bỏ qua. Chỉ dùng được một lần.',
       slots: 1,
       reqs: [{ label: 'Mang theo pháo sáng', met: count(s.inventory, 'flare') > 0 }],
-      check: { label: 'Bắn pháo sáng', attr: 'PER', dc: 13, mods: mods([]), xp: false },
+      check: { label: 'Bắn pháo sáng', attr: 'PER', dc: 13, tags, mods: mods([]), xp: false },
       resolve: (ctx, tier) => {
         ctx.removeItem('flare', 1, 'inv');
         onResult(ctx, tier, 'Quả pháo đỏ rực vút lên bầu trời');
@@ -143,7 +144,7 @@ function signalChoices(s: GameState, opts: { bonus: number; plane?: boolean; onP
       desc: 'Lóa ánh nắng về phía họ. Chỉ hiệu quả khi trời nắng.',
       slots: 1,
       reqs: [{ label: 'Trời nắng', met: sunny }],
-      check: { label: 'Chiếu gương tín hiệu', attr: 'PER', skill: 'navigation', dc: 15, mods: mods([]) },
+      check: { label: 'Chiếu gương tín hiệu', attr: 'PER', skill: 'navigation', dc: 15, tags, mods: mods([]) },
       resolve: (ctx, tier) => onResult(ctx, tier, 'Tia sáng lóe lên liên hồi về phía chân trời'),
     });
   }
@@ -155,7 +156,7 @@ function signalChoices(s: GameState, opts: { bonus: number; plane?: boolean; onP
     desc: 'Không có gì trong tay — chỉ còn hy vọng. Khả năng rất thấp.',
     slots: 1,
     energy: 6,
-    check: { label: 'Vẫy gọi trong tuyệt vọng', attr: 'PER', skill: 'survival', dc: opts.plane ? 24 : 23, mods: mods([]) },
+    check: { label: 'Vẫy gọi trong tuyệt vọng', attr: 'PER', skill: 'survival', dc: opts.plane ? 24 : 23, tags, mods: mods([]) },
     resolve: (ctx, tier) => onResult(ctx, tier, 'Bạn vẫy gọi đến khản cổ'),
   });
   out.push(ignore('Để họ đi', 'Bạn lặng lẽ nhìn theo cho tới khi nó khuất hẳn.'));
@@ -277,7 +278,7 @@ const list: EventDef[] = [
     trigger: 'day_start',
     notable: true,
     cooldownDays: 4,
-    eligible: (s) => s.day >= 3 && (s.world.weather === 'clear' || s.world.weather === 'cloudy'),
+    eligible: (s) => s.day >= 3 && (s.world.weather === 'clear' || s.world.weather === 'cloudy' || s.world.weather === 'breezy'),
     weight: () => 2,
     text: () => 'Mặt biển phẳng lặng như gương, gió nhẹ thổi ra khơi. Một ngày lý tưởng để ra biển.',
     passive: (ctx) => {
@@ -434,6 +435,7 @@ const list: EventDef[] = [
         energy: 10,
         check: {
           label: 'Săn thú lạ',
+          tags: ['hunting'],
           attr: 'AGI',
           skill: 'hunting',
           dc: 14,
@@ -624,7 +626,7 @@ const list: EventDef[] = [
     risk: 1,
     trigger: 'night',
     cooldownDays: 4,
-    eligible: (s) => s.world.weather === 'clear' || s.world.weather === 'hot',
+    eligible: (s) => s.world.weather === 'clear' || s.world.weather === 'hot' || s.world.weather === 'breezy',
     weight: (s) => (s.world.pacing === 'calm' ? 4 : 1.5),
     text: () => 'Đêm quang đãng, dải Ngân Hà vắt ngang bầu trời. Bạn nằm nhìn các vì sao, nhẩm tính phương hướng.',
     passive: (ctx) => {
@@ -692,7 +694,7 @@ const list: EventDef[] = [
     trigger: 'slot_start',
     notable: true,
     cooldownDays: 6,
-    eligible: (s) => s.day >= 6 && s.world.weather !== 'storm' && s.world.weather !== 'rain' && s.location !== 'jungle',
+    eligible: (s) => s.day >= 6 && !['storm', 'rain', 'fog', 'drizzle'].includes(s.world.weather) && s.location !== 'jungle',
     weight: () => 0.5,
     text: () => 'Tiếng động cơ ù ù trên đầu — một chiếc máy bay nhỏ đang bay ngang qua đảo! Nó bay rất nhanh.',
     journal: 'Một chiếc máy bay bay ngang qua đảo.',

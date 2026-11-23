@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.ts';
 import { Store } from '../src/db.ts';
-import { bands, successFace, tierFor } from '../src/engine/check.ts';
-import { GameError, chooseEvent, consume, escapeStep, findInstance, newGame, performAction } from '../src/engine/game.ts';
+import { WEATHER_DEFS, WEATHER_MARKOV } from '../src/content/weather.ts';
+import { bands, resolveCheck, successFace, tierFor } from '../src/engine/check.ts';
+import { GameError, actionEnergy, chooseEvent, consume, escapeStep, findInstance, newGame, performAction } from '../src/engine/game.ts';
 import type { GameState } from '../src/engine/types.ts';
 import { buildView } from '../src/engine/view.ts';
 
@@ -122,6 +123,62 @@ describe('survival', () => {
     expect(state.pending?.eventId).toBe('ship_sighted');
     const v = buildView('x', state);
     expect(v.pending!.choices.map((c) => c.id)).toContain('wave');
+  });
+});
+
+describe('weather', () => {
+  it('defines 10 weather types whose transitions stay within the set', () => {
+    const ids = Object.keys(WEATHER_DEFS);
+    expect(ids.length).toBe(10);
+    for (const [from, to] of Object.entries(WEATHER_MARKOV)) {
+      expect(ids).toContain(from);
+      for (const [w] of to) expect(ids).toContain(w);
+    }
+  });
+
+  it('applies weather buffs and nerfs to checks', () => {
+    const s = fresh();
+    s.world.weather = 'fog';
+    const hunt = resolveCheck(s, { attr: 'AGI', skill: 'hunting', dc: 14, outdoor: true, tags: ['hunting'] });
+    expect(hunt.mods.some((m) => m.value === 2)).toBe(true);
+    const look = resolveCheck(s, { attr: 'PER', dc: 12, outdoor: true });
+    expect(look.mods.some((m) => m.value === -2)).toBe(true);
+    s.world.weather = 'clear';
+    expect(resolveCheck(s, { attr: 'PER', dc: 12, outdoor: true }).mods.some((m) => m.value === 1)).toBe(true);
+    // indoor PER checks are not affected by fog
+    s.world.weather = 'fog';
+    expect(resolveCheck(s, { attr: 'PER', dc: 12 }).mods.length).toBe(0);
+  });
+
+  it('changes the energy cost of heavy work', () => {
+    const s = fresh();
+    const gather = findInstance(s, 'gather')!;
+    const base = actionEnergy(s, gather.def, '');
+    s.world.weather = 'breezy';
+    expect(actionEnergy(s, gather.def, '')).toBe(base - 2);
+    s.world.weather = 'humid';
+    expect(actionEnergy(s, gather.def, '')).toBe(base + 3);
+  });
+
+  it('produces every weather type over a long run, with no storm in the first 3 days', () => {
+    const seen = new Set<string>();
+    for (let seed = 0; seed < 30; seed++) {
+      let s: GameState = fresh(seed);
+      for (let i = 0; i < 80 && s.status === 'playing'; i++) {
+        s.vitals.hunger = 100;
+        s.vitals.thirst = 100;
+        s.vitals.health = 100;
+        if (s.pending) {
+          const v = buildView('x', s);
+          s = chooseEvent(s, v.pending!.choices.find((c) => c.available)!.id).state;
+          continue;
+        }
+        s = performAction(s, 'rest').state;
+        if (s.day <= 3) expect(s.world.weather).not.toBe('storm');
+        seen.add(s.world.weather);
+      }
+    }
+    expect(seen.size).toBe(10);
   });
 });
 

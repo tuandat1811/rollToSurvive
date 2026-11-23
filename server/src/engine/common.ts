@@ -66,12 +66,6 @@ export function signalLocationMod(region: RegionId): { label: string; value: num
   return null;
 }
 
-export function weatherSignalMod(s: GameState): { label: string; value: number } | null {
-  if (s.world.weather === 'rain') return { label: 'Mưa che tầm nhìn', value: -4 };
-  if (s.world.weather === 'cloudy') return { label: 'Trời âm u', value: -1 };
-  return null;
-}
-
 export function fireSource(s: GameState): string | null {
   if (s.structures.some((x) => x.region === s.location && x.id === 'campfire' && x.lit && x.integrity > 0)) return 'campfire';
   if (s.inventory.some((x) => x.id === 'torch')) return 'torch';

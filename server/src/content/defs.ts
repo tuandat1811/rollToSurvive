@@ -1,4 +1,4 @@
-import type { AttrId, RegionId, SkillId, WeatherId } from '../engine/types.ts';
+import type { AttrId, RegionId, SkillId } from '../engine/types.ts';
 
 export const SLOT_NAMES = ['Sáng', 'Trưa', 'Chiều', 'Tối'];
 
@@ -49,21 +49,7 @@ export const SKILL_DEFS: Record<SkillId, { name: string; icon: string; desc: str
   },
 };
 
-export const WEATHER_DEFS: Record<WeatherId, { name: string; icon: string; desc: string }> = {
-  clear: { name: 'Nắng ráo', icon: '☀️', desc: 'Thời tiết thuận lợi.' },
-  hot: { name: 'Nắng gắt', icon: '🥵', desc: 'Khát nhanh hơn (x1.5). Không có mưa.' },
-  cloudy: { name: 'Nhiều mây', icon: '☁️', desc: 'Trời âm u, có thể chuyển mưa.' },
-  rain: { name: 'Mưa', icon: '🌧️', desc: 'Hứng được nước mưa. Hoạt động ngoài trời -1. Ngủ ngoài trời dễ nhiễm lạnh.' },
-  storm: { name: 'Bão', icon: '⛈️', desc: 'Rất nguy hiểm. Hoạt động ngoài trời -3, biển động dữ dội, công trình bị hư hại.' },
-};
-
-export const WEATHER_MARKOV: Record<WeatherId, [WeatherId, number][]> = {
-  clear: [['clear', 40], ['hot', 18], ['cloudy', 27], ['rain', 15]],
-  hot: [['hot', 35], ['clear', 40], ['cloudy', 20], ['rain', 5]],
-  cloudy: [['clear', 30], ['cloudy', 22], ['rain', 36], ['storm', 12]],
-  rain: [['rain', 28], ['cloudy', 30], ['clear', 30], ['storm', 12]],
-  storm: [['rain', 50], ['cloudy', 40], ['clear', 10]],
-};
+export { WEATHER_DEFS, WEATHER_MARKOV } from './weather.ts';
 
 export interface RegionDef {
   id: RegionId;

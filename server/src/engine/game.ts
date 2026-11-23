@@ -1,6 +1,6 @@
 import { ACTIONS, type ActionDef, type Material } from '../content/actions.ts';
 import { BALANCE } from '../content/balance.ts';
-import { ATTR_DEFS, ROUTE_DEFS, SECONDARY_POOLS, WEATHER_MARKOV } from '../content/defs.ts';
+import { ATTR_DEFS, ROUTE_DEFS, SECONDARY_POOLS, WEATHER_DEFS, WEATHER_MARKOV } from '../content/defs.ts';
 import { EVENTS } from '../content/events.ts';
 import { ITEMS } from '../content/items.ts';
 import { awardXp, roll } from './check.ts';
@@ -222,12 +222,19 @@ export function materialStatus(s: GameState, mats: Material[]) {
   return mats.map((m) => ({ ...m, have: countBoth(s, m.id) }));
 }
 
+/** energy cost including weather: heavy physical work (base ≥ 6) is lighter in a breeze, heavier when humid */
+export function actionEnergy(s: GameState, def: ActionDef, param: string): number {
+  const base = def.energy(s, param);
+  const delta = WEATHER_DEFS[s.world.weather].energy ?? 0;
+  return base >= 6 ? Math.max(1, base + delta) : base;
+}
+
 export function unmetReasons(s: GameState, inst: ActionInstance): string[] {
   const { def, param } = inst;
   const out: string[] = [];
   for (const r of def.reqs?.(s, param) ?? []) if (!r.met) out.push(r.label);
   for (const m of materialStatus(s, def.materials?.(s, param) ?? [])) if (m.have < m.qty) out.push(`Thiếu ${ITEMS[m.id].name} (${m.have}/${m.qty})`);
-  const e = def.energy(s, param);
+  const e = actionEnergy(s, def, param);
   if (e > s.vitals.energy) out.push(`Không đủ năng lượng (cần ${e})`);
   return out;
 }
@@ -263,7 +270,7 @@ export function performAction(prev: GameState, key: string) {
   const { def, param } = inst;
   const ctx = new Ctx(s, def.name(s, param), def.icon(s, param));
   // commit start costs
-  const energy = def.energy(s, param);
+  const energy = actionEnergy(s, def, param);
   if (energy) ctx.vital('energy', -energy);
   for (const m of def.materials?.(s, param) ?? []) ctx.removeItem(m.id, m.qty, 'both');
 

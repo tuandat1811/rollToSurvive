@@ -278,6 +278,7 @@ const actions: ActionDef[] = [
     visible: k(true),
     check: (s) => ({
       label: 'Thu thập vật liệu',
+      tags: ['gather'],
       attr: 'STR',
       skill: 'survival',
       dc: here(s) === 'mountain' ? 11 : 10,
@@ -359,6 +360,7 @@ const actions: ActionDef[] = [
       const best = hasTag(s, 'rod') ? { label: 'Cần câu', value: 3 } : hasTag(s, 'spear') ? { label: 'Giáo gỗ', value: 1 } : { label: 'Tay không', value: -2 };
       return {
         label: 'Đánh cá',
+        tags: ['fishing'],
         attr: 'AGI',
         skill: 'fishing',
         dc: 13,
@@ -368,7 +370,6 @@ const actions: ActionDef[] = [
           here(s) === 'coast' && found(s, 'lagoon') && { label: 'Đầm phá', value: 2 },
           here(s) === 'river' && found(s, 'deep_pool') && { label: 'Vũng sâu', value: 2 },
           s.flags.fishBonusDay === s.day && { label: 'Đàn cá vào bờ', value: 3 },
-          s.world.weather === 'storm' && { label: 'Sóng dữ', value: -3 },
         ),
       };
     },
@@ -400,6 +401,7 @@ const actions: ActionDef[] = [
     visible: (s) => here(s) === 'jungle',
     check: (s) => ({
       label: 'Săn bắt',
+      tags: ['hunting'],
       attr: 'AGI',
       skill: 'hunting',
       dc: 14 + Math.floor(s.regions.jungle.wildlifeAlert / 20),
@@ -744,6 +746,7 @@ const actions: ActionDef[] = [
       if (!r.danger) return null;
       return {
         label: 'Vượt ghềnh đá',
+        tags: ['climb'],
         attr: 'AGI',
         skill: 'survival',
         dc: r.danger + (s.world.weather === 'storm' ? 3 : 0),
@@ -873,7 +876,7 @@ const actions: ActionDef[] = [
     energy: k(18),
     visible: (s) => here(s) === 'mountain',
     reqs: (s) => [{ label: 'Không có bão', met: s.world.weather !== 'storm' }],
-    check: (s) => ({ label: 'Leo núi', attr: 'AGI', skill: 'survival', dc: 14, outdoor: true, mods: mods(tool(s, 'rope', 2, 'Dây thừng')) }),
+    check: (s) => ({ label: 'Leo núi', tags: ['climb'], attr: 'AGI', skill: 'survival', dc: 14, outdoor: true, mods: mods(tool(s, 'rope', 2, 'Dây thừng')) }),
     priority: (s) => (s.flags.lookoutDone ? 25 : 75),
     resolve: (ctx, tier) => {
       const s = ctx.s;
@@ -1182,6 +1185,7 @@ const actions: ActionDef[] = [
         dc: d.dc,
         crit: 'safe',
         outdoor: d.id === 'campfire',
+        tags: d.id === 'campfire' ? ['fire'] : undefined,
         mods: mods(
           p === 'campfire' && countBoth(s, 'flint') > 0 && { label: 'Đá lửa', value: 5 },
           p === 'campfire' && hasTag(s, 'fire') && { label: 'Đuốc', value: 5 },
@@ -1226,6 +1230,7 @@ const actions: ActionDef[] = [
     visible: (s) => structuresAt(s, here(s), 'campfire').some((f) => !f.lit),
     check: (s) => ({
       label: 'Nhóm lửa',
+      tags: ['fire'],
       attr: 'INT',
       skill: 'survival',
       dc: 12,

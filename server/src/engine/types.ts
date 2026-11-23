@@ -5,7 +5,7 @@ export type AttrId = 'STR' | 'AGI' | 'END' | 'INT' | 'PER';
 export type SkillId = 'survival' | 'hunting' | 'fishing' | 'crafting' | 'medicine' | 'navigation';
 export type VitalId = 'health' | 'hunger' | 'thirst' | 'energy';
 export type RegionId = 'coast' | 'jungle' | 'river' | 'mountain' | 'cape';
-export type WeatherId = 'clear' | 'hot' | 'cloudy' | 'rain' | 'storm';
+export type WeatherId = 'clear' | 'hot' | 'cloudy' | 'breezy' | 'windy' | 'fog' | 'drizzle' | 'rain' | 'humid' | 'storm';
 export type Tier = 'crit_success' | 'success' | 'partial' | 'failure' | 'crit_failure';
 export type Discovery = 'unknown' | 'clued' | 'discovered';
 export type Pacing = 'calm' | 'normal' | 'tense';
@@ -238,6 +238,8 @@ export interface CheckSpec {
   crit?: CritPolicy;
   /** outdoor checks get weather modifiers */
   outdoor?: boolean;
+  /** action tags that weather (and other rules) can key on: fishing, hunting, gather, signal, fire, climb */
+  tags?: string[];
   /** when false, no XP is granted */
   xp?: boolean;
 }

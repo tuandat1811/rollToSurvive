@@ -10,7 +10,7 @@ import { TUTORIAL } from '../content/tutorial.ts';
 import { bands, odds, resolveCheck, successFace } from './check.ts';
 import { absSlot, carryMax, containerCap, storageWaterCap, waterCount, weightOf } from './ctx.ts';
 import { journey, stageCheck } from './escape.ts';
-import { eventChoices, instances, materialStatus, unmetReasons } from './game.ts';
+import { actionEnergy, eventChoices, instances, materialStatus, unmetReasons } from './game.ts';
 import { ATTRS, REGIONS, SKILLS, type CheckSpec, type GameState, type ItemStack } from './types.ts';
 
 function checkView(s: GameState, spec: CheckSpec): CheckView {
@@ -95,7 +95,7 @@ export function buildView(id: string, s: GameState): GameView {
             desc: def.desc(s, param),
             hint: def.hint?.(s, param),
             slots: def.slots ?? 1,
-            energy: def.energy(s, param),
+            energy: actionEnergy(s, def, param),
             materials: materialStatus(s, def.materials?.(s, param) ?? []).map((m) => ({
               ...m,
               name: ITEMS[m.id].name,
@@ -161,7 +161,7 @@ export function buildView(id: string, s: GameState): GameView {
   const forecast: GameView['forecast'] = [];
   if (s.world.forecastUntil > s.day) {
     const w = WEATHER_DEFS[s.world.tomorrow];
-    forecast.push({ day: s.day + 1, id: s.world.tomorrow, name: w.name, icon: w.icon });
+    forecast.push({ day: s.day + 1, id: s.world.tomorrow, name: w.name, icon: w.icon, mood: w.mood, effects: w.effects });
   }
 
   const raft = s.projects.find((p) => p.id === 'raft');
@@ -176,7 +176,10 @@ export function buildView(id: string, s: GameState): GameView {
     day: s.day,
     slot: s.slot,
     slotNames: SLOT_NAMES,
-    weather: { id: s.world.weather, ...WEATHER_DEFS[s.world.weather] },
+    weather: (() => {
+      const w = WEATHER_DEFS[s.world.weather];
+      return { id: s.world.weather, name: w.name, icon: w.icon, desc: w.desc, mood: w.mood, effects: w.effects };
+    })(),
     forecast,
     stormWarning: s.world.tomorrow === 'storm' && s.world.forecastUntil > s.day,
     location: { id: s.location, name: REGION_DEFS[s.location].name, icon: REGION_DEFS[s.location].icon, desc: REGION_DEFS[s.location].desc },

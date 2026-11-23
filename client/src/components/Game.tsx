@@ -11,6 +11,7 @@ import EventModal from './EventModal.tsx';
 import IntroGuide from './IntroGuide.tsx';
 import InventoryPanel from './InventoryPanel.tsx';
 import TutorialPanel from './TutorialPanel.tsx';
+import WeatherCard from './WeatherCard.tsx';
 import JournalPanel from './JournalPanel.tsx';
 import MapPanel from './MapPanel.tsx';
 import ResultModal from './ResultModal.tsx';
@@ -126,6 +127,7 @@ export default function Game({ initial, onExit, onNew }: { initial: GameView; on
         </div>
         <div className="col" data-hidden={mobile !== 'actions'}>
           {!tutorialHidden && view.status === 'playing' && <TutorialPanel view={view} onPick={setSelected} onHide={() => setHidden(true)} act={act} />}
+          <WeatherCard view={view} />
           <ActionBoard view={view} onPick={setSelected} guideKey={guideKey} />
         </div>
         <div className="col" data-hidden={mobile === 'actions' || mobile === 'status'}>

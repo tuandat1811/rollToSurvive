@@ -1,4 +1,5 @@
 import { ITEMS } from '../content/items.ts';
+import { WEATHER_DEFS } from '../content/weather.ts';
 import { awardXp, roll } from './check.ts';
 import { isSuccess, loseCarried, victory } from './common.ts';
 import { Ctx, waterCount } from './ctx.ts';
@@ -34,9 +35,9 @@ export function stageCheck(s: GameState): CheckSpec {
   const st = journey(e.method)[e.stage];
   const mods: { label: string; value: number }[] = [];
   const w = s.world.weather;
-  const wm: Record<string, number> = { clear: 1, hot: 0, cloudy: -1, rain: -3, storm: -8 };
-  if (wm[w]) mods.push({ label: w === 'clear' ? 'Trời quang' : w === 'cloudy' ? 'Trời âm u' : w === 'rain' ? 'Mưa gió' : 'Bão', value: wm[w] });
-  if (w === 'hot' && e.stage === 1) mods.push({ label: 'Nắng gắt', value: -1 });
+  const wd = WEATHER_DEFS[w];
+  if (wd.sea) mods.push({ label: `${wd.icon} ${wd.name}`, value: wd.sea });
+  if ((w === 'hot' || w === 'humid') && e.stage === 1) mods.push({ label: `${wd.icon} Nóng bức giữa biển`, value: -1 });
   if (s.flags.calmSeaDay === s.day) mods.push({ label: 'Biển lặng', value: 2 });
   if (e.method === 'raft') {
     const raft = s.projects.find((p) => p.id === 'raft');

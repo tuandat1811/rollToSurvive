@@ -51,6 +51,7 @@ Nguyên tắc kỹ thuật:
 - 5 vùng (Bãi biển, Rừng rậm, Dòng suối, Núi đá, Mũi Hải Đăng), 16 địa điểm phụ, 7 tuyến đường. Mỗi ván, địa điểm phụ, đường bị chặn và đồ trong xác tàu được sắp xếp ngẫu nhiên (Hybrid Island).
 - Khoảng 30 loại hành động, 13 công thức chế tạo, 7 công trình, bè 3 giai đoạn.
 - 20 sự kiện: bão (có báo trước), thú rừng, ô nhiễm nguồn nước (chuỗi sự kiện), tàu và máy bay đi ngang…
+- 10 loại thời tiết (`server/src/content/weather.ts`), mỗi loại có hiệu ứng riêng lên xúc xắc, năng lượng, độ khát, ban đêm, lửa trại, nước mưa và ra khơi.
 - 3 cách thoát đảo: đóng bè, phát tín hiệu cứu hộ, liều mình ra khơi (thử được ngay từ Ngày 1).
 - 5 thuộc tính (tăng theo mốc ngày sống sót), 6 kỹ năng học qua thử thách (lặp việc dễ thì nhận ít XP).
 

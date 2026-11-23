@@ -1,5 +1,6 @@
 import { BALANCE } from '../content/balance.ts';
 import { CONDITIONS } from '../content/conditions.ts';
+import { WEATHER_DEFS } from '../content/weather.ts';
 import { Ctx } from './ctx.ts';
 import type { Band, CheckSpec, GameState, RollInfo, SkillId, Tier } from './types.ts';
 
@@ -35,9 +36,11 @@ export function situationalMods(s: GameState, spec: CheckSpec): { label: string;
   if (s.vitals.hunger < t.low) out.push({ label: 'Đói', value: -1 });
   if (s.vitals.thirst < t.low) out.push({ label: 'Khát', value: -1 });
   if (s.vitals.energy < t.exhausted) out.push({ label: 'Kiệt sức', value: -2 });
-  if (spec.outdoor) {
-    if (s.world.weather === 'rain') out.push({ label: 'Trời mưa', value: -1 });
-    if (s.world.weather === 'storm') out.push({ label: 'Bão', value: -3 });
+  for (const r of WEATHER_DEFS[s.world.weather].rules) {
+    if (r.outdoor && !spec.outdoor) continue;
+    if (r.attrs && !r.attrs.includes(spec.attr)) continue;
+    if (r.tags && !r.tags.some((t) => spec.tags?.includes(t))) continue;
+    out.push({ label: `${WEATHER_DEFS[s.world.weather].icon} ${r.label}`, value: r.value });
   }
   return out;
 }

@@ -26,9 +26,9 @@ function applyNeedsDamage(ctx: Ctx) {
 
 function endOfSlot(ctx: Ctx) {
   const s = ctx.s;
-  const hot = s.world.weather === 'hot' ? D.hotThirstMult : 1;
+  const thirstMult = WEATHER_DEFS[s.world.weather].thirst ?? 1;
   decay(ctx, 'hunger', D.hungerPerSlot);
-  decay(ctx, 'thirst', D.thirstPerSlot * hot + (hasCondition(s, 'illness') ? D.illnessThirstExtra : 0));
+  decay(ctx, 'thirst', D.thirstPerSlot * thirstMult +(hasCondition(s, 'illness') ? D.illnessThirstExtra : 0));
   applyNeedsDamage(ctx);
   if (hasCondition(s, 'poisoned')) ctx.vital('health', -5, 'Trúng độc');
   const inj = s.conditions.find((c) => c.id === 'injury');
@@ -66,8 +66,9 @@ function night(ctx: Ctx) {
     decay(ctx, 'thirst', D.thirstNight * (hasCondition(s, 'illness') ? 1.3 : 1));
     applyNeedsDamage(ctx);
 
-    if (!shelter && (w === 'rain' || w === 'storm')) {
-      if (ctx.rng.chance(w === 'storm' ? 0.85 : 0.45)) ctx.addCondition('exposure', 1, 8);
+    const exposure = WEATHER_DEFS[w].exposure ?? 0;
+    if (!shelter && exposure > 0) {
+      if (ctx.rng.chance(exposure)) ctx.addCondition('exposure', 1, 8);
       if (w === 'storm') ctx.vital('health', -8, 'Ngủ ngoài trời giữa bão');
     }
 
@@ -76,7 +77,7 @@ function night(ctx: Ctx) {
     if (!shelter && s.skills.survival.lvl >= 3) energy += 10;
     if (fire) energy += N.energyFire;
     const shelterStruct = atBase ? structuresAt(s, s.location).find((x) => x.id === 'hut' || x.id === 'lean_to') : undefined;
-    if (shelterStruct && shelterStruct.integrity < 40 && (w === 'rain' || w === 'storm')) {
+    if (shelterStruct && shelterStruct.integrity < 40 && (WEATHER_DEFS[w].rainWater ?? 0) > 0) {
       energy -= 12;
       ctx.change('bad', 'Mái che dột nát, ngủ không yên');
     }
@@ -139,6 +140,9 @@ function spoil(ctx: Ctx) {
   const limit = ctx.now + 1;
   const hasRack = s.baseRegion ? hasStructure(s, 'storage_rack', s.baseRegion) : false;
   if (hasRack) for (const st of s.storage) if (st.exp !== undefined) st.exp += 2;
+  // humid weather: food spoils half a day sooner
+  if (WEATHER_DEFS[s.world.weather].spoilFaster)
+    for (const st of [...s.inventory, ...s.storage]) if (st.exp !== undefined) st.exp -= 2;
   const lost: Record<string, number> = {};
   const check = (list: ItemStack[]) => {
     for (const st of list) {
@@ -162,7 +166,7 @@ function regenerate(ctx: Ctx) {
     r.wildlifeAlert = Math.max(0, r.wildlifeAlert - R.alertDecay);
   }
   const river = s.regions.river;
-  if (river.water === 'muddy' && s.world.weather !== 'rain' && s.world.weather !== 'storm') river.water = 'clean';
+  if (river.water === 'muddy' && !WEATHER_DEFS[s.world.weather].muddies) river.water = 'clean';
   if (river.water === 'contaminated') {
     const left = Number(s.flags.contamDays ?? 0) - 1;
     if (s.flags.contamCleared || left <= 0) {
@@ -189,7 +193,8 @@ function dayStart(ctx: Ctx) {
   s.world.weather = s.world.tomorrow;
   s.world.tomorrow = nextWeather(ctx, s.world.weather, s.day + 1);
   const w = s.world.weather;
-  if (w === 'rain' || w === 'storm') s.world.lastRainDay = s.day;
+  const wd = WEATHER_DEFS[w];
+  if ((wd.rainWater ?? 0) > 0) s.world.lastRainDay = s.day;
 
   // pacing for the new day
   const prev = s.world.pacing;
@@ -205,24 +210,32 @@ function dayStart(ctx: Ctx) {
     // fires
     for (const f of s.structures.filter((x) => x.id === 'campfire' && x.lit)) {
       const covered = !!shelterAt(s, f.region);
-      const p = w === 'storm' ? 1 : w === 'rain' ? (covered ? 0.15 : 0.4) : 0;
+      const p = wd.fireOut ? wd.fireOut[covered ? 1 : 0] : 0;
       if (p && ctx.rng.chance(p)) {
         f.lit = false;
-        ctx.change('bad', `🔥 Lửa trại ở ${REGION_DEFS[f.region].name} bị ${w === 'storm' ? 'bão' : 'mưa'} dập tắt`);
+        ctx.change('bad', `🔥 Lửa trại ở ${REGION_DEFS[f.region].name} bị tắt (${wd.name.toLowerCase()})`);
       }
     }
-    // rain collection
-    if (s.baseRegion && (w === 'rain' || w === 'storm')) {
-      const n = structuresAt(s, s.baseRegion, 'rain_collector').length;
-      if (n > 0) ctx.addItem('water_safe', (w === 'storm' ? 6 : 4) * n, { to: 'storage' });
+    // wind wear on structures (storms have their own event)
+    if (wd.structureDamage) {
+      for (const st of [...s.structures]) {
+        const dmg = ctx.rng.int(wd.structureDamage[0], wd.structureDamage[1]);
+        st.integrity = Math.max(1, st.integrity - dmg);
+      }
+      if (s.structures.length) ctx.change('bad', `${wd.icon} Gió lớn làm các công trình hư hại nhẹ`);
     }
-    if ((w === 'rain' || w === 'storm') && s.regions.river.water === 'clean') s.regions.river.water = 'muddy';
+    // rain collection
+    if (s.baseRegion && wd.rainWater) {
+      const n = structuresAt(s, s.baseRegion, 'rain_collector').length;
+      if (n > 0) ctx.addItem('water_safe', wd.rainWater * n, { to: 'storage' });
+    }
+    if (wd.muddies && s.regions.river.water === 'clean') s.regions.river.water = 'muddy';
   });
 
   ctx.notice({
-    title: `Ngày ${s.day} — ${WEATHER_DEFS[w].name}`,
-    icon: WEATHER_DEFS[w].icon,
-    text: dayText(s.world.pacing, w),
+    title: `Ngày ${s.day} — ${wd.icon} ${wd.name}`,
+    icon: wd.icon,
+    text: `${dayText(s.world.pacing, w)}\nHiệu ứng hôm nay: ${wd.effects.map((e) => `${e.good ? '▲' : '▼'} ${e.text}`).join(' · ')}`,
     changes: changes.changes,
   });
 
@@ -230,12 +243,11 @@ function dayStart(ctx: Ctx) {
 }
 
 function dayText(p: Pacing, w: WeatherId): string {
-  if (w === 'storm') return 'Gió rít từng cơn, mưa quất xối xả. Hôm nay ra ngoài là liều mạng.';
-  if (w === 'hot') return 'Mặt trời thiêu đốt từ sáng sớm. Bạn sẽ khát nhanh hơn.';
-  if (w === 'rain') return 'Mưa rơi đều trên đảo. Nước ngọt dồi dào, nhưng mọi thứ ẩm ướt.';
-  if (p === 'calm') return 'Một buổi sáng yên bình. Sóng vỗ nhẹ vào bờ.';
-  if (p === 'tense') return 'Có gì đó bất an trong không khí. Chim chóc im bặt.';
-  return 'Một ngày mới trên hòn đảo.';
+  const base = WEATHER_DEFS[w].dayText;
+  if (WEATHER_DEFS[w].mood === 'danger') return base;
+  if (p === 'calm') return `${base} Mọi thứ có vẻ yên bình.`;
+  if (p === 'tense') return `${base} Có gì đó bất an trong không khí.`;
+  return base;
 }
 
 /**

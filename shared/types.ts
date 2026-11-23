@@ -212,6 +212,16 @@ export interface SkillView {
   perks: { lvl: number; text: string; unlocked: boolean }[];
 }
 
+export interface WeatherView {
+  id: string;
+  name: string;
+  icon: string;
+  desc: string;
+  mood: 'good' | 'neutral' | 'bad' | 'danger';
+  /** player-facing buffs (good) and nerfs */
+  effects: { text: string; good: boolean }[];
+}
+
 export interface TutorialStepView {
   id: string;
   phase: string;
@@ -231,8 +241,8 @@ export interface GameView {
   day: number;
   slot: number;
   slotNames: string[];
-  weather: { id: string; name: string; icon: string; desc: string };
-  forecast: { day: number; id: string; name: string; icon: string }[];
+  weather: WeatherView;
+  forecast: (Omit<WeatherView, 'desc'> & { day: number })[];
   stormWarning: boolean;
   location: { id: string; name: string; icon: string; desc: string };
   baseRegion: string | null;
