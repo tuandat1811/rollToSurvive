@@ -12,9 +12,9 @@ export const BALANCE = {
   carry: { base: 25, basket: 10 },
   decay: {
     hungerPerSlot: 4,
-    thirstPerSlot: 6,
+    thirstPerSlot: 5,
     hungerNight: 6,
-    thirstNight: 8,
+    thirstNight: 7, // sleeping costs less water than working
     hotThirstMult: 1.5,
     illnessThirstExtra: 3,
     starveDamage: 5, // per slot when hunger = 0

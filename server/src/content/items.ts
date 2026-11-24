@@ -32,7 +32,7 @@ const defs: ItemDef[] = [
   { id: 'barrel', name: 'Thùng phuy rỗng', icon: '🛢️', kind: 'material', weight: 3, desc: 'Thùng kín nổi tốt — phao tuyệt vời cho bè.' },
 
   // ---- food
-  { id: 'coconut', name: 'Dừa', icon: '🥥', kind: 'food', weight: 1, desc: 'Cùi dừa và nước dừa.', food: { hunger: 12, thirst: 8 }, spoilDays: 10 },
+  { id: 'coconut', name: 'Dừa', icon: '🥥', kind: 'food', weight: 1, desc: 'Cùi dừa và nước dừa — nguồn nước sạch ở bãi biển.', food: { hunger: 10, thirst: 12 }, spoilDays: 10 },
   { id: 'fruit', name: 'Trái cây rừng', icon: '🍌', kind: 'food', weight: 0.4, desc: 'Chuối dại, xoài rừng… an toàn để ăn.', food: { hunger: 14, thirst: 3 }, spoilDays: 3 },
   { id: 'berries', name: 'Quả mọng lạ', icon: '🫐', kind: 'food', weight: 0.2, desc: 'Không chắc có an toàn không.', food: { hunger: 10, risk: 0.35 }, spoilDays: 2 },
   { id: 'shellfish', name: 'Sò ốc sống', icon: '🦪', kind: 'food', weight: 0.4, desc: 'Ăn sống dễ bị ngộ độc. Nên nấu chín.', food: { hunger: 8, risk: 0.3, cookTo: 'shellfish_cooked' }, spoilDays: 1 },
