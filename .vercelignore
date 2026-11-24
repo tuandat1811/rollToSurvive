@@ -1,0 +1,3 @@
+# designer tooling and docs are not part of the player build
+docs/
+server/scripts/

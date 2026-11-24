@@ -70,6 +70,12 @@ Action,ACT-ESC-002,repair_raft,Sửa bè (0%),Escape,Tier 2,,,"Thay dây buộc,
 Action,ACT-ESC-003,escape_raft,Ra khơi bằng bè,Escape,Tier 3,,,"Rời đảo trên chiếc bè. Hành trình gồm 3 chặng, mỗi chặng tốn một buổi và một lần tung xúc xắc. Thất bại có thể làm hỏng bè, bị thương — hoặc tệ hơn."
 Action,ACT-ESC-004,escape_desperate,Liều mình ra khơi,Escape,Tier 3,,,"Ôm lấy khúc gỗ nổi và lao ra biển, phó mặc cho số phận. Khả năng thành công cực thấp; thất bại sẽ bị sóng đánh dạt về bờ trong tình trạng tồi tệ — hoặc không bao giờ trở về."
 Action,ACT-ESC-005,build:signal_pyre,Xây Đống lửa tín hiệu,Escape,Tier 3,,,"Đống củi lớn sẵn sàng đốt khi có tàu. Xây ở nơi nhìn ra biển; Mũi Hải Đăng là tốt nhất."
+Action,ACT-GAT-008,dig_clams,Đào sò dưới cát,Gathering,Tier 1,,,"Lúc nước ròng, đào lớp cát ướt tìm sò ốc. Nhanh và ít tốn sức, nhưng mỗi ngày chỉ đào được một lần."
+Action,ACT-MED-004,herbal_tea,Nấu trà thảo mộc,Medical & Recovery,Tier 1,,,"Đun thảo dược với nước sạch trên lửa trại. Ấm người, tỉnh táo, xua đi nỗi hoảng sợ."
+Action,ACT-HUN-005,catch_crabs,Bắt cua đá,Hunting & Trapping,Tier 1,,,Chiều tối cua đá bò ra khỏi khe. Chúng nhanh và kẹp rất đau — phải nhanh tay hơn chúng.
+Action,ACT-RES-003,watch_tides,Quan sát thủy triều,Research,Tier 2,,,Ngồi trên mỏm đá ghi nhớ giờ nước lên xuống và nơi cá tụ. Hiểu thủy triều thì đánh cá dễ hơn hẳn trong ngày.
+Action,ACT-FSH-004,spear_fishing,Đâm cá bằng giáo,Fishing,Tier 2,,,"Lội ra chỗ nước nông, đứng im chờ cá rồi phóng giáo. Nhiều cá hơn câu nhưng giáo mau mòn."
+Action,ACT-SOC-003,carve_tally,Khắc vạch đếm ngày,Social & Narrative,Tier 1,,,"Khắc thêm một vạch lên vách đá. Nhìn hàng vạch dài ra, bạn biết mình vẫn đang chiến đấu."
 Event,EVT-WTH-001,storm_warning,Dấu hiệu bão,weather,common,world,cooldown 1d,"Chân trời tối sầm lại. Sóng bạc đầu đánh mạnh vào bờ, chim biển bay vội vào đất liền. Ngày mai bão sẽ đổ bộ!
 
 Hãy về nơi trú ẩn, cất đồ vào kho và chuẩn bị: “Gia cố nơi trú ẩn”, “Tích trữ củi khô” (nhóm Căn cứ)."
@@ -134,6 +140,18 @@ Event,EVT-ESC-005,plane_overhead,Máy bay!,escape,rare,world,cooldown 6d,Tiếng
 Event,EVT-ESC-006,rescue_search,Trực thăng tìm kiếm,escape,common,persistent,,"Tiếng cánh quạt phành phạch từ xa — một chiếc trực thăng cứu hộ đang bay dọc bờ biển, tìm kiếm!"
 Event,EVT-ESC-007,island_in_distance,Bóng đất liền,escape,unique,narrative,once,"Trời trong vắt. Phía tây bắc, sát đường chân trời, hiện lên một dải mờ xanh thẫm — đất liền! Bạn ghi nhớ hướng đó."
 Event,EVT-ESC-008,false_beacon,Ánh sáng ngoài khơi,escape,unique,narrative,once,"Lúc chạng vạng, một đốm sáng chớp tắt ngoài khơi xa. Tàu ư? Hay chỉ là ảo giác?"
+Event,EVT-WLD-016,crab_march,Đàn cua di cư,wildlife,common,world,cooldown 4d,"Hàng trăm con cua đỏ bò ngang bãi cát, nối đuôi nhau về phía biển."
+Event,EVT-RES-009,driftwood_pile,Gỗ trôi dồn đống,resources,common,world,cooldown 3d,"Sóng gió dồn cả một đống gỗ trôi lên bãi, khô có ướt có."
+Event,EVT-ECO-009,fruit_bats,Dơi ăn quả,ecology,common,world,cooldown 6d,"Đêm qua, đàn dơi quạ kéo về rừng ăn sạch những chùm quả chín. Mấy ngày tới tìm thức ăn ở Rừng rậm sẽ kém hơn."
+Event,EVT-PSY-005,humming_tune,Giai điệu cũ,psychology,common,world,cooldown 4d,"Bên đống lửa, bạn bất giác ngân nga một giai điệu từ ngày còn ở nhà. Lòng nhẹ đi một chút."
+Event,EVT-HEA-002,leech_bite,Đỉa bám,health,uncommon,action,cooldown 4d,"Rút chân khỏi nước, bạn thấy mấy con đỉa đen bám chặt vào bắp chân."
+Event,EVT-WTH-005,sudden_squall,Gió giật bất chợt,weather,common,world,cooldown 3d,"Một cơn gió giật quét qua, cát đá bay mù mịt, đồ đạc trong túi kêu lạch cạch."
+Event,EVT-NAR-004,carved_initials,Chữ khắc trên thân cây,narrative,unique,action,once,Trên thân một cây cổ thụ có dòng chữ khắc đã mờ: “M.T. — ngày 41 — hải đăng phía đông bắc”.
+Event,EVT-WLD-017,curious_parrot,Con vẹt tò mò,wildlife,uncommon,world,once,"Một con vẹt sặc sỡ đậu trên cành thấp, nghiêng đầu nhìn chằm chằm vào túi đồ ăn của bạn."
+Event,EVT-WLD-018,parrot_returns,Vẹt dẫn đường,wildlife,common,persistent,,"Con vẹt hôm trước sà xuống vai bạn rồi bay vụt đi, thỉnh thoảng dừng lại chờ. Nó dẫn bạn tới một bụi cây trĩu quả."
+Event,EVT-ESC-009,oil_sheen,Vệt dầu ngoài khơi,escape,unique,world,once,Xa ngoài khơi có một vệt dầu loang óng ánh — dấu vết của tàu thuyền. Bạn đoán ra nhịp tàu qua lại.
+Event,EVT-BAS-007,ants_in_storage,Kiến vào kho,base,common,world,cooldown 4d,Một hàng kiến dài đang tha đồ ăn ra khỏi kho!
+Event,EVT-ECO-010,tide_pools,Vũng nước triều,ecology,common,world,cooldown 3d,Nước rút để lại những vũng nhỏ đầy tôm cá mắc cạn.
 Consequence,CON-IMM-001,vital_change,Thay đổi chỉ số sinh tồn,immediate,,character,instant,"Tăng/giảm Sức khỏe, No bụng, Nước hoặc Năng lượng."
 Consequence,CON-IMM-002,gain_item,Nhận vật phẩm,immediate,,inventory,instant,"Nhận vật phẩm (vào hành trang, hoặc kho nếu đầy và đang ở căn cứ)."
 Consequence,CON-IMM-003,lose_item,Mất vật phẩm,immediate,,inventory,instant,Mất một số vật phẩm cụ thể.

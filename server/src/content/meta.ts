@@ -1,3 +1,5 @@
+import { PACK } from './data/pack.js';
+
 // Content registry metadata: stable codes + classification for every action and
 // event. Counting rule (GDD Diversity-01): one entry = one ID with its own function.
 // Renaming an item, changing a reward amount or rewording text is NOT new content —
@@ -216,3 +218,8 @@ export const EVENT_META: Record<string, EventMeta> = {
 
 /** rarity multiplies the random-pick weight (unique events are guarded by `once`) */
 export const RARITY_WEIGHT: Record<Rarity, number> = { common: 1, uncommon: 0.6, rare: 0.3, unique: 1 };
+
+// ---------------------------------------------------------------- data-pack content
+// Codes and classification of content authored in docs/content-pack.xlsx.
+for (const a of PACK.actions) ACTION_META[a.id] = { code: a.code, tier: (Number(a.tier) || 1) as 1 | 2 | 3 };
+for (const e of PACK.events) EVENT_META[e.id] = { code: e.code, rarity: e.rarity as Rarity, source: e.source as EventSource };

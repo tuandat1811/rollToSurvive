@@ -31,6 +31,7 @@ import { con } from '../engine/consequence.js';
 import { OBJECT_DEFS, objectsAt } from './objects.js';
 import { LOCATION_STATES, locationAccessible, locationState } from './locationStates.js';
 import { PREPS, PREP_BY_TAG, prepFlag } from './prep.js';
+import { DATA_ACTIONS } from './data/loader.js';
 import { EXPEDITIONS, EXPEDITION_BY_ID, resolveStep, runsFlag } from './expeditions.js';
 
 export type ActionGroup = 'survival' | 'explore' | 'food' | 'craft' | 'base' | 'medical' | 'escape' | 'travel';
@@ -1890,5 +1891,7 @@ function readOldJournal(ctx: Ctx) {
   );
 }
 
-export const ACTIONS: Record<string, ActionDef> = Object.fromEntries(actions.map((a) => [a.id, a]));
-export const ACTION_LIST = actions;
+/** actions defined in code (data-pack actions must not reuse these ids) */
+export const CODE_ACTION_IDS = new Set(actions.map((a) => a.id));
+export const ACTION_LIST = [...actions, ...DATA_ACTIONS];
+export const ACTIONS: Record<string, ActionDef> = Object.fromEntries(ACTION_LIST.map((a) => [a.id, a]));

@@ -56,6 +56,22 @@ Xuất danh mục nội dung (mã ACT/EVT/CON, phân loại, tier/độ hiếm) 
 npm run content:export
 ```
 
+### Soạn nội dung bằng Excel (data-driven content)
+
+Đây là công cụ nội bộ cho Game Designer — người chơi không thấy file Excel (thư mục `docs/` và `server/scripts/` không nằm trong bản deploy, xem `.vercelignore`). Hành động và sự kiện mới có thể viết hoàn toàn trong `docs/content-pack.xlsx`, không cần sửa code:
+
+1. Mở `docs/content-pack.xlsx`, đọc sheet **README** (cú pháp điều kiện, hậu quả, mods, đối kháng…).
+2. Thêm dòng vào 4 sheet **Actions**, **Events**, **Choices**, **Outcomes**. Các sheet màu nâu liệt kê mọi ID hợp lệ (hậu quả, vật phẩm, địa điểm, nội dung có sẵn).
+3. Nhập vào game — bộ kiểm tra báo lỗi bằng tiếng Việt và không ghi gì nếu còn lỗi:
+
+```powershell
+npm run content:import
+```
+
+4. Chạy `npm test` và `npm run dev` để chơi thử. Dùng `npm run content:import -- --check` để chỉ kiểm tra, `npm run content:template` để tạo lại file Excel từ nội dung hiện tại.
+
+File sinh ra là `server/src/content/data/pack.ts` (không sửa tay).
+
 ## Kiến trúc
 
 | Thư mục | Nội dung |

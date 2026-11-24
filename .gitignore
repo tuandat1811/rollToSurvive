@@ -4,6 +4,6 @@ dist
 *.db-journal
 *.db-wal
 *.db-shm
-data/
+/data/
 .vercel
 .env*

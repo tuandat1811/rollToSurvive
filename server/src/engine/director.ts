@@ -77,7 +77,7 @@ const rough = (s: { world: { misfortune?: number } }) => (s.world.misfortune ?? 
 /** controlled randomness: after a rough patch, ease off risky events and favour recovery */
 function hardship(s: { world: { misfortune?: number } }, def: EventDef): number {
   if (!rough(s)) return 1;
-  if (RECOVERY_EVENTS.has(def.id)) return MISFORTUNE.recoveryMult;
+  if (RECOVERY_EVENTS.has(def.id) || def.recovery) return MISFORTUNE.recoveryMult;
   if (def.risk >= 2) return MISFORTUNE.riskyMult;
   return 1;
 }
@@ -131,7 +131,7 @@ function available(ctx: Ctx, def: EventDef): boolean {
 
 export function fire(ctx: Ctx, def: EventDef, data?: Record<string, unknown>) {
   const s = ctx.s;
-  if (RECOVERY_EVENTS.has(def.id) && s.world.misfortune) s.world.misfortune = Math.max(0, s.world.misfortune - MISFORTUNE.recoveryRelief);
+  if ((RECOVERY_EVENTS.has(def.id) || def.recovery) && s.world.misfortune) s.world.misfortune = Math.max(0, s.world.misfortune - MISFORTUNE.recoveryRelief);
   s.history.push({ id: def.id, at: ctx.now });
   if (s.history.length > 400) s.history.splice(0, s.history.length - 400);
   s.stats.events++;

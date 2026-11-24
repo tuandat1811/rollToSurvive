@@ -1,3 +1,5 @@
+import { PACK } from './data/pack.js';
+
 // Event families: events that share the same underlying situation/mechanic.
 // "Tìm được 3 gỗ" and "Tìm được 5 gỗ" are one family — variety is measured per
 // family, not per event id. Families drive the family cooldown and novelty weighting.
@@ -86,8 +88,11 @@ export const FAMILY_COOLDOWN_DAYS: Record<string, number> = {
   route_trouble: 3,
 };
 
+/** families declared in the content pack (docs/content-pack.xlsx) */
+const PACK_FAMILY: Record<string, string> = Object.fromEntries(PACK.events.filter((e) => e.family).map((e) => [e.id, e.family]));
+
 export function familyOf(eventId: string): string {
-  return EVENT_FAMILY[eventId] ?? eventId;
+  return EVENT_FAMILY[eventId] ?? PACK_FAMILY[eventId] ?? eventId;
 }
 
 /** novelty weighting knobs */

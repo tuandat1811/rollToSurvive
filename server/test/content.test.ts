@@ -66,7 +66,7 @@ describe('content registry', () => {
   it('only applies consequences that exist in the registry', () => {
     const dir = join(__dirname, '../src/content');
     const used = new Set<string>();
-    for (const f of readdirSync(dir)) {
+    for (const f of readdirSync(dir).filter((x) => x.endsWith('.ts'))) {
       const src = readFileSync(join(dir, f), 'utf8');
       for (const m of src.matchAll(/\bcon\(ctx, '([a-z_]+)'/g)) used.add(m[1]);
     }

@@ -13,6 +13,7 @@ import { EXTRA_EVENTS } from './events-extra.js';
 import { ACTION_EVENTS } from './events-action.js';
 import { CONTROL_EVENTS } from './events-control.js';
 import { EXPEDITION_EVENTS } from './events-expedition.js';
+import { DATA_EVENTS } from './data/loader.js';
 import { con } from '../engine/consequence.js';
 import { ITEMS } from './items.js';
 
@@ -55,6 +56,8 @@ export interface EventDef {
   context?: (s: GameState) => number;
   /** foreshadowing: this event never fires at random — only after its omen event schedules it */
   omen?: string;
+  /** controlled randomness: a recovery opportunity (favoured after hardship) */
+  recovery?: boolean;
   /** meaningful risk: why this is happening to the player (shown on the card) */
   cause?: (s: GameState, data?: Record<string, unknown>) => string;
   text: (s: GameState, data?: Record<string, unknown>) => string;
@@ -783,5 +786,8 @@ const STRUCT_NAMES: Record<string, string> = {
   signal_pyre: 'Đống lửa tín hiệu',
 };
 
-export const EVENTS: Record<string, EventDef> = Object.fromEntries([...list, ...EXTRA_EVENTS, ...CHAIN_EVENTS, ...ACTION_EVENTS, ...CONTROL_EVENTS, ...EXPEDITION_EVENTS].map((e) => [e.id, e]));
+const CODE_EVENTS = [...list, ...EXTRA_EVENTS, ...CHAIN_EVENTS, ...ACTION_EVENTS, ...CONTROL_EVENTS, ...EXPEDITION_EVENTS];
+/** events defined in code (data-pack events must not reuse these ids) */
+export const CODE_EVENT_IDS = new Set(CODE_EVENTS.map((e) => e.id));
+export const EVENTS: Record<string, EventDef> = Object.fromEntries([...CODE_EVENTS, ...DATA_EVENTS].map((e) => [e.id, e]));
 export { SLOT_NAMES };
