@@ -1,6 +1,7 @@
 // Balance & robustness simulation: a heuristic bot plays many runs directly
 // against the engine. Usage: npm run sim -- [runs] [maxDays]
 import { ITEMS } from '../src/content/items.js';
+import { EVENT_META } from '../src/content/meta.js';
 import {
   allocateAttr,
   chooseEvent,
@@ -105,6 +106,8 @@ function step(s: GameState, rng: Rng): GameState {
 }
 
 const results: { status: string; day: number; ending?: string; cause?: string }[] = [];
+const sourceCount: Record<string, number> = {};
+const conCount: Record<string, number> = {};
 let errors = 0;
 const t0 = Date.now();
 for (let i = 0; i < RUNS; i++) {
@@ -121,6 +124,11 @@ for (let i = 0; i < RUNS; i++) {
     if (errors <= 5) console.error(`run ${i} day ${s.day}:`, (e as Error).message);
   }
   results.push({ status: s.status, day: s.day, ending: s.ending?.kind, cause: s.stats.lastDamage });
+  for (const h of s.history) {
+    const src = EVENT_META[h.id]?.source ?? '?';
+    sourceCount[src] = (sourceCount[src] ?? 0) + 1;
+  }
+  for (const c of s.conLog ?? []) conCount[c.code] = (conCount[c.code] ?? 0) + 1;
 }
 
 const by = (f: (r: (typeof results)[0]) => string) =>
@@ -134,3 +142,5 @@ console.log('death causes:', by((r) => (r.status === 'dead' ? r.cause || '?' : '
 if (days.length) console.log(`death day: min ${days[0]}, median ${days[Math.floor(days.length / 2)]}, max ${days[days.length - 1]}`);
 const wins = results.filter((r) => r.status === 'victory').map((r) => r.day).sort((a, b) => a - b);
 if (wins.length) console.log(`victory day: min ${wins[0]}, median ${wins[Math.floor(wins.length / 2)]}, max ${wins[wins.length - 1]}`);
+console.log('events by source (per run):', Object.fromEntries(Object.entries(sourceCount).map(([k, v]) => [k, +(v / RUNS).toFixed(2)])));
+console.log('distinct consequences used:', Object.keys(conCount).length, '· top:', Object.entries(conCount).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([k, v]) => `${k}×${v}`).join(' '));

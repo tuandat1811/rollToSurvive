@@ -93,6 +93,7 @@ p { margin: 0 0 8px; }
 .badge.energy { background: rgba(201, 214, 75, 0.14); color: var(--energy); }
 .badge.dice { background: rgba(233, 196, 106, 0.15); color: var(--sand); }
 .badge.free { background: rgba(143, 209, 106, 0.14); color: var(--good); }
+.badge.code { background: transparent; border: 1px dashed var(--line); color: var(--text-dim); font-family: ui-monospace, monospace; font-size: 11px; }
 .badge.warn { background: rgba(244, 162, 97, 0.16); color: var(--warn); }
 .badge.bad { background: rgba(239, 107, 91, 0.16); color: var(--bad); }
 .badge.good { background: rgba(143, 209, 106, 0.14); color: var(--good); }
@@ -282,6 +283,7 @@ p { margin: 0 0 8px; }
 .region-info { margin-top: 10px; padding: 12px; }
 .loc-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
 .loc-list span { padding: 3px 8px; border-radius: 8px; background: var(--panel-2); font-size: 12px; cursor: help; }
+.loc-list span.bad { background: rgba(224, 108, 94, 0.16); color: var(--bad); }
 .abund { display: grid; grid-template-columns: auto 1fr; gap: 4px 8px; align-items: center; font-size: 11.5px; margin-top: 8px; }
 
 /* ---------------------------------------------------------- modal */

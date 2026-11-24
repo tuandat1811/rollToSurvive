@@ -3,6 +3,8 @@ import { REGION_DEFS, WEATHER_DEFS, WEATHER_MARKOV } from '../content/defs.js';
 import { ITEMS } from '../content/items.js';
 import { Ctx, fireLit, hasCondition, hasStructure, shelterAt, structuresAt } from './ctx.js';
 import { runTrigger } from './director.js';
+import { processDelayed } from './consequence.js';
+import { OBJECT_DEFS } from '../content/objects.js';
 import { traitWeatherMult } from '../content/traits.js';
 import type { Rng } from './rng.js';
 import type { GameState, ItemStack, Pacing, WeatherId } from './types.js';
@@ -118,6 +120,7 @@ function night(ctx: Ctx) {
 
     spoil(ctx);
     regenerate(ctx);
+    expireObjects(ctx);
   });
 
   const milestone = BALANCE.milestones as readonly number[];
@@ -158,6 +161,19 @@ function spoil(ctx: Ctx) {
   check(s.inventory);
   check(s.storage);
   for (const [id, n] of Object.entries(lost)) ctx.change('loss', `${ITEMS[id].icon} ${n} ${ITEMS[id].name} bị hỏng`);
+}
+
+/** world objects lying around too long are lost (washed away, rotted…) */
+function expireObjects(ctx: Ctx) {
+  const s = ctx.s;
+  if (!s.objects?.length) return;
+  const limit = ctx.now + 1;
+  for (const o of [...s.objects]) {
+    if (o.expiresAt === undefined || o.expiresAt > limit) continue;
+    s.objects = s.objects.filter((x) => x !== o);
+    const def = OBJECT_DEFS[o.kind];
+    ctx.change('loss', `${def?.icon ?? '❔'} ${def?.expireText ?? `${def?.name ?? o.kind} đã biến mất.`}`);
+  }
 }
 
 function regenerate(ctx: Ctx) {
@@ -277,6 +293,8 @@ export function advanceSlots(ctx: Ctx, n: number, opts: { atSea?: boolean } = {}
       dayStart(ctx);
       if (checkDeath(ctx)) return;
     } else s.slot++;
+    processDelayed(ctx);
+    if (checkDeath(ctx)) return;
     if (!opts.atSea && i === n - 1) runTrigger(ctx, 'slot_start');
     if (checkDeath(ctx)) return;
   }

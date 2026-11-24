@@ -1,7 +1,8 @@
 import { BALANCE } from '../content/balance.js';
 import { REGION_DEFS } from '../content/defs.js';
 import { EVENTS, type EventDef, type EventTrigger } from '../content/events.js';
-import { FAMILY_COOLDOWN_DAYS, NOVELTY, familyOf } from '../content/families.js';
+import { AFTER_ACTION_CHANCE, FAMILY_COOLDOWN_DAYS, NOVELTY, PACING_CATEGORY_MULT, familyOf } from '../content/families.js';
+import { EVENT_META, RARITY_WEIGHT } from '../content/meta.js';
 import { traitEventMult } from '../content/traits.js';
 import type { Ctx } from './ctx.js';
 
@@ -47,8 +48,40 @@ export function runTrigger(ctx: Ctx, trigger: EventTrigger) {
   if (!ctx.rng.chance(p)) return;
   const pool = Object.values(EVENTS)
     .filter((d) => d.trigger === trigger && !d.forced && d.weight && available(ctx, d) && !familyOnCooldown(ctx, d.id))
-    .map((d) => [d, d.weight!(s) * traitEventMult(s, d.id) * novelty(ctx, d.id)] as const)
+    .map((d) => [d, directorWeight(ctx, d)] as const)
     .filter(([, w]) => w > 0);
+  const pick = ctx.rng.weighted(pool);
+  if (pick) fire(ctx, pick);
+}
+
+/**
+ * Director weight W = B × N × C × P × rarity × island trait
+ * (base weight, novelty, context fit, pacing fit, rarity, island modifier).
+ */
+export function directorWeight(ctx: Ctx, def: EventDef): number {
+  const s = ctx.s;
+  const B = def.weight ? def.weight(s) : 0;
+  if (B <= 0) return 0;
+  const N = novelty(ctx, def.id);
+  const C = def.context ? def.context(s) : 1;
+  const P = PACING_CATEGORY_MULT[s.world.pacing][def.category] ?? 1;
+  const meta = EVENT_META[def.id];
+  const R = meta ? RARITY_WEIGHT[meta.rarity] : 1;
+  return B * N * C * P * R * traitEventMult(s, def.id);
+}
+
+/** Action events: what the player just did can trigger an event (fishing → snagged net…) */
+export function runAfterAction(ctx: Ctx, actionId: string) {
+  const s = ctx.s;
+  if (s.status !== 'playing' || s.escape || s.pending) return;
+  const E = BALANCE.events;
+  let p = AFTER_ACTION_CHANCE;
+  if (s.world.notableToday >= E.softCap) p *= E.overCapMult;
+  const pool = Object.values(EVENTS)
+    .filter((d) => d.trigger === 'after_action' && d.onAction?.includes(actionId) && available(ctx, d) && !familyOnCooldown(ctx, d.id))
+    .map((d) => [d, directorWeight(ctx, d)] as const)
+    .filter(([, w]) => w > 0);
+  if (!pool.length || !ctx.rng.chance(p)) return;
   const pick = ctx.rng.weighted(pool);
   if (pick) fire(ctx, pick);
 }

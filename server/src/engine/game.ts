@@ -6,6 +6,7 @@ import { ITEMS } from '../content/items.js';
 import { awardXp, roll } from './check.js';
 import { Ctx, absSlot, count, countBoth, storageWaterCap, waterCount, containerCap, carryMax, weightOf } from './ctx.js';
 import { escapeDecision } from './escape.js';
+import { runAfterAction } from './director.js';
 import { Rng } from './rng.js';
 import { advanceSlots, checkDeath, rollWeather } from './time.js';
 import { pickTraits, traitDefs } from '../content/traits.js';
@@ -364,6 +365,9 @@ export function performAction(prev: GameState, key: string) {
   s.flags[`done:${xpKey}`] = true;
   s.recentActions.push({ key: xpKey, at: absSlot(s) });
   if (s.recentActions.length > 60) s.recentActions.splice(0, s.recentActions.length - 60);
+
+  // action events: may put a card in front of the player before time moves on
+  if (s.status === 'playing' && !s.escape) runAfterAction(ctx, def.id);
 
   const slots = def.slots ?? 1;
   if (s.status === 'playing' && slots > 0 && !s.escape) advanceSlots(ctx, slots);

@@ -108,6 +108,14 @@ export interface ActionView {
   notes: string[];
   priority: number;
   followUp: boolean;
+  /** content registry code, e.g. ACT-CRF-003 */
+  code?: string;
+  /** soft progression tier 1–3 */
+  tier?: number;
+  /** attemptable without the skill/knowledge, at a penalty */
+  untrained?: boolean;
+  /** set on actions that belong to a world object */
+  objectUid?: number;
 }
 
 export interface ChoiceView {
@@ -133,6 +141,10 @@ export interface EventView {
   text: string;
   changes: Change[];
   choices: ChoiceView[];
+  /** content registry code, e.g. EVT-WLD-009 */
+  code?: string;
+  rarity?: string;
+  source?: string;
 }
 
 export interface EscapeView {
@@ -183,7 +195,9 @@ export interface RegionView {
   here: boolean;
   base: boolean;
   seaView: boolean;
-  locations: { id: string; name: string; icon: string; desc: string }[];
+  locations: { id: string; name: string; icon: string; desc: string; state?: string; stateGood?: boolean }[];
+  /** persistent world objects lying in this region */
+  objects: { uid: number; kind: string; name: string; icon: string; desc: string; daysLeft?: number }[];
   structures: { id: string; name: string; icon: string; integrity: number; lit?: boolean }[];
   traps: number;
   water?: string;

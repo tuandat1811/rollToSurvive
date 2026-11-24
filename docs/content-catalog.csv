@@ -1,0 +1,174 @@
+﻿Type,Code,ID,Name,Category,Tier/Rarity,Source/Target,Persistence,Description
+Action,ACT-EXP-001,explore,Khám phá Bãi biển,Exploration,Tier 1,,,"Đi sâu vào khu vực, tìm địa điểm mới, đường đi và manh mối. Còn khoảng 3 điều chưa khám phá."
+Action,ACT-EXP-002,search_wreck,Lục soát xác tàu,Exploration,Tier 1,,,Trèo vào xác tàu tìm đồ dùng còn sót lại. Cẩn thận mảnh kim loại sắc nhọn.
+Action,ACT-EXP-003,climb_lookout,Leo lên đỉnh núi,Exploration,Tier 2,,,Leo lên đỉnh núi để nhìn bao quát hòn đảo và vùng biển. Leo trèo nguy hiểm.
+Action,ACT-EXP-004,search_ruins,Lục soát tàn tích hải đăng,Exploration,Tier 2,,,"Ngọn hải đăng bỏ hoang có thể còn thứ hữu ích: dầu, gương, sổ sách của người gác đèn."
+Action,ACT-EXP-005,object:washed_crate:pry,Cạy nắp thùng (Thùng hàng trôi dạt),Exploration,Tier 1,,,Dùng dao lách vào khe nắp và cạy từ từ — lấy được đồ nguyên vẹn.
+Action,ACT-EXP-006,object:old_cache:open,Mở gói đồ cẩn thận (Gói đồ trong hốc cây),Exploration,Tier 1,,,"Gỡ từng lớp vải dầu, kiểm tra xem có gì nguy hiểm bên trong."
+Action,ACT-EXP-007,clear_location:cave,Dọn lối vào Hang đá,Exploration,Tier 2,,,"Hang đá đang ở trạng thái “Lối vào thông thoáng”. Bẩy đá, chèn gỗ để mở lại lối vào."
+Action,ACT-GAT-001,collect_water,Lấy nước suối,Gathering,Tier 1,,,Đổ đầy các bình chứa bằng nước suối. Nước chưa xử lý có thể gây ngộ độc — nên đun sôi.
+Action,ACT-GAT-002,forage,Tìm kiếm thức ăn,Gathering,Tier 1,,,"Nhặt dừa, mò sò ốc, bắt cua, vớt rong biển trên bãi đá. Đồ sống nên nấu chín."
+Action,ACT-GAT-003,gather,Thu thập vật liệu,Gathering,Tier 1,,,Nhặt gỗ trôi dạt và lá cọ dọc bãi biển.
+Action,ACT-GAT-004,beachcomb,Dạo bờ nhặt đồ trôi dạt,Gathering,Tier 1,,,"Đi dọc mép nước xem sóng đánh dạt vào những gì — mỗi lần một khác: gỗ, dây, chai lọ, cua, rong biển, thỉnh thoảng có món quý."
+Action,ACT-GAT-005,collect_debris,Nhặt đồ trôi dạt,Gathering,Tier 1,,,"Sau bão, bãi biển đầy gỗ và đồ vật trôi dạt. Chỉ có trong ngày hôm nay."
+Action,ACT-GAT-006,object:washed_crate:smash,Đập vỡ thùng (Thùng hàng trôi dạt),Gathering,Tier 1,,,"Lấy đá đập vỡ thùng. Nhanh, không cần dụng cụ — nhưng đồ bên trong có thể hỏng và có thể bị dằm đâm."
+Action,ACT-HUN-001,hunt,Săn thú nhỏ,Hunting & Trapping,Tier 2,,,"Rình bắt heo rừng, thỏ, chim trong rừng. Không có vũ khí rất bất lợi. Thú sẽ cảnh giác hơn nếu bị săn liên tục."
+Action,ACT-HUN-002,set_trap:snare,Đặt bẫy thú,Hunting & Trapping,Tier 2,,,Đặt bẫy trên lối mòn của thú. Quay lại từ ngày hôm sau để thu thịt (không tốn thời gian).
+Action,ACT-HUN-003,check_traps,Thu bẫy,Hunting & Trapping,Tier 2,,,"Kiểm tra các bẫy đã đặt ở khu vực này. Việc nhanh, không tốn thời gian."
+Action,ACT-FSH-001,fish,Đánh cá,Fishing,Tier 1,,,Bắt cá ở vùng nước nông ven bờ. Bắt bằng tay rất khó.
+Action,ACT-FSH-002,set_trap:fish_trap,Đặt bẫy cá,Fishing,Tier 2,,,Đặt lờ đón cá. Quay lại từ ngày hôm sau để thu cá (không tốn thời gian).
+Action,ACT-CRF-001,craft:stone_knife,Chế tạo Dao đá,Crafting,Tier 1,,,Ghè đá thành lưỡi sắc. Mở khóa nhiều công thức cần dao.
+Action,ACT-CRF-002,craft:stone_axe,Chế tạo Rìu đá,Crafting,Tier 2,,,"Thu thập gỗ nhiều hơn, tốn ít sức hơn; dọn cây đổ dễ dàng."
+Action,ACT-CRF-003,craft:spear,Chế tạo Giáo gỗ,Crafting,Tier 2,,,"Săn bắt +2, đâm cá +1."
+Action,ACT-CRF-004,craft:fishing_rod,Chế tạo Cần câu,Crafting,Tier 2,,,Đánh cá +3. Lưỡi câu làm từ mảnh kim loại.
+Action,ACT-CRF-005,craft:rope,Chế tạo Dây thừng,Crafting,Tier 1,,,Bện sợi dây leo thành dây thừng chắc chắn.
+Action,ACT-CRF-006,craft:coconut_cup,Chế tạo Gáo dừa,Crafting,Tier 1,,,Đựng thêm 1 phần nước. (Ăn luôn phần cùi dừa.)
+Action,ACT-CRF-007,craft:basket,Chế tạo Giỏ đan,Crafting,Tier 2,,,Mang thêm 10 đơn vị khối lượng.
+Action,ACT-CRF-008,craft:bandage,Chế tạo Băng gạc,Crafting,Tier 1,,,Xé vải bạt làm 2 cuộn băng.
+Action,ACT-CRF-009,craft:torch,Chế tạo Đuốc,Crafting,Tier 1,,,"Nguồn lửa mang theo (dùng 3 lần), đốt lửa tín hiệu khi cần."
+Action,ACT-CRF-010,craft:signal_mirror,Chế tạo Gương tín hiệu,Crafting,Tier 2,,,Mài mảnh kim loại thành gương — ra hiệu cho tàu khi trời nắng.
+Action,ACT-CRF-011,craft:snare,Chế tạo Bẫy thú,Crafting,Tier 2,,,Đặt ở rừng để bắt thú nhỏ mà không cần đi săn.
+Action,ACT-CRF-012,craft:fish_trap,Chế tạo Bẫy cá,Crafting,Tier 2,,,"Lờ đan đặt ở suối hoặc biển, thu cá vào ngày hôm sau."
+Action,ACT-CRF-013,craft:poultice,Chế tạo Thuốc đắp thảo dược,Crafting,Tier 2,,,"Giã thảo dược làm thuốc: chữa nhiễm trùng, ngộ độc, nọc độc."
+Action,ACT-BLD-001,build:lean_to,Xây Lều tạm,Base Building,Tier 1,,,"Mái che đơn sơ. Lập căn cứ tại đây, ngủ đêm hồi phục tốt hơn, tránh mưa. ⚑ Căn cứ sẽ được lập tại Bãi biển."
+Action,ACT-BLD-002,build:hut,Xây Chòi kiên cố,Base Building,Tier 3,,,"Nơi trú chắc chắn: hồi phục rất tốt, chịu bão tốt hơn."
+Action,ACT-BLD-003,build:campfire,Xây Lửa trại,Base Building,Tier 1,,,"Nấu ăn, đun nước, sưởi ấm và xua thú. Mưa bão có thể làm tắt lửa. Có đá lửa — nhóm lửa dễ hơn nhiều."
+Action,ACT-BLD-004,build:rain_collector,Xây Bộ hứng nước mưa,Base Building,Tier 2,,,Tự động hứng nước sạch vào kho mỗi ngày mưa (chứa tối đa 6 phần).
+Action,ACT-BLD-005,build:storage_rack,Xây Giá phơi & kho,Base Building,Tier 2,,,"Đồ ăn trong kho hỏng chậm gấp đôi, ít bị thú lục lọi. Cho phép hun khói."
+Action,ACT-BLD-006,build:fence,Xây Hàng rào gai,Base Building,Tier 2,,,Bảo vệ căn cứ khỏi thú rừng ban đêm.
+Action,ACT-BLD-007,make_fire,Nhóm lửa trại,Base Building,Tier 1,,,"Nhóm một đống lửa ngay tại Bãi biển để nướng đồ ăn, đun sôi nước và sưởi ấm khi ngủ. Có đá lửa — nhóm dễ hơn nhiều. Mưa, gió lớn có thể làm lửa tắt."
+Action,ACT-BLD-008,relight_fire,Nhóm lại lửa trại,Base Building,Tier 1,,,Lửa trại đã tắt. Có đá lửa — dễ dàng.
+Action,ACT-BLD-009,repair,repair,Base Building,Tier 2,,,"Gia cố, thay thế phần hư hỏng."
+Action,ACT-COK-001,cook,Nấu ăn,Cooking & Preservation,Tier 1,,,Nướng chín đồ ăn sống bên lửa trại (tối đa 6 phần). Đồ chín no hơn và an toàn.
+Action,ACT-COK-002,smoke_food,Hun khói thực phẩm,Cooking & Preservation,Tier 2,,,Hun khói cá/thịt sống trên giá phơi (tối đa 6 phần). Giữ được 8 ngày — rất hợp để tích trữ cho chuyến ra khơi.
+Action,ACT-COK-003,boil_water,Đun sôi nước,Cooking & Preservation,Tier 1,,,Đun sôi toàn bộ nước chưa xử lý (cả trong kho nếu ở căn cứ) thành nước sạch. Cần lửa trại và nồi/lon thiếc.
+Action,ACT-MED-001,rest,Nghỉ ngơi,Medical & Recovery,Tier 1,,,Nghỉ ngơi một buổi để hồi sức.
+Action,ACT-MED-002,treat,treat,Medical & Recovery,Tier 2,,,
+Action,ACT-MED-003,search_herbs,Tìm thảo dược,Medical & Recovery,Tier 2,,,Tìm cây thuốc dưới tán rừng.
+Action,ACT-RES-001,trace_contamination,Truy tìm nguồn ô nhiễm,Research,Tier 2,,,Ngược dòng suối tìm xem thứ gì làm nước bị ô nhiễm.
+Action,ACT-RES-002,remove_carcass,Dọn xác thú khỏi dòng suối,Research,Tier 2,,,Kéo xác thú ra khỏi dòng nước. Việc nặng nhọc và mất vệ sinh.
+Action,ACT-NAV-001,travel,Đi,Navigation,Tier 1,,,Theo lối mòn bìa rừng. 
+Action,ACT-NAV-002,study_currents,Nghiên cứu hải lưu,Navigation,Tier 2,,,"Quan sát sóng, vật trôi và hướng gió để hiểu dòng hải lưu quanh đảo. Hiểu biết hiện tại: 0/3. Rất quan trọng khi ra khơi."
+Action,ACT-NAV-003,read_sky,Quan sát bầu trời,Navigation,Tier 1,,,"Nhìn mây, gió và chim chóc để đoán thời tiết. Việc nhanh, mỗi ngày một lần."
+Action,ACT-NAV-004,clear_route,clear_route,Navigation,Tier 2,,,"Dọn cây đổ, đất đá chắn đường. Không có rìu sẽ rất vất vả."
+Action,ACT-NAV-005,find_detour,find_detour,Navigation,Tier 2,,,Tìm một lối đi khác thay vì dọn đường. Đường vòng dài hơn — tốn thêm năng lượng mỗi lần đi.
+Action,ACT-SOC-001,track_footprints,Lần theo dấu chân,Social & Narrative,Tier 2,,,Lần theo những dấu chân cũ xem chúng dẫn tới đâu. Có thể ai đó từng sống ở đây.
+Action,ACT-SOC-002,search_camp,Lục soát trại bỏ hoang,Social & Narrative,Tier 2,,,Xem xét kỹ khu trại của người bị nạn trước bạn.
+Action,ACT-ESC-001,build_raft,Đóng bè: Khung bè (1/3),Escape,Tier 3,,,Buộc các thân gỗ thành khung bè thô. Sau bước này đã có thể liều ra khơi.
+Action,ACT-ESC-002,repair_raft,Sửa bè (0%),Escape,Tier 2,,,"Thay dây buộc, gia cố thân bè."
+Action,ACT-ESC-003,escape_raft,Ra khơi bằng bè,Escape,Tier 3,,,"Rời đảo trên chiếc bè. Hành trình gồm 3 chặng, mỗi chặng tốn một buổi và một lần tung xúc xắc. Thất bại có thể làm hỏng bè, bị thương — hoặc tệ hơn."
+Action,ACT-ESC-004,escape_desperate,Liều mình ra khơi,Escape,Tier 3,,,"Ôm lấy khúc gỗ nổi và lao ra biển, phó mặc cho số phận. Khả năng thành công cực thấp; thất bại sẽ bị sóng đánh dạt về bờ trong tình trạng tồi tệ — hoặc không bao giờ trở về."
+Action,ACT-ESC-005,build:signal_pyre,Xây Đống lửa tín hiệu,Escape,Tier 3,,,"Đống củi lớn sẵn sàng đốt khi có tàu. Xây ở nơi nhìn ra biển; Mũi Hải Đăng là tốt nhất."
+Event,EVT-WTH-001,storm_warning,Dấu hiệu bão,weather,common,world,cooldown 1d,"Chân trời tối sầm lại. Sóng bạc đầu đánh mạnh vào bờ, chim biển bay vội vào đất liền. Ngày mai bão sẽ đổ bộ!
+
+Hãy về nơi trú ẩn, cất đồ vào kho và chuẩn bị đối phó."
+Event,EVT-WTH-002,storm_hits,Bão đổ bộ,weather,common,world,,"Cơn bão quét qua hòn đảo suốt đêm và sáng nay. Cây đổ, sóng tràn lên bờ."
+Event,EVT-WTH-003,heatwave,Nắng như đổ lửa,weather,common,world,cooldown 4d,Nắng gắt từ sáng sớm. Hôm nay bạn sẽ mất nước nhanh hơn — hãy mang đủ nước bên mình.
+Event,EVT-WTH-004,damp_fuel,Củi ẩm,weather,common,world,cooldown 3d,Hơi ẩm ngấm vào mọi thứ. Củi hôm nay ẩm sì — nhóm lửa sẽ khó hơn (-3).
+Event,EVT-ECO-001,landslide,Sạt lở,ecology,uncommon,world,cooldown 5d,Mưa dầm làm sạt một mảng đất đá trên sườn núi.
+Event,EVT-ECO-002,fish_school,Đàn cá vào bờ,ecology,common,world,cooldown 3d,"Từng đàn cá lớn kéo vào vùng nước nông, chim biển lao xuống kiếm mồi không ngớt."
+Event,EVT-ECO-003,river_contamination,Nước suối đổi màu,ecology,unique,world,once,"Bạn có cảm giác bất an mơ hồ, nhưng không rõ vì sao."
+Event,EVT-ECO-004,mushrooms_after_rain,Nấm mọc sau mưa,ecology,common,world,cooldown 3d,"Sau cơn mưa, những cây nấm trắng mọc kín một thân gỗ mục. Ăn được hay không thì… chưa chắc."
+Event,EVT-ECO-005,falling_fruit,Trái chín rụng,resources,common,world,cooldown 4d,Gió thổi mạnh làm trái chín rụng lộp độp quanh bạn. Chỉ việc nhặt!
+Event,EVT-ECO-006,cave_collapse,Sạt lở cửa hang,ecology,uncommon,world,cooldown 6d,"Sau trận mưa, đất đá trên núi trở nên lỏng lẻo. Tin xấu: cửa hang đá đã bị sạt lở, đất đá lấp kín lối vào."
+Event,EVT-RES-001,storm_debris,Đồ trôi dạt sau bão,resources,common,persistent,,"Sóng bão đánh dạt vào bãi biển đủ thứ: gỗ, dây, mảnh vỡ… Xác tàu cũng bị lật thêm, lộ ra những khoang mới."
+Event,EVT-RES-002,coconut_fall,Dừa rụng,resources,common,world,cooldown 3d,Một cơn gió mạnh làm mấy trái dừa rụng lộp độp ngay cạnh bạn.
+Event,EVT-RES-003,bottles_in_sand,Chai lọ trong cát,resources,common,world,cooldown 4d,Sóng rút để lộ mấy chiếc chai thủy tinh vùi trong cát. Thứ đựng nước quý giá!
+Event,EVT-RES-004,kelp_washup,Rong biển dạt bờ,resources,common,world,cooldown 3d,"Triều rút để lại từng đám rong biển còn tươi, lẫn vài con cua nhỏ bò lổm ngổm."
+Event,EVT-RES-005,wild_yams,Dây khoai rừng,resources,uncommon,world,cooldown 5d,Bạn nhận ra dây leo của khoai mỡ rừng. Dưới đất chắc chắn có củ — nếu chịu khó đào.
+Event,EVT-RES-006,lost_cargo,Thùng hàng trôi dạt,resources,unique,world,once,Một thùng gỗ niêm phong dập dềnh cách bờ chừng năm chục mét. Hàng từ con tàu của bạn chăng?
+Event,EVT-RES-007,sharp_stone,Hòn đá sắc cạnh,resources,unique,world,once,Một hòn đá vỡ có cạnh sắc như lưỡi dao. Buộc thêm cán là thành dao dùng tạm!
+Event,EVT-RES-008,net_snag,Mắc phải lưới cũ,resources,uncommon,action,cooldown 4d,"Dây câu của bạn mắc vào thứ gì đó nặng trịch dưới nước: một tấm lưới đánh cá cũ, rong rêu bám đầy, vẫn còn vài con cá mắc bên trong."
+Event,EVT-DIS-001,freshwater_seep,Cát ẩm dưới chân,discovery,unique,world,once,"Bạn để ý một vệt cát luôn ẩm ướt dù trời nắng, sát chân vách đá. Có thể bên dưới có mạch nước ngọt!"
+Event,EVT-DIS-002,monkeys_lead,Bầy khỉ dẫn đường,discovery,common,persistent,,"Bầy khỉ hôm trước xuất hiện, kêu inh ỏi rồi chuyền cành về một hướng — như muốn bạn đi theo."
+Event,EVT-DIS-003,strange_rock,Hòn đá lấp lánh,discovery,uncommon,action,cooldown 5d,"Giữa đống đá vụn, một hòn đá có vân đen bóng lấp lánh dưới nắng — trông giống đá lửa, nhưng lớn hơn hẳn những viên bạn từng thấy."
+Event,EVT-DIS-004,hidden_hollow,Hốc cây bí ẩn,discovery,uncommon,action,once,"Khi kéo một dây leo, lớp vỏ cây mục bong ra để lộ một hốc cây — bên trong có một gói vải dầu được buộc cẩn thận. Ai đó đã cất giấu nó ở đây."
+Event,EVT-WLD-001,bush_noise,Tiếng động trong bụi cây,wildlife,common,world,cooldown 2d,Bụi cây trước mặt rung lên sột soạt. Có thứ gì đó khá lớn đang di chuyển trong đó.
+Event,EVT-WLD-002,monkey_thief,Khỉ trộm đồ,wildlife,common,world,cooldown 3d,"Một con khỉ từ trên cây phóng xuống, giật lấy đồ ăn trong túi bạn rồi chạy biến!"
+Event,EVT-WLD-003,turtle_nesting,Rùa biển lên bờ,wildlife,uncommon,world,cooldown 3d,"Hoàng hôn buông xuống, một con rùa biển lớn chậm chạp bò lên bãi cát và bắt đầu đào ổ đẻ trứng."
+Event,EVT-WLD-004,snake_at_spring,Rắn bên dòng suối,wildlife,common,world,cooldown 4d,Một con rắn đầu tam giác nằm cuộn tròn trên tảng đá ngay chỗ bạn hay lấy nước.
+Event,EVT-WLD-005,bee_hive,Tổ ong rừng,wildlife,uncommon,world,cooldown 6d,Tiếng vo ve rộn ràng trong hốc một cây cổ thụ. Một tổ ong rừng — và mật ong!
+Event,EVT-WLD-006,wounded_boar,Vết máu thú,wildlife,uncommon,world,cooldown 5d,"Những vệt máu còn tươi trên lá. Một con lợn rừng bị thương — dễ săn hơn, nhưng thú bị dồn đường thì rất liều."
+Event,EVT-WLD-007,stranded_dolphin,Cá heo mắc cạn,wildlife,unique,world,once,"Một chú cá heo con mắc cạn trong vũng nước nông, thở hổn hển. Nếu không ai giúp, nó sẽ chết."
+Event,EVT-WLD-008,wounded_seabird,Chim biển bị thương,wildlife,uncommon,world,cooldown 6d,Một con hải âu gãy cánh nằm thoi thóp trên bãi đá.
+Event,EVT-WLD-009,injured_boar,Lợn rừng mắc bẫy dây leo,wildlife,unique,world,once,"Một con lợn rừng non vướng chân vào bụi dây leo gai, máu rỉ ra từ vết cứa. Nó gầm gừ khi thấy bạn nhưng không thoát ra được."
+Event,EVT-WLD-010,boar_friend_visit,Vị khách quen,wildlife,common,persistent,,"Con lợn rừng bạn từng chữa đứng ở bìa rừng, vết thương đã lành. Nó không bỏ chạy, chỉ khịt khịt mũi nhìn bạn."
+Event,EVT-WLD-011,boar_sow_angry,Lợn mẹ nổi giận,wildlife,common,persistent,,"Một con lợn rừng cái khổng lồ chặn ngang lối mòn, hai mắt đỏ ngầu. Nó đã lần theo mùi của bạn."
+Event,EVT-WLD-012,monkey_troop,Bầy khỉ tò mò,wildlife,unique,world,once,"Cả một bầy khỉ kéo đến, đu cành quanh bạn, kêu chí chóe. Con đầu đàn nhìn chằm chằm vào túi đồ của bạn."
+Event,EVT-WLD-013,dolphins_return,Đàn cá heo trở lại,wildlife,common,persistent,,"Một đàn cá heo lượn sát bờ, nhảy lên khỏi mặt nước. Một con nhỏ hơn bơi tách ra, quay vòng trước mặt bạn — là nó!"
+Event,EVT-WLD-014,dolphin_washed,Xác cá heo dạt bờ,wildlife,common,persistent,,Sóng đánh dạt xác chú cá heo hôm trước lên bãi cát. Chim biển đã bắt đầu sà xuống.
+Event,EVT-WLD-015,bird_nest,Tổ chim trên mỏm đá,wildlife,common,action,cooldown 3d,"Bạn trông thấy một tổ chim biển đầy trứng trên một mỏm đá chênh vênh. Chim bố mẹ đang lượn vòng phía trên, kêu inh ỏi."
+Event,EVT-BAS-001,boar_raid,Thú rừng lục lọi trại,base,common,world,cooldown 2d,"Trong lúc bạn vắng mặt, thú rừng đã mò vào căn cứ và lục tung kho thức ăn."
+Event,EVT-BAS-002,loose_roof,Mái lều lung lay,base,common,world,cooldown 3d,"Gió chiều thổi mái lều kêu lật phật. Nếu đêm nay hay ngày mai trời trở xấu, mái che sẽ không trụ nổi."
+Event,EVT-BAS-003,boar_tracks_camp,Dấu chân quanh trại,base,common,persistent,,"Quanh chỗ bạn nghỉ chi chít dấu chân lợn rừng, đất bị cày xới. Con lợn bị thương hôm trước — giờ nó đói và liều lĩnh."
+Event,EVT-BAS-004,boar_night_raid,Lợn rừng phá trại,base,common,persistent,,"Nửa đêm, con lợn rừng đói lao vào phá tung kho đồ ăn của bạn."
+Event,EVT-BAS-005,monkey_raid,Bầy khỉ báo thù,base,common,persistent,,Đêm qua bầy khỉ bị xua đuổi hôm trước kéo đến lục tung đồ ăn của bạn.
+Event,EVT-HEA-001,twisted_ankle,Hụt chân,health,uncommon,world,cooldown 5d,"Một hòn đá lăn dưới chân, bạn trẹo cổ chân. Cơn đau nhói lên mỗi bước đi."
+Event,EVT-PSY-001,nightmare,Ác mộng,psychology,common,world,cooldown 2d,"Bạn mơ thấy mình chìm xuống đáy biển cùng con tàu. Tỉnh dậy giữa đêm, tim đập thình thịch."
+Event,EVT-PSY-002,starry_night,Bầu trời đầy sao,psychology,common,world,cooldown 4d,"Đêm quang đãng, dải Ngân Hà vắt ngang bầu trời. Bạn nằm nhìn các vì sao, nhẩm tính phương hướng."
+Event,EVT-PSY-003,rainbow,Cầu vồng sau mưa,psychology,common,world,cooldown 4d,Một dải cầu vồng vắt ngang hòn đảo sau cơn mưa đêm qua. Bạn thấy lòng nhẹ bẫng.
+Event,EVT-NAR-001,message_bottle,Chai trôi dạt,narrative,unique,narrative,once,Một chiếc chai thủy tinh bị sóng đánh vào chân bạn. Bên trong là mảnh giấy cũ: “…dòng hải lưu phía tây bắc chảy thẳng về đất liền. Đừng ra khơi khi gió chướng…”
+Event,EVT-NAR-002,copper_locket,Mặt dây chuyền đồng,narrative,unique,narrative,once,Lẫn trong đống mảnh vỡ là một mặt dây chuyền đồng. Bên trong là tấm ảnh nhòe nước của một gia đình đang cười. Bạn chợt nghĩ tới những người đang chờ mình trở về.
+Event,EVT-NAR-003,human_footprints,Dấu chân người!,narrative,uncommon,action,once,"Bạn khựng lại. Trên nền đất ẩm là một dấu chân người — đã cũ, nhưng chắc chắn không phải của bạn. Một hàng dấu chân dẫn sâu vào rừng."
+Event,EVT-ESC-001,calm_sea,Biển lặng,escape,uncommon,world,cooldown 4d,"Mặt biển phẳng lặng như gương, gió nhẹ thổi ra khơi. Một ngày lý tưởng để ra biển."
+Event,EVT-ESC-002,ship_sighted,Tàu ở đường chân trời!,escape,common,world,,"Một con tàu hàng đang chạy ngang qua phía xa, cách bờ vài hải lý. Đây có thể là cơ hội rời đảo — nhưng nó sẽ không đợi bạn. Từ bãi biển thấp, tín hiệu khó được nhìn thấy hơn."
+Event,EVT-ESC-003,ship_closer,Con tàu chậm lại,escape,common,persistent,,Con tàu giảm tốc và chếch mũi về phía đảo. Họ đã thấy gì đó! Đây là cơ hội cuối cùng để khiến họ chắc chắn.
+Event,EVT-ESC-004,ship_missed,Tiếng còi tàu,escape,common,world,,Tiếng còi tàu trầm đục vọng lại từ phía biển. Từ Bãi biển bạn không thể nhìn ra biển — khi bạn hiểu ra thì đã quá muộn.
+Event,EVT-ESC-005,plane_overhead,Máy bay!,escape,rare,world,cooldown 6d,Tiếng động cơ ù ù trên đầu — một chiếc máy bay nhỏ đang bay ngang qua đảo! Nó bay rất nhanh.
+Event,EVT-ESC-006,rescue_search,Trực thăng tìm kiếm,escape,common,persistent,,"Tiếng cánh quạt phành phạch từ xa — một chiếc trực thăng cứu hộ đang bay dọc bờ biển, tìm kiếm!"
+Event,EVT-ESC-007,island_in_distance,Bóng đất liền,escape,unique,narrative,once,"Trời trong vắt. Phía tây bắc, sát đường chân trời, hiện lên một dải mờ xanh thẫm — đất liền! Bạn ghi nhớ hướng đó."
+Event,EVT-ESC-008,false_beacon,Ánh sáng ngoài khơi,escape,unique,narrative,once,"Lúc chạng vạng, một đốm sáng chớp tắt ngoài khơi xa. Tàu ư? Hay chỉ là ảo giác?"
+Consequence,CON-IMM-001,vital_change,Thay đổi chỉ số sinh tồn,immediate,,character,instant,"Tăng/giảm Sức khỏe, No bụng, Nước hoặc Năng lượng."
+Consequence,CON-IMM-002,gain_item,Nhận vật phẩm,immediate,,inventory,instant,"Nhận vật phẩm (vào hành trang, hoặc kho nếu đầy và đang ở căn cứ)."
+Consequence,CON-IMM-003,lose_item,Mất vật phẩm,immediate,,inventory,instant,Mất một số vật phẩm cụ thể.
+Consequence,CON-IMM-004,gain_xp,Kinh nghiệm kỹ năng,immediate,,character,instant,Nhận XP cho một kỹ năng.
+Consequence,CON-IMM-005,injury,Bị thương,immediate,,character,until_resolved,"Thương tích (cộng dồn mức độ, tối đa 3)."
+Consequence,CON-IMM-006,illness,Ngộ độc / đau bụng,immediate,,character,until_resolved,"Bệnh đường ruột, giảm dần qua đêm."
+Consequence,CON-IMM-007,poisoned,Trúng độc,immediate,,character,temporary,Mất Sức khỏe mỗi buổi cho tới khi hết độc.
+Consequence,CON-IMM-008,exposure,Nhiễm lạnh,immediate,,character,temporary,"Kiểm tra -1, ngủ hồi sức kém."
+Consequence,CON-IMM-009,shaken,Hoảng sợ,immediate,,character,temporary,Kiểm tra PER/INT -1 trong một thời gian.
+Consequence,CON-IMM-010,determined,Quyết tâm,immediate,,character,temporary,Mọi kiểm tra +1 trong một thời gian.
+Consequence,CON-IMM-011,infection,Nhiễm trùng,immediate,,character,until_resolved,Mất Sức khỏe mỗi đêm cho tới khi chữa.
+Consequence,CON-IMM-012,cure_condition,Khỏi một trạng thái,immediate,,character,instant,Xóa một trạng thái đang mắc.
+Consequence,CON-IMM-013,tool_wear,Hao mòn công cụ,immediate,,inventory,instant,"Công cụ mất độ bền, có thể hỏng."
+Consequence,CON-IMM-014,lose_carried,Mất đồ mang theo,immediate,,inventory,instant,Một phần đồ đang mang bị trôi mất / rơi mất.
+Consequence,CON-IMM-015,food_stolen,Bị lấy mất thức ăn,immediate,,inventory,instant,Thú rừng lấy mất một phần thức ăn trong kho (hoặc hành trang nếu chưa có căn cứ).
+Consequence,CON-DLY-001,delayed_infection,Vết thương nhiễm trùng muộn,delayed,,character,until_resolved,"Sau một thời gian, vết thương chưa băng bó sẽ nhiễm trùng."
+Consequence,CON-DLY-002,delayed_food_poisoning,Ngộ độc thực phẩm muộn,delayed,,character,until_resolved,"Vài buổi sau khi ăn đồ hỏng, cơn đau bụng mới kéo đến."
+Consequence,CON-DLY-003,delayed_fatigue,Kiệt sức muộn,delayed,,character,instant,Gắng sức quá độ khiến cơ thể sụp xuống sau đó.
+Consequence,CON-PER-001,water_contaminated,Nguồn nước suối bị ô nhiễm,persistent,,region,until_resolved,Nước suối rất dễ gây bệnh cho tới khi xử lý nguồn ô nhiễm hoặc tự hồi phục.
+Consequence,CON-PER-002,water_cleaned,Nguồn ô nhiễm đã được xử lý,persistent,,region,instant,Nước suối sẽ trong lại từ ngày mai.
+Consequence,CON-PER-003,area_danger,Khu vực trở nên nguy hiểm,persistent,,region,temporary,Săn bắt trong rừng khó hơn trong một thời gian.
+Consequence,CON-PER-004,camp_guarded,Trại được rào tạm,persistent,,structure,temporary,Thú rừng không phá được kho trong vài ngày.
+Consequence,CON-PER-005,damp_fuel,Củi ẩm,persistent,,world,temporary,Nhóm lửa -3 trong ngày.
+Consequence,CON-PER-006,hunt_bonus,Biết lối mòn thú,persistent,,knowledge,temporary,Săn bắt +2 trong một thời gian.
+Consequence,CON-PER-007,fish_run,Đàn cá vào bờ,persistent,,region,temporary,Đánh cá +3 trong ngày.
+Consequence,CON-PER-008,calm_sea,Biển lặng,persistent,,world,temporary,Ra khơi +2 trong ngày.
+Consequence,CON-PER-009,animal_ally,Thú rừng thân thiện canh trại,persistent,,world,permanent,Thú rừng khác không còn phá kho.
+Consequence,CON-ENV-001,route_blocked,Tuyến đường bị chặn,environmental,,route,until_resolved,"Cây đổ, sạt lở chặn một tuyến đường (dọn hoặc tìm đường vòng)."
+Consequence,CON-ENV-002,route_opened,Tuyến đường thông lại,environmental,,route,permanent,Một tuyến đường bị chặn đã thông.
+Consequence,CON-ENV-003,route_detour,Mở đường vòng,environmental,,route,permanent,Đi được nhưng xa hơn (tốn thêm năng lượng mỗi lần).
+Consequence,CON-ENV-004,abundance_change,Trữ lượng tài nguyên thay đổi,environmental,,region,environmental_recovery,"Thức ăn, cá, thú hoặc gỗ của một vùng tăng/giảm; tự hồi phục dần."
+Consequence,CON-ENV-005,structure_damage,Công trình hư hại,environmental,,structure,until_resolved,"Công trình mất độ bền; về 0 thì bị phá hủy."
+Consequence,CON-ENV-006,fire_out,Lửa trại tắt,environmental,,structure,until_resolved,Lửa trại ở một vùng bị dập tắt.
+Consequence,CON-ENV-007,river_muddy,Nước suối đục,environmental,,region,environmental_recovery,"Nước suối đục sau mưa, rủi ro cao hơn; trong lại khi tạnh."
+Consequence,CON-ENV-008,location_state,Địa điểm đổi trạng thái,environmental,,location,until_resolved,Một địa điểm đã biết chuyển trạng thái (ví dụ cửa hang bị sạt lở / đã dọn).
+Consequence,CON-ENV-009,spawn_object,Xuất hiện vật thể,environmental,,world,until_resolved,"Một vật thể (thùng hàng, gói đồ…) xuất hiện và tồn tại tới khi xử lý hoặc hết hạn."
+Consequence,CON-ENV-010,remove_object,Vật thể biến mất,environmental,,world,instant,Vật thể đã được xử lý hoặc bị cuốn đi.
+Consequence,CON-ENV-011,wreck_restock,Xác tàu lộ thêm khoang,environmental,,location,permanent,Có thêm đồ để lục soát trong xác tàu.
+Consequence,CON-OPP-001,discover_location,Phát hiện địa điểm,opportunity,,location,permanent,Mở một địa điểm mới với hành động / tài nguyên riêng.
+Consequence,CON-OPP-002,discover_route,Tìm ra tuyến đường,opportunity,,route,permanent,Biết thêm một tuyến đường giữa hai vùng.
+Consequence,CON-OPP-003,clue_region,Manh mối về vùng đất mới,opportunity,,knowledge,permanent,Biết đến sự tồn tại của một vùng chưa khám phá.
+Consequence,CON-OPP-004,learn_knowledge,Học được kiến thức,opportunity,,knowledge,permanent,"Mở khóa kiến thức (bản vẽ bè, cách đặt bẫy, cây thuốc…)."
+Consequence,CON-OPP-005,ship_schedule_known,Biết lịch tàu,opportunity,,knowledge,permanent,Biết khi nào tàu kế tiếp đi qua.
+Consequence,CON-OPP-006,currents_knowledge,Hiểu thêm hải lưu,opportunity,,knowledge,permanent,"Hiểu biết hải lưu +1 (tối đa 3), giúp ra khơi."
+Consequence,CON-OPP-007,forecast_known,Biết trước thời tiết,opportunity,,knowledge,temporary,Biết thời tiết ngày mai.
+Consequence,CON-OPP-008,land_sighted,Biết hướng đất liền,opportunity,,knowledge,permanent,Ra khơi chặng 3 +2.
+Consequence,CON-OPP-009,sea_guide,Đàn cá heo dẫn đường,opportunity,,knowledge,permanent,Ra khơi chặng 1 +1.
+Consequence,CON-CHN-001,schedule_event,Hẹn sự kiện tiếp nối,chain,,story,until_resolved,"Một sự kiện tiếp nối sẽ xảy ra sau vài ngày, khi đúng ngữ cảnh."
+Consequence,CON-CHN-002,chain_state,Ghi nhận nhánh câu chuyện,chain,,story,permanent,Ghi lại lựa chọn của người chơi trong một chuỗi để các sự kiện sau phản ứng theo.
+WorldObject,,washed_crate,Thùng hàng trôi dạt,object,,,3 days,Một thùng gỗ đóng đinh kín bị sóng đánh dạt vào bờ. Thủy triều có thể cuốn nó đi bất cứ lúc nào.
+WorldObject,,old_cache,Gói đồ trong hốc cây,object,,,until handled,Một gói vải dầu được nhét kỹ trong hốc cây — ai đó đã cất giấu nó từ lâu. Có thể có bẫy hoặc côn trùng làm tổ bên trong.
+LocationState,,cave:open,Hang đá: Lối vào thông thoáng,location,,,initial,Có thể trú ẩn trong hang.
+LocationState,,cave:collapsed,Hang đá: Cửa hang bị sạt lở,location,,,until_resolved,Đất đá lấp kín lối vào — không thể trú trong hang cho tới khi dọn được đường vào.
+LocationState,,cave:cleared,Hang đá: Đã dọn lại lối vào,location,,,until_resolved,"Lối vào được chèn đá cẩn thận, hang lại dùng được."

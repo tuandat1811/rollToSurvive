@@ -27,6 +27,9 @@ import { CONDITIONS } from './conditions.js';
 import { LOCATION_DEFS, REGION_DEFS, ROUTE_DEFS, SLOT_NAMES, WEATHER_DEFS } from './defs.js';
 import { ITEMS, itemName } from './items.js';
 import { traitDefs } from './traits.js';
+import { con } from '../engine/consequence.js';
+import { OBJECT_DEFS, objectsAt } from './objects.js';
+import { LOCATION_STATES, locationAccessible, locationState } from './locationStates.js';
 
 export type ActionGroup = 'survival' | 'explore' | 'food' | 'craft' | 'base' | 'medical' | 'escape' | 'travel';
 
@@ -65,6 +68,8 @@ export interface ActionDef {
   resolve: (ctx: Ctx, tier: Tier, p: string) => void;
   priority?: (s: GameState, p: string) => number;
   followUp?: boolean;
+  /** soft tier lock: attemptable without the skill/knowledge, but at a penalty and with real crit-failure risk */
+  untrained?: (s: GameState, p: string) => boolean;
   /** XP key for repetition tracking (defaults to id:param) */
   xpKey?: (s: GameState, p: string) => string;
 }
@@ -79,6 +84,31 @@ const injuryEnergy = (s: GameState) => condSev(s, 'injury') * 3;
 const stormExtra = (s: GameState) => (s.world.weather === 'storm' ? 5 : 0);
 const needWater = (s: GameState) => s.vitals.thirst < 40;
 const needFood = (s: GameState) => s.vitals.hunger < 40;
+
+const absSlotOf = (s: GameState) => (s.day - 1) * 4 + s.slot;
+
+/** soft tiers (GDD Diversity-01): skill/knowledge locks are not hard walls */
+export const UNTRAINED = { penalty: -5, label: 'Chưa thành thạo' };
+const untrainedMod = (on: boolean) => on && { label: UNTRAINED.label, value: UNTRAINED.penalty };
+const untrainedNote = (lockText?: string) =>
+  `⚠️ Chưa thành thạo (${lockText ?? 'chưa mở khóa'}): kiểm tra ${UNTRAINED.penalty}, có thể thất bại thảm hại và mất trắng vật liệu`;
+const recipeLocked = (s: GameState, p: string) => {
+  const r = RECIPES.find((x) => x.id === p)!;
+  return !!r.unlocked && !r.unlocked(s);
+};
+const structureLocked = (s: GameState, p: string) => {
+  const d = STRUCTURES.find((x) => x.id === p)!;
+  return !!d.unlocked && !d.unlocked(s);
+};
+
+/** world-object action variant `uid:kind:action` */
+function objAct(s: GameState, p: string) {
+  const [uid, kind, act] = p.split(':');
+  const obj = (s.objects ?? []).find((o) => o.uid === Number(uid) && o.kind === kind);
+  const def = OBJECT_DEFS[kind];
+  const a = def?.actions.find((x) => x.id === act);
+  return obj && def && a ? { obj, def, a } : undefined;
+}
 
 function refundHalf(ctx: Ctx, mats: Material[]) {
   for (const m of mats) {
@@ -1168,6 +1198,78 @@ const actions: ActionDef[] = [
     },
   },
 
+  // ============================== PERSISTENT WORLD: objects & location states
+  {
+    id: 'object',
+    group: 'explore',
+    icon: (s, p) => objAct(s, p)?.a.icon ?? '❔',
+    name: (s, p) => {
+      const x = objAct(s, p)!;
+      return `${x.a.label} (${x.def.name})`;
+    },
+    desc: (s, p) => {
+      const x = objAct(s, p)!;
+      return `${x.def.desc} ${x.a.desc}`;
+    },
+    hint: (s, p) => objAct(s, p)?.a.hint ?? '',
+    energy: (s, p) => objAct(s, p)?.a.energy ?? 0,
+    followUp: true,
+    variants: (s) => objectsAt(s).flatMap((o) => (OBJECT_DEFS[o.kind]?.actions ?? []).map((a) => `${o.uid}:${o.kind}:${a.id}`)),
+    visible: k(true),
+    reqs: (s, p) => objAct(s, p)?.a.reqs?.(s) ?? [],
+    check: (s, p) => objAct(s, p)?.a.check?.(s) ?? null,
+    notes: (s, p) => {
+      const x = objAct(s, p);
+      if (!x?.obj.expiresAt) return [];
+      const days = Math.max(0, Math.ceil((x.obj.expiresAt - absSlotOf(s)) / 4));
+      return [`⏳ Vật thể sẽ biến mất sau khoảng ${days} ngày`];
+    },
+    priority: k(60),
+    xpKey: (s, p) => `object:${p.split(':').slice(1).join(':')}`,
+    resolve: (ctx, tier, p) => {
+      const x = objAct(ctx.s, p)!;
+      x.a.resolve(ctx, tier, x.obj);
+    },
+  },
+  {
+    id: 'clear_location',
+    group: 'explore',
+    icon: k('⛏️'),
+    name: (s, p) => `Dọn lối vào ${LOCATION_DEFS[p].name}`,
+    desc: (s, p) => `${LOCATION_DEFS[p].name} đang ở trạng thái “${LOCATION_STATES[p].states[locationState(s, p)].label}”. Bẩy đá, chèn gỗ để mở lại lối vào.${s.flags[`clearing:${p}`] ? ' Bạn đã dọn được một phần.' : ''}`,
+    hint: k('Mở lại địa điểm (trú ẩn trong hang)'),
+    energy: k(16),
+    followUp: true,
+    variants: (s) => Object.keys(LOCATION_STATES).filter((loc) => found(s, loc) && LOCATION_DEFS[loc].region === here(s) && !locationAccessible(s, loc)),
+    visible: k(true),
+    materials: k([{ id: 'wood', qty: 2 }]),
+    check: (s, p) => ({
+      label: 'Dọn lối vào',
+      attr: 'STR',
+      skill: 'survival',
+      dc: 14,
+      outdoor: true,
+      mods: mods(tool(s, 'axe', 1, 'Rìu đá làm đòn bẩy'), tool(s, 'rope', 1, 'Dây thừng kéo đá'), !!s.flags[`clearing:${p}`] && { label: 'Đã dọn một phần', value: 3 }),
+    }),
+    priority: k(55),
+    resolve: (ctx, tier, p) => {
+      if (isSuccess(tier) || (tier === 'partial' && ctx.s.flags[`clearing:${p}`])) {
+        delete ctx.s.flags[`clearing:${p}`];
+        ctx.say('Tảng đá cuối cùng lăn sang bên. Lối vào đã thông, được chèn gỗ chắc chắn.');
+        con(ctx, 'location_state', { loc: p, state: 'cleared' });
+      } else if (tier === 'partial') {
+        ctx.flag(`clearing:${p}`);
+        ctx.say('Bạn dọn được một phần đống đổ nát. Thêm một lần nữa là xong.');
+      } else {
+        ctx.say('Đá quá nặng, bạn không xê dịch được bao nhiêu.');
+        if (tier === 'crit_failure') {
+          ctx.say('Một tảng đá lăn xuống đè trúng chân bạn!');
+          con(ctx, 'injury', { sev: 1 });
+        }
+      }
+    },
+  },
+
   // ============================== CRAFTING
   {
     id: 'craft',
@@ -1185,15 +1287,17 @@ const actions: ActionDef[] = [
     reqs: (s, p) => {
       const r = RECIPES.find((x) => x.id === p)!;
       const out: Req[] = [];
-      if (r.unlocked) out.push({ label: r.lockText ?? 'Chưa mở khóa', met: r.unlocked(s) });
       if (r.tool) out.push({ label: `Có dao (${itemName('knife')} hoặc ${itemName('stone_knife')})`, met: hasTag(s, r.tool) });
       return out;
     },
     materials: (s, p) => RECIPES.find((r) => r.id === p)!.inputs,
     check: (s, p) => {
       const r = RECIPES.find((x) => x.id === p)!;
-      return { label: `Chế tạo ${r.name}`, attr: r.attr, skill: r.skill, dc: r.dc, crit: 'safe' };
+      const locked = recipeLocked(s, p);
+      return { label: `Chế tạo ${r.name}`, attr: r.attr, skill: r.skill, dc: r.dc, crit: locked ? 'standard' : 'safe', mods: mods(untrainedMod(locked)) };
     },
+    untrained: recipeLocked,
+    notes: (s, p) => (recipeLocked(s, p) ? [untrainedNote(RECIPES.find((x) => x.id === p)!.lockText)] : []),
     priority: (s, p) => {
       const important: Record<string, number> = { stone_knife: 40, stone_axe: 35, spear: 30, basket: 25, coconut_cup: 30 };
       const owned = countBoth(s, p) > 0;
@@ -1203,6 +1307,11 @@ const actions: ActionDef[] = [
     resolve: (ctx, tier, p) => {
       const r = RECIPES.find((x) => x.id === p)!;
       const def = ITEMS[r.output.id];
+      if (tier === 'crit_failure') {
+        ctx.say('Làm theo trí nhớ mơ hồ, bạn làm hỏng toàn bộ vật liệu — và tự làm mình bị thương.');
+        con(ctx, 'injury', { sev: 1 });
+        return;
+      }
       if (!atLeastPartial(tier)) {
         ctx.say('Sản phẩm hỏng giữa chừng.');
         refundHalf(ctx, r.inputs);
@@ -1247,7 +1356,6 @@ const actions: ActionDef[] = [
     reqs: (s, p) => {
       const d = STRUCTURES.find((x) => x.id === p)!;
       const out: Req[] = [];
-      if (d.unlocked) out.push({ label: d.lockText ?? 'Chưa mở khóa', met: d.unlocked(s) });
       return out;
     },
     materials: (s, p) => STRUCTURES.find((x) => x.id === p)!.inputs,
@@ -1258,15 +1366,18 @@ const actions: ActionDef[] = [
         attr: d.attr,
         skill: d.skill,
         dc: d.dc,
-        crit: 'safe',
         outdoor: d.id === 'campfire',
         tags: d.id === 'campfire' ? ['fire'] : undefined,
         mods: mods(
           p === 'campfire' && countBoth(s, 'flint') > 0 && { label: 'Đá lửa', value: 5 },
           p === 'campfire' && hasTag(s, 'fire') && { label: 'Đuốc', value: 5 },
+          untrainedMod(structureLocked(s, p)),
         ),
+        crit: structureLocked(s, p) ? 'standard' : 'safe',
       };
     },
+    untrained: structureLocked,
+    notes: (s, p) => (structureLocked(s, p) ? [untrainedNote(STRUCTURES.find((x) => x.id === p)!.lockText)] : []),
     priority: (s, p) => {
       const pr: Record<string, number> = { lean_to: 70, campfire: 68, rain_collector: 45, storage_rack: 30, fence: 25, hut: 35, signal_pyre: here(s) === 'cape' ? 60 : 25 };
       return pr[p] ?? 20;
@@ -1275,6 +1386,11 @@ const actions: ActionDef[] = [
     resolve: (ctx, tier, p) => {
       const s = ctx.s;
       const d = STRUCTURES.find((x) => x.id === p)!;
+      if (tier === 'crit_failure' && structureLocked(s, p)) {
+        ctx.say('Kết cấu sai ngay từ đầu — cả khung sập xuống, vật liệu gãy vụn, bạn bị đè trúng.');
+        con(ctx, 'injury', { sev: 1 });
+        return;
+      }
       if (!atLeastPartial(tier)) {
         ctx.say(p === 'campfire' ? 'Bạn cọ xát mãi mà ngọn lửa không chịu bén.' : 'Công trình đổ sụp giữa chừng.');
         if (p !== 'campfire') refundHalf(ctx, d.inputs);

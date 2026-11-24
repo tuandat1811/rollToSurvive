@@ -12,6 +12,9 @@ import { journey, stageCheck } from './escape.js';
 import { buildEscapePlan } from './escapePlan.js';
 import { traitDefs } from '../content/traits.js';
 import { actionEnergy, eventChoices, instances, materialStatus, unmetReasons } from './game.js';
+import { EVENT_META, actionMeta } from '../content/meta.js';
+import { OBJECT_DEFS } from '../content/objects.js';
+import { locationStateDef } from '../content/locationStates.js';
 import { ATTRS, REGIONS, SKILLS, type CheckSpec, type GameState, type ItemStack } from './types.js';
 
 function checkView(s: GameState, spec: CheckSpec): CheckView {
@@ -109,6 +112,10 @@ export function buildView(id: string, s: GameState): GameView {
             notes: def.notes?.(s, param) ?? [],
             priority: def.priority?.(s, param) ?? 10,
             followUp: !!def.followUp,
+            code: actionMeta(inst.key)?.code,
+            tier: actionMeta(inst.key)?.tier,
+            untrained: def.untrained?.(s, param) || undefined,
+            objectUid: def.id === 'object' ? Number(param.split(':')[0]) : undefined,
           };
         })
       : [];
@@ -149,6 +156,9 @@ export function buildView(id: string, s: GameState): GameView {
       text: def.text(s, s.pending.data) + extra,
       changes: s.pending.changes ?? [],
       choices,
+      code: EVENT_META[def.id]?.code,
+      rarity: EVENT_META[def.id]?.rarity,
+      source: EVENT_META[def.id]?.source,
     };
   }
 
@@ -253,7 +263,20 @@ export function buildView(id: string, s: GameState): GameView {
           here: s.location === rid,
           base: s.baseRegion === rid,
           seaView: d.seaView,
-          locations: r.found.map((l) => ({ id: l, name: LOCATION_DEFS[l].name, icon: LOCATION_DEFS[l].icon, desc: LOCATION_DEFS[l].desc })),
+          locations: r.found.map((l) => {
+            const st = locationStateDef(s, l);
+            return { id: l, name: LOCATION_DEFS[l].name, icon: LOCATION_DEFS[l].icon, desc: LOCATION_DEFS[l].desc, state: st?.label, stateGood: st ? !!st.good : undefined };
+          }),
+          objects: (s.objects ?? [])
+            .filter((o) => o.region === rid && OBJECT_DEFS[o.kind])
+            .map((o) => ({
+              uid: o.uid,
+              kind: o.kind,
+              name: OBJECT_DEFS[o.kind].name,
+              icon: OBJECT_DEFS[o.kind].icon,
+              desc: OBJECT_DEFS[o.kind].desc,
+              daysLeft: o.expiresAt !== undefined ? Math.max(0, Math.ceil((o.expiresAt - now) / 4)) : undefined,
+            })),
           structures: s.structures
             .filter((x) => x.region === rid)
             .map((x) => {

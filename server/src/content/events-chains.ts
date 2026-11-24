@@ -5,6 +5,7 @@ import { type Ctx, countBoth, hasStructure } from '../engine/ctx.js';
 import type { GameState, Tier } from '../engine/types.js';
 import type { EventChoice, EventDef } from './events.js';
 import { ITEMS } from './items.js';
+import { con } from '../engine/consequence.js';
 
 const ignore = (label: string, text: string, after?: (ctx: Ctx) => void): EventChoice => ({
   id: 'ignore',
@@ -76,13 +77,13 @@ export const CHAIN_EVENTS: EventDef[] = [
               ctx.say('Nó kịp cắn vào tay bạn trước khi chạy.');
               ctx.addCondition('injury', 1);
             }
-            ctx.flag('chain_boar', 'healed');
+            con(ctx, 'chain_state', { chain: 'boar', state: 'healed' });
             ctx.schedule('boar_friend_visit', days(ctx, 3, 5));
             ctx.journal('Chữa cho một con lợn rừng mắc bẫy rồi thả nó đi.', 'event');
           } else {
             ctx.say('Con lợn hoảng loạn húc bạn ngã rồi thoát được, máu vẫn chảy. Nó sẽ không quên chuyện này.');
             ctx.addCondition('injury', 1);
-            ctx.flag('chain_boar', 'abandoned');
+            con(ctx, 'chain_state', { chain: 'boar', state: 'abandoned' });
             ctx.schedule('boar_tracks_camp', days(ctx, 2, 4));
           }
         },
@@ -100,13 +101,13 @@ export const CHAIN_EVENTS: EventDef[] = [
           if (meat) ctx.addItem('meat_raw', meat);
           if (tier === 'crit_failure') ctx.addCondition('injury', 1);
           ctx.say('Từ sâu trong rừng vọng ra tiếng rống giận dữ.');
-          ctx.flag('chain_boar', 'killed');
+          con(ctx, 'chain_state', { chain: 'boar', state: 'killed' });
           ctx.schedule('boar_sow_angry', days(ctx, 2, 4));
           ctx.journal('Giết con lợn rừng non mắc bẫy. Có tiếng lợn mẹ rống trong rừng.', 'event');
         },
       },
       ignore('Bỏ đi', 'Không phải việc của bạn. Bạn bỏ đi, sau lưng là tiếng rít đau đớn.', (ctx) => {
-        ctx.flag('chain_boar', 'abandoned');
+        con(ctx, 'chain_state', { chain: 'boar', state: 'abandoned' });
         ctx.schedule('boar_tracks_camp', days(ctx, 2, 4));
       }),
     ],
@@ -132,14 +133,13 @@ export const CHAIN_EVENTS: EventDef[] = [
         resolve: (ctx) => {
           const food = ctx.s.inventory.find((x) => ITEMS[x.id]?.kind === 'food');
           if (food) ctx.removeItem(food.id, 1, 'inv');
-          ctx.flag('boarFriend');
           ctx.say('Nó ăn ngon lành rồi nằm phục dưới gốc cây gần trại. Từ giờ, đám lợn rừng khác ít dám lại gần.');
-          ctx.change('good', '🐗 Có lợn rừng quen canh trại: thú rừng không còn phá kho');
+          con(ctx, 'animal_ally');
           ctx.addCondition('determined', 1, 6);
           ctx.journal('Con lợn rừng được cứu quay lại và ở gần trại. Nó xua đuổi những con thú khác.', 'event');
         },
       },
-      ignore('Xua nó đi', 'Bạn vung tay đuổi. Con lợn ngơ ngác rồi lủi vào rừng.', (ctx) => ctx.flag('chain_boar', 'done')),
+      ignore('Xua nó đi', 'Bạn vung tay đuổi. Con lợn ngơ ngác rồi lủi vào rừng.', (ctx) => con(ctx, 'chain_state', { chain: 'boar', state: 'done' })),
     ],
   },
   {
@@ -167,7 +167,7 @@ export const CHAIN_EVENTS: EventDef[] = [
         check: { label: 'Dựng rào tạm', attr: 'STR', skill: 'crafting', dc: 10, crit: 'safe' },
         resolve: (ctx, tier) => {
           if (isSuccess(tier) || tier === 'partial') {
-            ctx.flag('campGuarded', ctx.s.day + 4);
+            con(ctx, 'camp_guarded', { days: 4 });
             ctx.say('Hàng rào tạm đủ chắc để một con lợn đói phải bỏ cuộc.');
           } else {
             ctx.say('Rào chắn ọp ẹp, chắc không cản được gì.');
@@ -214,7 +214,7 @@ export const CHAIN_EVENTS: EventDef[] = [
       if (hasStructure(s, 'fence', s.baseRegion ?? s.location) || Number(s.flags.campGuarded ?? 0) >= s.day) return;
       const lost = loseFood(ctx, 0.5, true);
       if (!lost) ctx.say('May mà trong kho chẳng còn gì đáng giá.');
-      ctx.flag('chain_boar', 'done');
+      con(ctx, 'chain_state', { chain: 'boar', state: 'done' });
       ctx.journal('Con lợn rừng bị bỏ mặc hôm trước quay lại phá kho thức ăn.', 'consequence');
     },
   },
@@ -229,8 +229,7 @@ export const CHAIN_EVENTS: EventDef[] = [
     eligible: (s) => s.location === 'jungle' || s.location === 'river',
     text: () => 'Một con lợn rừng cái khổng lồ chặn ngang lối mòn, hai mắt đỏ ngầu. Nó đã lần theo mùi của bạn.',
     passive: (ctx) => {
-      ctx.flag('jungleDangerUntil', ctx.now + 12);
-      ctx.change('bad', '⚠️ Rừng nguy hiểm trong 3 ngày: săn bắt khó hơn (-3)');
+      con(ctx, 'area_danger', { slots: 12 });
     },
     choices: (s) => [
       {
@@ -322,7 +321,7 @@ export const CHAIN_EVENTS: EventDef[] = [
           const food = ctx.s.inventory.find((x) => ITEMS[x.id]?.kind === 'food');
           if (food) ctx.removeItem(food.id, 1, 'inv');
           ctx.say('Con đầu đàn chộp lấy, rồi cả bầy chuyền cành đi mất, thỉnh thoảng ngoái lại nhìn bạn.');
-          ctx.flag('chain_monkey', 'friendly');
+          con(ctx, 'chain_state', { chain: 'monkey', state: 'friendly' });
           ctx.schedule('monkeys_lead', days(ctx, 2, 4));
         },
       },
@@ -335,11 +334,11 @@ export const CHAIN_EVENTS: EventDef[] = [
         check: { label: 'Xua bầy khỉ', attr: 'STR', skill: 'survival', dc: 10, outdoor: true },
         resolve: (ctx, tier) => {
           ctx.say(isSuccess(tier) ? 'Bầy khỉ la hét bỏ chạy.' : 'Bầy khỉ chạy đi nhưng ném trả cả trái cây thối vào bạn.');
-          ctx.flag('chain_monkey', 'hostile');
+          con(ctx, 'chain_state', { chain: 'monkey', state: 'hostile' });
           ctx.schedule('monkey_raid', days(ctx, 2, 3));
         },
       },
-      ignore('Phớt lờ', 'Bạn mặc kệ chúng. Bầy khỉ theo bạn một đoạn rồi tản đi.', (ctx) => ctx.flag('chain_monkey', 'neutral')),
+      ignore('Phớt lờ', 'Bạn mặc kệ chúng. Bầy khỉ theo bạn một đoạn rồi tản đi.', (ctx) => con(ctx, 'chain_state', { chain: 'monkey', state: 'neutral' })),
     ],
   },
   {
@@ -359,7 +358,7 @@ export const CHAIN_EVENTS: EventDef[] = [
         ctx.addItem('fruit', 4);
         if (ctx.rng.chance(0.5)) ctx.addItem('honey', 1);
       }
-      ctx.flag('chain_monkey', 'done');
+      con(ctx, 'chain_state', { chain: 'monkey', state: 'done' });
     },
     journal: 'Bầy khỉ từng được cho ăn dẫn bạn tới một nơi mới trong rừng.',
   },
@@ -379,7 +378,7 @@ export const CHAIN_EVENTS: EventDef[] = [
       const s = ctx.s;
       if (hasStructure(s, 'fence', s.baseRegion ?? s.location)) return;
       loseFood(ctx, 0.3, true);
-      ctx.flag('chain_monkey', 'done');
+      con(ctx, 'chain_state', { chain: 'monkey', state: 'done' });
       ctx.journal('Bầy khỉ bị xua đuổi quay lại trộm đồ ăn ban đêm.', 'consequence');
     },
   },
@@ -419,10 +418,8 @@ export const CHAIN_EVENTS: EventDef[] = [
         slots: 0,
         check: { label: 'Đọc hải lưu theo đàn cá heo', attr: 'PER', skill: 'navigation', dc: 11 },
         resolve: (ctx, tier) => {
-          if (isSuccess(tier) && ctx.s.world.currents < 3) {
-            ctx.s.world.currents++;
-            ctx.change('good', `🧭 Hiểu biết hải lưu: ${ctx.s.world.currents}/3`);
-          } else ctx.say('Bạn ngắm đàn cá heo cho tới khi chúng khuất hẳn. Lòng nhẹ nhõm lạ thường.');
+          if (isSuccess(tier) && ctx.s.world.currents < 3) con(ctx, 'currents_knowledge');
+          else ctx.say('Bạn ngắm đàn cá heo cho tới khi chúng khuất hẳn. Lòng nhẹ nhõm lạ thường.');
           ctx.addCondition('determined', 1, 4);
         },
       },

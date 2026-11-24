@@ -14,6 +14,14 @@ export default function EventModal({ event: e, busy, act }: { event: EventView; 
       <div className="modal-head">
         <div>
           <h2>{e.title}</h2>
+          {e.code && (
+            <div className="row wrap" style={{ marginTop: 6 }}>
+              {e.source === 'action' && <span className="badge">Do hành động của bạn</span>}
+              {e.source === 'persistent' && <span className="badge">Hệ quả từ trước</span>}
+              {e.rarity === 'rare' && <span className="badge warn">Hiếm</span>}
+              <span className="badge code">{e.code}</span>
+            </div>
+          )}
         </div>
       </div>
       <div className="modal-body">

@@ -121,6 +121,18 @@ export interface ScheduledEvent {
   data?: Record<string, unknown>;
 }
 
+export type ConParams = Record<string, string | number | boolean | undefined>;
+
+/** a persistent object lying somewhere in the world until handled or expired */
+export interface WorldObject {
+  uid: number;
+  kind: string;
+  region: RegionId;
+  createdAt: number;
+  expiresAt?: number;
+  data?: Record<string, unknown>;
+}
+
 /** event memory: what happened, what the player chose and how it went */
 export interface EventMemory {
   id: string;
@@ -222,6 +234,14 @@ export interface GameState {
   };
   flags: Record<string, number | boolean | string>;
   history: EventMemory[];
+  /** persistent state of discovered locations (e.g. cave: accessible / collapsed) */
+  locations?: Record<string, { state: string; since: number }>;
+  /** objects lying in the world (washed-up crate, old cache…) */
+  objects?: WorldObject[];
+  /** delayed consequences waiting to happen */
+  delayed?: { con: string; params: ConParams; at: number }[];
+  /** consequence memory: what has happened to this world */
+  conLog?: { code: string; at: number; key?: string }[];
   chains: Record<string, ChainState>;
   scheduled: ScheduledEvent[];
   pending: PendingEvent | null;

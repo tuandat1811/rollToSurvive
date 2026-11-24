@@ -135,8 +135,19 @@ export default function MapPanel({ view, onTravel }: { view: GameView; onTravel:
         {r.locations.length > 0 && (
           <div className="loc-list">
             {r.locations.map((l) => (
-              <span key={l.id} title={l.desc}>
+              <span key={l.id} title={l.desc} className={l.stateGood === false ? 'bad' : ''}>
                 {l.icon} {l.name}
+                {l.state && l.stateGood === false ? ` — ${l.state}` : ''}
+              </span>
+            ))}
+          </div>
+        )}
+        {r.objects.length > 0 && (
+          <div className="loc-list">
+            {r.objects.map((o) => (
+              <span key={o.uid} title={o.desc}>
+                {o.icon} {o.name}
+                {o.daysLeft !== undefined ? ` (còn ~${o.daysLeft} ngày)` : ''}
               </span>
             ))}
           </div>

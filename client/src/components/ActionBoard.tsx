@@ -23,6 +23,7 @@ export function ActionCard({ a, onPick }: { a: ActionView; onPick: (a: ActionVie
           </span>
         )}
         {a.materials.length > 0 && <span className={`badge ${a.materials.every((m) => m.have >= m.qty) ? '' : 'bad'}`}>🧰 vật liệu</span>}
+        {a.untrained && <span className="badge warn" title="Có thể thử, nhưng kiểm tra -5 và có thể thất bại thảm hại">⚠️ Chưa thành thạo</span>}
       </div>
     </button>
   );
@@ -70,8 +71,15 @@ export default function ActionBoard({ view, onPick }: { view: GameView; onPick: 
         <div className="desc">{view.location.desc}</div>
         <div className="tags">
           {region.locations.map((l) => (
-            <span key={l.id} className="badge" title={l.desc}>
+            <span key={l.id} className={`badge ${l.stateGood === false ? 'bad' : ''}`} title={l.desc}>
               {l.icon} {l.name}
+              {l.state && l.stateGood === false ? ` — ${l.state}` : ''}
+            </span>
+          ))}
+          {region.objects.map((o) => (
+            <span key={o.uid} className="badge warn" title={o.desc}>
+              {o.icon} {o.name}
+              {o.daysLeft !== undefined ? ` (còn ~${o.daysLeft} ngày)` : ''}
             </span>
           ))}
           {region.structures.map((s, i) => (

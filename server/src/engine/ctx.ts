@@ -2,6 +2,7 @@ import { BALANCE } from '../content/balance.js';
 import { CONDITIONS } from '../content/conditions.js';
 import { LOCATION_DEFS, REGION_DEFS, ROUTE_DEFS, SKILL_DEFS } from '../content/defs.js';
 import { ITEMS, item, itemName } from '../content/items.js';
+import { locationAccessible } from '../content/locationStates.js';
 import { Rng } from './rng.js';
 import type {
   ChangeKind,
@@ -63,7 +64,7 @@ export function storageWaterCap(s: GameState): number {
 export function shelterAt(s: GameState, region: RegionId): 'hut' | 'lean_to' | 'cave' | null {
   if (hasStructure(s, 'hut', region)) return 'hut';
   if (hasStructure(s, 'lean_to', region)) return 'lean_to';
-  if (region === 'mountain' && s.regions.mountain.found.includes('cave')) return 'cave';
+  if (region === 'mountain' && s.regions.mountain.found.includes('cave') && locationAccessible(s, 'cave')) return 'cave';
   return null;
 }
 
@@ -100,6 +101,8 @@ export function regionName(id: RegionId) {
 export class Ctx {
   rng: Rng;
   res: TurnResult;
+  /** consequences applied in this transaction (conflict detection) */
+  applied: { id: string; key?: string }[] = [];
 
   constructor(
     public s: GameState,

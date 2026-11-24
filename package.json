@@ -12,7 +12,8 @@
     "start": "npm run start -w server",
     "test": "npm run test -w server",
     "sim": "npm run sim -w server",
-    "typecheck": "npm run typecheck -w server && npm run typecheck -w client"
+    "typecheck": "npm run typecheck -w server && npm run typecheck -w client",
+    "content:export": "npm run content:export -w server"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",

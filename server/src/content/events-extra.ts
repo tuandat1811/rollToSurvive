@@ -5,6 +5,7 @@ import { type Ctx, countBoth, hasTag, shelterAt, structuresAt } from '../engine/
 import type { GameState, Tier } from '../engine/types.js';
 import { REGION_DEFS } from './defs.js';
 import type { EventChoice, EventDef } from './events.js';
+import { con } from '../engine/consequence.js';
 
 const ignore = (label = 'Bỏ qua', text = 'Bạn quyết định không can dự.'): EventChoice => ({
   id: 'ignore',
@@ -355,9 +356,8 @@ export const EXTRA_EVENTS: EventDef[] = [
             ctx.say('Bạn đẩy được nó ra biển, nhưng trượt ngã trên đá.');
             ctx.addCondition('injury', 1);
           } else ctx.say('Chú cá heo vẫy đuôi lao ra biển khơi, quay lại nhảy lên một vòng như lời cảm ơn.');
-          ctx.flag('dolphinSaved');
-          ctx.addCondition('determined', 1, 8);
-          ctx.change('good', '🐬 Đàn cá heo sẽ nhớ bạn: ra khơi chặng 1 +1');
+          con(ctx, 'sea_guide');
+          con(ctx, 'determined', { slots: 8 });
           ctx.journal('Cứu một chú cá heo mắc cạn. Từ đó, đàn cá heo thường bơi gần bờ.', 'event');
         },
       },
@@ -425,7 +425,7 @@ export const EXTRA_EVENTS: EventDef[] = [
     weight: () => 3,
     text: () => 'Hơi ẩm ngấm vào mọi thứ. Củi hôm nay ẩm sì — nhóm lửa sẽ khó hơn (-3).',
     passive: (ctx) => {
-      ctx.flag('dampDay', ctx.s.day);
+      con(ctx, 'damp_fuel');
     },
   },
   {
@@ -557,8 +557,7 @@ export const EXTRA_EVENTS: EventDef[] = [
     weight: () => 2,
     text: () => 'Trời trong vắt. Phía tây bắc, sát đường chân trời, hiện lên một dải mờ xanh thẫm — đất liền! Bạn ghi nhớ hướng đó.',
     passive: (ctx) => {
-      ctx.flag('landSighted');
-      ctx.change('good', '🧭 Biết hướng đất liền: ra khơi chặng 3 +2');
+      con(ctx, 'land_sighted');
     },
     journal: 'Nhìn thấy bóng đất liền ở phía tây bắc.',
   },

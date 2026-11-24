@@ -50,6 +50,12 @@ npm test
 npm run sim -- 300 60
 ```
 
+Xuất danh mục nội dung (mã ACT/EVT/CON, phân loại, tier/độ hiếm) ra `docs/content-catalog.csv`:
+
+```powershell
+npm run content:export
+```
+
 ## Kiến trúc
 
 | Thư mục | Nội dung |

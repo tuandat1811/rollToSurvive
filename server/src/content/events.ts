@@ -10,9 +10,11 @@ import type { CheckSpec, GameState, Req, Tier } from '../engine/types.js';
 import { REGION_DEFS, SLOT_NAMES } from './defs.js';
 import { CHAIN_EVENTS } from './events-chains.js';
 import { EXTRA_EVENTS } from './events-extra.js';
+import { ACTION_EVENTS } from './events-action.js';
+import { con } from '../engine/consequence.js';
 import { ITEMS } from './items.js';
 
-export type EventTrigger = 'day_start' | 'slot_start' | 'night';
+export type EventTrigger = 'day_start' | 'slot_start' | 'night' | 'after_action';
 export type EventCategory =
   | 'weather' | 'wildlife' | 'ecology' | 'discovery' | 'resources'
   | 'base' | 'health' | 'psychology' | 'narrative' | 'escape';
@@ -45,6 +47,10 @@ export interface EventDef {
   eligible?: (s: GameState, data?: Record<string, unknown>) => boolean;
   forced?: (s: GameState) => boolean;
   weight?: (s: GameState) => number;
+  /** after_action events: the action ids that can trigger them */
+  onAction?: string[];
+  /** Director context multiplier C (how well the event fits the current situation) */
+  context?: (s: GameState) => number;
   text: (s: GameState, data?: Record<string, unknown>) => string;
   /** applied the moment the event appears; may return extra text */
   passive?: (ctx: Ctx, data?: Record<string, unknown>) => string | void;
@@ -231,14 +237,8 @@ const list: EventDef[] = [
           ctx.change('loss', `Bẫy ở ${regionName(t.region)} bị cuốn mất`);
         }
       }
-      const candidates = s.routes.filter((r) => r.known && r.status === 'open' && !r.danger && r.id !== 'coast-jungle');
-      if (candidates.length && ctx.rng.chance(0.45)) {
-        const r = ctx.rng.pick(candidates);
-        r.status = 'blocked';
-        ctx.change('bad', `🌳 Cây đổ chặn đường ${regionName(r.a)} ↔ ${regionName(r.b)}`);
-        ctx.journal(`Bão quật đổ cây, chặn tuyến ${regionName(r.a)} ↔ ${regionName(r.b)}. Cần dọn đường hoặc tìm đường vòng.`, 'consequence');
-      }
-      ctx.schedule('storm_debris', 4);
+      if (ctx.rng.chance(0.45)) con(ctx, 'route_blocked', { route: 'random', cause: 'Bão quật đổ cây' });
+      con(ctx, 'schedule_event', { event: 'storm_debris', slots: 4 });
       if (!shelterAt(s, s.location)) lines.push('Bạn không có chỗ trú — hãy cẩn thận.');
       return lines.join(' ');
     },
@@ -254,10 +254,9 @@ const list: EventDef[] = [
     text: () => 'Sóng bão đánh dạt vào bãi biển đủ thứ: gỗ, dây, mảnh vỡ… Xác tàu cũng bị lật thêm, lộ ra những khoang mới.',
     passive: (ctx) => {
       ctx.flag('debrisDay', ctx.s.day);
-      const extra = ['canvas', 'rope', 'scrap', 'canned', 'wood'];
-      const n = ctx.rng.int(1, 2);
-      for (let i = 0; i < n; i++) ctx.s.world.wreckPool.push(ctx.rng.pick(extra));
+      con(ctx, 'wreck_restock', { count: ctx.rng.int(1, 2) });
       ctx.change('info', 'Có thể nhặt đồ trôi dạt ở Bãi biển hôm nay');
+      if (ctx.rng.chance(0.6)) con(ctx, 'spawn_object', { kind: 'washed_crate', region: 'coast' });
     },
   },
   {
@@ -284,8 +283,7 @@ const list: EventDef[] = [
     weight: () => 2,
     text: () => 'Mặt biển phẳng lặng như gương, gió nhẹ thổi ra khơi. Một ngày lý tưởng để ra biển.',
     passive: (ctx) => {
-      ctx.flag('calmSeaDay', ctx.s.day);
-      ctx.change('good', 'Hôm nay: ra khơi bằng bè +2');
+      con(ctx, 'calm_sea');
     },
   },
   {
@@ -302,11 +300,7 @@ const list: EventDef[] = [
     weight: () => 2,
     text: () => 'Mưa dầm làm sạt một mảng đất đá trên sườn núi.',
     passive: (ctx) => {
-      const r = ctx.s.routes.filter((x) => x.known && x.status === 'open' && (x.id === 'river-mountain' || x.id === 'jungle-mountain'));
-      const pick = ctx.rng.pick(r);
-      pick.status = 'blocked';
-      ctx.change('bad', `Đường ${regionName(pick.a)} ↔ ${regionName(pick.b)} bị đất đá chặn`);
-      ctx.journal(`Sạt lở chặn tuyến ${regionName(pick.a)} ↔ ${regionName(pick.b)}.`, 'consequence');
+      con(ctx, 'route_blocked', { route: 'random', among: 'river-mountain,jungle-mountain', cause: 'Đất đá sạt lở' });
     },
   },
 
@@ -324,8 +318,7 @@ const list: EventDef[] = [
     weight: () => 3,
     text: () => 'Từng đàn cá lớn kéo vào vùng nước nông, chim biển lao xuống kiếm mồi không ngớt.',
     passive: (ctx) => {
-      ctx.flag('fishBonusDay', ctx.s.day);
-      ctx.change('good', 'Hôm nay: đánh cá +3');
+      con(ctx, 'fish_run');
     },
   },
   {
@@ -344,9 +337,7 @@ const list: EventDef[] = [
         : 'Bạn có cảm giác bất an mơ hồ, nhưng không rõ vì sao.',
     passive: (ctx) => {
       const r = ctx.s.regions.river;
-      r.water = 'contaminated';
-      ctx.flag('contamDays', 7);
-      ctx.s.chains.contamination = { status: 'active', step: 0 };
+      con(ctx, 'water_contaminated', { days: 7 });
       if (ctx.s.location === 'river') {
         r.waterKnown = true;
         ctx.change('bad', 'Nước suối có thể đã bị ô nhiễm');
@@ -383,11 +374,7 @@ const list: EventDef[] = [
     text: () =>
       'Một chiếc chai thủy tinh bị sóng đánh vào chân bạn. Bên trong là mảnh giấy cũ: “…dòng hải lưu phía tây bắc chảy thẳng về đất liền. Đừng ra khơi khi gió chướng…”',
     passive: (ctx) => {
-      const w = ctx.s.world;
-      if (w.currents < 3) {
-        w.currents++;
-        ctx.change('good', `🧭 Hiểu biết hải lưu: ${w.currents}/3`);
-      }
+      con(ctx, 'currents_knowledge');
     },
     journal: 'Nhặt được chai trôi dạt với lời nhắn về dòng hải lưu phía tây bắc.',
   },
@@ -417,8 +404,7 @@ const list: EventDef[] = [
         resolve: (ctx, tier) => {
           if (isSuccess(tier)) {
             ctx.say('Một con lợn rừng! Bạn ghi nhớ lối mòn và nơi nó hay kiếm ăn.');
-            ctx.flag('huntBonusUntil', ctx.now + 8);
-            ctx.change('good', 'Săn bắt ở Rừng rậm +2 trong 2 ngày');
+            con(ctx, 'hunt_bonus', { slots: 8 });
             ctx.journal('Phát hiện lối mòn của lợn rừng trong rừng.', 'discovery');
           } else if (tier === 'partial') ctx.say('Chỉ là một con kỳ đà lớn. Nó lững thững bỏ đi.');
           else if (tier === 'failure') ctx.say('Bạn không nhìn rõ được gì, tiếng động xa dần.');
@@ -753,5 +739,5 @@ const STRUCT_NAMES: Record<string, string> = {
   signal_pyre: 'Đống lửa tín hiệu',
 };
 
-export const EVENTS: Record<string, EventDef> = Object.fromEntries([...list, ...EXTRA_EVENTS, ...CHAIN_EVENTS].map((e) => [e.id, e]));
+export const EVENTS: Record<string, EventDef> = Object.fromEntries([...list, ...EXTRA_EVENTS, ...CHAIN_EVENTS, ...ACTION_EVENTS].map((e) => [e.id, e]));
 export { SLOT_NAMES };
