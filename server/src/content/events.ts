@@ -11,6 +11,7 @@ import { REGION_DEFS, SLOT_NAMES } from './defs.js';
 import { CHAIN_EVENTS } from './events-chains.js';
 import { EXTRA_EVENTS } from './events-extra.js';
 import { ACTION_EVENTS } from './events-action.js';
+import { CONTROL_EVENTS } from './events-control.js';
 import { con } from '../engine/consequence.js';
 import { ITEMS } from './items.js';
 
@@ -51,12 +52,19 @@ export interface EventDef {
   onAction?: string[];
   /** Director context multiplier C (how well the event fits the current situation) */
   context?: (s: GameState) => number;
+  /** foreshadowing: this event never fires at random — only after its omen event schedules it */
+  omen?: string;
+  /** meaningful risk: why this is happening to the player (shown on the card) */
+  cause?: (s: GameState, data?: Record<string, unknown>) => string;
   text: (s: GameState, data?: Record<string, unknown>) => string;
   /** applied the moment the event appears; may return extra text */
   passive?: (ctx: Ctx, data?: Record<string, unknown>) => string | void;
   choices?: (s: GameState, data?: Record<string, unknown>) => EventChoice[];
   journal?: boolean | string;
 }
+
+/** shelter at this region was reinforced against today's / tonight's weather */
+export const reinforced = (s: GameState, region: string) => s.baseRegion === region && Number(s.flags.reinforcedUntil ?? 0) >= s.day;
 
 const ignore = (label = 'Bỏ qua', text = 'Bạn quyết định không can dự.'): EventChoice => ({
   id: 'ignore',
@@ -190,8 +198,9 @@ const list: EventDef[] = [
     trigger: 'slot_start',
     cooldownDays: 1,
     forced: (s) => s.slot >= 2 && s.world.tomorrow === 'storm',
+    cause: () => 'Điềm báo: ngày mai bão đổ bộ',
     text: () =>
-      'Chân trời tối sầm lại. Sóng bạc đầu đánh mạnh vào bờ, chim biển bay vội vào đất liền. Ngày mai bão sẽ đổ bộ!\n\nHãy về nơi trú ẩn, cất đồ vào kho và chuẩn bị đối phó.',
+      'Chân trời tối sầm lại. Sóng bạc đầu đánh mạnh vào bờ, chim biển bay vội vào đất liền. Ngày mai bão sẽ đổ bộ!\n\nHãy về nơi trú ẩn, cất đồ vào kho và chuẩn bị: “Gia cố nơi trú ẩn”, “Tích trữ củi khô” (nhóm Căn cứ).',
     passive: (ctx) => {
       ctx.s.world.forecastUntil = Math.max(ctx.s.world.forecastUntil, ctx.s.day + 1);
     },
@@ -206,12 +215,14 @@ const list: EventDef[] = [
     trigger: 'day_start',
     notable: true,
     forced: (s) => s.world.weather === 'storm',
+    cause: () => 'Đã có dấu hiệu bão từ chiều hôm trước',
     text: () => 'Cơn bão quét qua hòn đảo suốt đêm và sáng nay. Cây đổ, sóng tràn lên bờ.',
     passive: (ctx) => {
       const s = ctx.s;
       const lines: string[] = [];
       for (const st of [...s.structures]) {
-        const dmg = st.id === 'hut' ? ctx.rng.int(5, 18) : st.id === 'signal_pyre' ? ctx.rng.int(25, 45) : ctx.rng.int(15, 35);
+        let dmg = st.id === 'hut' ? ctx.rng.int(5, 18) : st.id === 'signal_pyre' ? ctx.rng.int(25, 45) : ctx.rng.int(15, 35);
+        if (reinforced(s, st.region)) dmg = Math.round(dmg * 0.3);
         st.integrity -= dmg;
         const name = STRUCT_NAMES[st.id] ?? st.id;
         if (st.integrity <= 0) {
@@ -239,6 +250,7 @@ const list: EventDef[] = [
       }
       if (ctx.rng.chance(0.45)) con(ctx, 'route_blocked', { route: 'random', cause: 'Bão quật đổ cây' });
       con(ctx, 'schedule_event', { event: 'storm_debris', slots: 4 });
+      if (s.baseRegion && reinforced(s, s.baseRegion)) lines.push('Nhờ được gia cố từ trước, căn cứ chỉ hư hại nhẹ.');
       if (!shelterAt(s, s.location)) lines.push('Bạn không có chỗ trú — hãy cẩn thận.');
       return lines.join(' ');
     },
@@ -268,6 +280,7 @@ const list: EventDef[] = [
     trigger: 'day_start',
     cooldownDays: 4,
     forced: (s) => s.world.weather === 'hot',
+    cause: () => 'Thời tiết hôm nay: nắng gắt',
     text: () => 'Nắng gắt từ sáng sớm. Hôm nay bạn sẽ mất nước nhanh hơn — hãy mang đủ nước bên mình.',
   },
   {
@@ -295,10 +308,11 @@ const list: EventDef[] = [
     trigger: 'day_start',
     notable: true,
     cooldownDays: 5,
+    omen: 'ground_cracks',
+    cause: () => 'Điềm báo: đất nứt trên sườn dốc sau mưa',
     eligible: (s) =>
-      s.world.weather === 'rain' && s.routes.some((r) => r.known && r.status === 'open' && (r.id === 'river-mountain' || r.id === 'jungle-mountain')),
-    weight: () => 2,
-    text: () => 'Mưa dầm làm sạt một mảng đất đá trên sườn núi.',
+      s.world.lastRainDay >= s.day - 1 && s.routes.some((r) => r.known && r.status === 'open' && (r.id === 'river-mountain' || r.id === 'jungle-mountain')),
+    text: () => 'Những vết nứt hôm trước đã sụp xuống: mưa dầm làm sạt một mảng đất đá trên sườn núi.',
     passive: (ctx) => {
       con(ctx, 'route_blocked', { route: 'random', among: 'river-mountain,jungle-mountain', cause: 'Đất đá sạt lở' });
     },
@@ -327,23 +341,46 @@ const list: EventDef[] = [
     icon: '☠️',
     category: 'ecology',
     risk: 2,
-    trigger: 'day_start',
+    trigger: 'after_action',
+    onAction: ['collect_water'],
     once: true,
-    eligible: (s) => s.day >= 3 && s.regions.river.water !== 'contaminated',
-    weight: () => 1.2,
-    text: (s) =>
-      s.location === 'river'
-        ? 'Sáng nay nước suối có màu đục lạ và thoang thoảng mùi hôi. Có gì đó không ổn ở thượng nguồn.'
-        : 'Bạn có cảm giác bất an mơ hồ, nhưng không rõ vì sao.',
+    notable: true,
+    eligible: (s) => s.day >= 3 && s.location === 'river' && s.regions.river.water !== 'contaminated',
+    weight: () => 3,
+    text: () =>
+      'Bạn vừa múc đầy bình thì khựng lại: nước suối có màu đục lạ và thoang thoảng mùi hôi thối. Có thứ gì đó không ổn ở thượng nguồn.',
     passive: (ctx) => {
-      const r = ctx.s.regions.river;
       con(ctx, 'water_contaminated', { days: 7 });
-      if (ctx.s.location === 'river') {
-        r.waterKnown = true;
-        ctx.change('bad', 'Nước suối có thể đã bị ô nhiễm');
-        ctx.journal('Nước suối đục và có mùi lạ. Có thể có thứ gì đó làm ô nhiễm ở thượng nguồn.', 'consequence');
-      }
+      ctx.s.regions.river.waterKnown = true;
+      ctx.journal('Nước suối đục và có mùi lạ. Có thể có thứ gì đó làm ô nhiễm ở thượng nguồn.', 'consequence');
+      return 'Có thể “Truy tìm nguồn ô nhiễm” hoặc “Tìm nguồn nước khác”.';
     },
+    choices: () => [
+      {
+        id: 'dump',
+        label: 'Đổ bỏ nước vừa lấy',
+        icon: '🫗',
+        desc: 'Không mạo hiểm: đổ hết nước suối chưa xử lý trong bình.',
+        slots: 0,
+        resolve: (ctx) => {
+          const n = ctx.s.inventory.filter((x) => x.id === 'water_raw').reduce((a, x) => a + x.qty, 0);
+          if (n) ctx.removeItem('water_raw', n, 'inv');
+          ctx.say('Bạn đổ sạch chỗ nước vừa múc. Phải tìm nguồn nước khác thôi.');
+        },
+      },
+      {
+        id: 'keep',
+        label: 'Giữ lại, sẽ đun sôi kỹ',
+        icon: '🔥',
+        desc: 'Nước này rất dễ gây bệnh nếu uống sống — nhớ đun sôi trước khi uống.',
+        slots: 0,
+        resolve: (ctx) => {
+          for (const st of ctx.s.inventory) if (st.id === 'water_raw') st.risk = Math.max(st.risk ?? 0, 0.6);
+          ctx.say('Bạn giữ lại bình nước, tự nhắc mình phải đun thật sôi.');
+          ctx.change('bad', 'Nước suối trong bình rất dễ gây bệnh nếu uống sống');
+        },
+      },
+    ],
   },
   {
     id: 'coconut_fall',
@@ -559,17 +596,22 @@ const list: EventDef[] = [
     trigger: 'night',
     notable: true,
     cooldownDays: 2,
+    omen: 'boar_signs',
+    cause: () => 'Điềm báo: dấu vết lợn rừng quanh kho',
     eligible: (s) =>
       !!s.baseRegion &&
+      !s.flags.boarFriend &&
       !hasStructure(s, 'fence', s.baseRegion) &&
       s.storage.some((x) => ITEMS[x.id]?.kind === 'food'),
-    weight: (s) => (s.flags.boarFriend ? 0 : s.baseRegion && hasStructure(s, 'storage_rack', s.baseRegion) ? 1.5 : 4),
     text: (s) =>
-      s.location === s.baseRegion
+      Number(s.flags.campGuarded ?? 0) >= s.day
+        ? 'Nửa đêm, lợn rừng lại mò tới kho — nhưng kho đã được chằng buộc chắc chắn. Nó ủi quanh một lúc rồi bỏ đi tay không.'
+        : s.location === s.baseRegion
         ? 'Nửa đêm, tiếng sột soạt đánh thức bạn. Một con lợn rừng đang lục kho thức ăn! Bạn vung đuốc xua nó đi kịp lúc.'
         : 'Trong lúc bạn vắng mặt, thú rừng đã mò vào căn cứ và lục tung kho thức ăn.',
     passive: (ctx) => {
       const s = ctx.s;
+      if (Number(s.flags.campGuarded ?? 0) >= s.day) return;
       const rack = hasStructure(s, 'storage_rack', s.baseRegion!);
       const present = s.location === s.baseRegion;
       const frac = (present ? 0.2 : 0.55) * (rack ? 0.5 : 1);
@@ -739,5 +781,5 @@ const STRUCT_NAMES: Record<string, string> = {
   signal_pyre: 'Đống lửa tín hiệu',
 };
 
-export const EVENTS: Record<string, EventDef> = Object.fromEntries([...list, ...EXTRA_EVENTS, ...CHAIN_EVENTS, ...ACTION_EVENTS].map((e) => [e.id, e]));
+export const EVENTS: Record<string, EventDef> = Object.fromEntries([...list, ...EXTRA_EVENTS, ...CHAIN_EVENTS, ...ACTION_EVENTS, ...CONTROL_EVENTS].map((e) => [e.id, e]));
 export { SLOT_NAMES };

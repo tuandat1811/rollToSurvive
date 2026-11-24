@@ -1,7 +1,7 @@
 import { BALANCE } from '../content/balance.js';
 import { REGION_DEFS } from '../content/defs.js';
 import { EVENTS, type EventDef, type EventTrigger } from '../content/events.js';
-import { AFTER_ACTION_CHANCE, FAMILY_COOLDOWN_DAYS, NOVELTY, PACING_CATEGORY_MULT, familyOf } from '../content/families.js';
+import { AFTER_ACTION_CHANCE, FAMILY_COOLDOWN_DAYS, MISFORTUNE, NOVELTY, PACING_CATEGORY_MULT, RECOVERY_EVENTS, familyOf } from '../content/families.js';
 import { EVENT_META, RARITY_WEIGHT } from '../content/meta.js';
 import { traitEventMult } from '../content/traits.js';
 import type { Ctx } from './ctx.js';
@@ -19,7 +19,7 @@ export function runTrigger(ctx: Ctx, trigger: EventTrigger) {
 
   // scheduled follow-ups (event chains). A follow-up waits until its context fits
   // (e.g. the player is back at camp) and lapses after its window expires.
-  const due = s.scheduled.filter((e) => e.at <= ctx.now && EVENTS[e.eventId] && (EVENTS[e.eventId].trigger === trigger || trigger !== 'night'));
+  const due = s.scheduled.filter((e) => e.at <= ctx.now && EVENTS[e.eventId] && (EVENTS[e.eventId].trigger === trigger || (trigger !== 'night' && EVENTS[e.eventId].trigger !== 'night')));
   for (const e of due) {
     const def = EVENTS[e.eventId];
     if (def.choices && s.pending) continue; // wait until the current card is resolved
@@ -33,7 +33,7 @@ export function runTrigger(ctx: Ctx, trigger: EventTrigger) {
 
   // forced world events (e.g. storm landfall, warnings)
   for (const def of Object.values(EVENTS)) {
-    if (def.trigger !== trigger || !def.forced) continue;
+    if (def.trigger !== trigger || !def.forced || def.omen) continue;
     if (!available(ctx, def)) continue;
     if (def.choices && s.pending) continue;
     if (def.forced(s)) fire(ctx, def);
@@ -44,10 +44,11 @@ export function runTrigger(ctx: Ctx, trigger: EventTrigger) {
   const E = BALANCE.events;
   let p = trigger === 'night' ? 0.3 : trigger === 'day_start' ? 0.25 : E.pacingChance[s.world.pacing];
   if (s.world.notableToday >= E.softCap) p *= E.overCapMult;
+  if (trigger === 'day_start' && rough(s)) p = Math.max(p, MISFORTUNE.roughEventChance);
   if (s.day === 1 && s.slot === 0) p = 0; // let the player get their bearings
   if (!ctx.rng.chance(p)) return;
   const pool = Object.values(EVENTS)
-    .filter((d) => d.trigger === trigger && !d.forced && d.weight && available(ctx, d) && !familyOnCooldown(ctx, d.id))
+    .filter((d) => d.trigger === trigger && !d.forced && !d.omen && d.weight && available(ctx, d) && !familyOnCooldown(ctx, d.id))
     .map((d) => [d, directorWeight(ctx, d)] as const)
     .filter(([, w]) => w > 0);
   const pick = ctx.rng.weighted(pool);
@@ -67,7 +68,17 @@ export function directorWeight(ctx: Ctx, def: EventDef): number {
   const P = PACING_CATEGORY_MULT[s.world.pacing][def.category] ?? 1;
   const meta = EVENT_META[def.id];
   const R = meta ? RARITY_WEIGHT[meta.rarity] : 1;
-  return B * N * C * P * R * traitEventMult(s, def.id);
+  return B * N * C * P * R * traitEventMult(s, def.id) * hardship(s, def);
+}
+
+const rough = (s: { world: { misfortune?: number } }) => (s.world.misfortune ?? 0) >= MISFORTUNE.rough;
+
+/** controlled randomness: after a rough patch, ease off risky events and favour recovery */
+function hardship(s: { world: { misfortune?: number } }, def: EventDef): number {
+  if (!rough(s)) return 1;
+  if (RECOVERY_EVENTS.has(def.id)) return MISFORTUNE.recoveryMult;
+  if (def.risk >= 2) return MISFORTUNE.riskyMult;
+  return 1;
 }
 
 /** Action events: what the player just did can trigger an event (fishing → snagged net…) */
@@ -78,7 +89,7 @@ export function runAfterAction(ctx: Ctx, actionId: string) {
   let p = AFTER_ACTION_CHANCE;
   if (s.world.notableToday >= E.softCap) p *= E.overCapMult;
   const pool = Object.values(EVENTS)
-    .filter((d) => d.trigger === 'after_action' && d.onAction?.includes(actionId) && available(ctx, d) && !familyOnCooldown(ctx, d.id))
+    .filter((d) => d.trigger === 'after_action' && !d.omen && d.onAction?.includes(actionId) && available(ctx, d) && !familyOnCooldown(ctx, d.id))
     .map((d) => [d, directorWeight(ctx, d)] as const)
     .filter(([, w]) => w > 0);
   if (!pool.length || !ctx.rng.chance(p)) return;
@@ -119,6 +130,7 @@ function available(ctx: Ctx, def: EventDef): boolean {
 
 export function fire(ctx: Ctx, def: EventDef, data?: Record<string, unknown>) {
   const s = ctx.s;
+  if (RECOVERY_EVENTS.has(def.id) && s.world.misfortune) s.world.misfortune = Math.max(0, s.world.misfortune - MISFORTUNE.recoveryRelief);
   s.history.push({ id: def.id, at: ctx.now });
   if (s.history.length > 400) s.history.splice(0, s.history.length - 400);
   s.stats.events++;

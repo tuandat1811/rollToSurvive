@@ -41,6 +41,8 @@ export interface StructureInst {
   region: RegionId;
   integrity: number;
   lit?: boolean;
+  /** patched only partially — needs more materials to finish the repair */
+  unfinished?: boolean;
 }
 
 export interface ProjectInst {
@@ -231,6 +233,8 @@ export interface GameState {
     wreckPool: string[];
     ruinsPool: string[];
     campPool: string[];
+    /** controlled randomness: recent hardship (0..10); high values make the Director ease off */
+    misfortune?: number;
   };
   flags: Record<string, number | boolean | string>;
   history: EventMemory[];

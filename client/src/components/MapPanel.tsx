@@ -157,6 +157,7 @@ export default function MapPanel({ view, onTravel }: { view: GameView; onTravel:
             {r.structures.map((s, i) => (
               <span key={i} title={`Độ bền ${s.integrity}%`}>
                 {s.icon} {s.name} {s.integrity < 100 ? `(${s.integrity}%)` : ''}
+                {s.unfinished ? ' — vá tạm' : ''}
               </span>
             ))}
           </div>

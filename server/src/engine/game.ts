@@ -3,6 +3,8 @@ import { BALANCE } from '../content/balance.js';
 import { ATTR_DEFS, ROUTE_DEFS, SECONDARY_POOLS, WEATHER_DEFS, WEATHER_MARKOV } from '../content/defs.js';
 import { EVENTS } from '../content/events.js';
 import { ITEMS } from '../content/items.js';
+import { CONDITIONS } from '../content/conditions.js';
+import { MISFORTUNE } from '../content/families.js';
 import { awardXp, roll } from './check.js';
 import { Ctx, absSlot, count, countBoth, storageWaterCap, waterCount, containerCap, carryMax, weightOf } from './ctx.js';
 import { escapeDecision } from './escape.js';
@@ -323,7 +325,21 @@ function begin(s: GameState): GameState {
   return structuredClone(s);
 }
 
+/** controlled randomness: how hard did this transaction hit the player? */
+export function updateMisfortune(ctx: Ctx) {
+  const s = ctx.s;
+  const st = ctx.start;
+  let m = 0;
+  const drop = st.health - s.vitals.health;
+  if (drop > 0) m += drop / 12;
+  for (const c of s.conditions) if (!CONDITIONS[c.id]?.good && !st.bad.includes(c.id)) m += 1;
+  m += st.structures.filter((uid) => !s.structures.some((x) => x.uid === uid)).length * 1.5;
+  if (ctx.res.roll?.tier === 'crit_failure') m += 0.5;
+  if (m > 0) s.world.misfortune = Math.min(MISFORTUNE.max, Math.round(((s.world.misfortune ?? 0) + m) * 10) / 10);
+}
+
 function finish(ctx: Ctx): { state: GameState; result: TurnResult } {
+  updateMisfortune(ctx);
   checkDeath(ctx);
   ctx.sync();
   ctx.s.version++;

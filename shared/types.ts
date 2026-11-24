@@ -145,6 +145,8 @@ export interface EventView {
   code?: string;
   rarity?: string;
   source?: string;
+  /** meaningful risk: why this is happening */
+  cause?: string;
 }
 
 export interface EscapeView {
@@ -198,7 +200,7 @@ export interface RegionView {
   locations: { id: string; name: string; icon: string; desc: string; state?: string; stateGood?: boolean }[];
   /** persistent world objects lying in this region */
   objects: { uid: number; kind: string; name: string; icon: string; desc: string; daysLeft?: number }[];
-  structures: { id: string; name: string; icon: string; integrity: number; lit?: boolean }[];
+  structures: { id: string; name: string; icon: string; integrity: number; lit?: boolean; unfinished?: boolean }[];
   traps: number;
   water?: string;
   abundance?: { forage: number; fish: number; game: number; wood: number };

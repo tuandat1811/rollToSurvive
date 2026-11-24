@@ -25,6 +25,7 @@ export default function EventModal({ event: e, busy, act }: { event: EventView; 
         </div>
       </div>
       <div className="modal-body">
+        {e.cause && <div className="cause small muted">🔎 Vì sao: {e.cause}</div>}
         <p className="narr">{e.text}</p>
         <Changes changes={e.changes} />
         <div className="section-title" style={{ marginTop: 16 }}>Bạn sẽ làm gì?</div>

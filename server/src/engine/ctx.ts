@@ -103,6 +103,8 @@ export class Ctx {
   res: TurnResult;
   /** consequences applied in this transaction (conflict detection) */
   applied: { id: string; key?: string }[] = [];
+  /** snapshot when the transaction began (misfortune tracking) */
+  start: { health: number; bad: string[]; structures: number[] };
 
   constructor(
     public s: GameState,
@@ -110,6 +112,11 @@ export class Ctx {
     icon = '',
   ) {
     this.rng = new Rng(s.rng);
+    this.start = {
+      health: s.vitals.health,
+      bad: s.conditions.filter((c) => !CONDITIONS[c.id]?.good).map((c) => c.id),
+      structures: s.structures.map((x) => x.uid),
+    };
     this.res = { title, icon, narrative: [], changes: [], notices: [], timeAdvanced: 0 };
   }
 

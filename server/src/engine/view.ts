@@ -159,6 +159,7 @@ export function buildView(id: string, s: GameState): GameView {
       code: EVENT_META[def.id]?.code,
       rarity: EVENT_META[def.id]?.rarity,
       source: EVENT_META[def.id]?.source,
+      cause: def.cause?.(s, s.pending.data),
     };
   }
 
@@ -281,7 +282,7 @@ export function buildView(id: string, s: GameState): GameView {
             .filter((x) => x.region === rid)
             .map((x) => {
               const sd = STRUCTURES.find((q) => q.id === x.id)!;
-              return { id: x.id, name: sd.name, icon: sd.icon, integrity: x.integrity, lit: x.lit };
+              return { id: x.id, name: sd.name, icon: sd.icon, integrity: x.integrity, lit: x.lit, unfinished: x.unfinished };
             }),
           traps: s.traps.filter((t) => t.region === rid).length,
           water:

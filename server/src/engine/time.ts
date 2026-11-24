@@ -5,6 +5,7 @@ import { Ctx, fireLit, hasCondition, hasStructure, shelterAt, structuresAt } fro
 import { runTrigger } from './director.js';
 import { processDelayed } from './consequence.js';
 import { OBJECT_DEFS } from '../content/objects.js';
+import { MISFORTUNE } from '../content/families.js';
 import { traitWeatherMult } from '../content/traits.js';
 import type { Rng } from './rng.js';
 import type { GameState, ItemStack, Pacing, WeatherId } from './types.js';
@@ -84,6 +85,9 @@ function night(ctx: Ctx) {
     if (shelterStruct && shelterStruct.integrity < 40 && (WEATHER_DEFS[w].rainWater ?? 0) > 0) {
       energy -= 12;
       ctx.change('bad', 'Mái che dột nát, ngủ không yên');
+    } else if (shelterStruct?.unfinished && (WEATHER_DEFS[w].rainWater ?? 0) > 0) {
+      energy -= 8;
+      ctx.change('bad', 'Chỗ vá tạm trên mái bị dột (cần hoàn thiện sửa chữa)');
     }
     if (s.vitals.hunger < T.low || s.vitals.thirst < T.low) energy -= N.energyPenaltyNeeds;
     if (hasCondition(s, 'exposure')) energy -= N.energyPenaltyExposure;
@@ -117,6 +121,7 @@ function night(ctx: Ctx) {
     if (hasCondition(s, 'exposure') && ((shelter && fire) || ctx.rng.chance(0.35))) ctx.removeCondition('exposure');
 
     runTrigger(ctx, 'night');
+    if (s.world.misfortune) s.world.misfortune = Math.max(0, Math.round((s.world.misfortune * MISFORTUNE.nightKeep - MISFORTUNE.nightDrop) * 10) / 10);
 
     spoil(ctx);
     regenerate(ctx);
@@ -243,7 +248,8 @@ function dayStart(ctx: Ctx) {
     // wind wear on structures (storms have their own event)
     if (wd.structureDamage) {
       for (const st of [...s.structures]) {
-        const dmg = ctx.rng.int(wd.structureDamage[0], wd.structureDamage[1]);
+        let dmg = ctx.rng.int(wd.structureDamage[0], wd.structureDamage[1]);
+        if (s.baseRegion === st.region && Number(s.flags.reinforcedUntil ?? 0) >= s.day) dmg = Math.round(dmg * 0.3);
         st.integrity = Math.max(1, st.integrity - dmg);
       }
       if (s.structures.length) ctx.change('bad', `${wd.icon} Gió lớn làm các công trình hư hại nhẹ`);

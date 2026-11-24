@@ -511,3 +511,5 @@ p { margin: 0 0 8px; }
 .trait-good { border-left-color: var(--good); }
 .trait-bad { border-left-color: var(--bad); }
 .trait-mixed { border-left-color: var(--sand); }
+
+.cause { margin: 0 0 8px; padding: 6px 10px; border-left: 3px solid var(--line); background: var(--panel-2); border-radius: 6px; }

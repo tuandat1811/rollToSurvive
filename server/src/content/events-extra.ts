@@ -1,7 +1,7 @@
 // Additional events for run-to-run variety. Many are adapted from the
 // "Dùng được" cards of the 350-card proposal, with concrete outcomes.
 import { fireSource, isSuccess, snakeBite } from '../engine/common.js';
-import { type Ctx, countBoth, hasTag, shelterAt, structuresAt } from '../engine/ctx.js';
+import { type Ctx, carryMax, countBoth, weightOf, hasTag, shelterAt, structuresAt } from '../engine/ctx.js';
 import type { GameState, Tier } from '../engine/types.js';
 import { REGION_DEFS } from './defs.js';
 import type { EventChoice, EventDef } from './events.js';
@@ -17,6 +17,14 @@ const ignore = (label = 'Bỏ qua', text = 'Bạn quyết định không can d�
 
 const at = (...regions: string[]) => (s: GameState) => regions.includes(s.location);
 const did = (s: GameState, key: string) => !!s.flags[`done:${key}`];
+
+/** meaningful risk: you only slip for a reason */
+function ankleCause(s: GameState): string | undefined {
+  if (s.vitals.energy < 35) return 'Bạn đang kiệt sức — bước chân thiếu vững';
+  if (['rain', 'drizzle', 'storm'].includes(s.world.weather)) return 'Đá trơn vì mưa';
+  if (weightOf(s.inventory) > carryMax(s) * 0.8) return 'Hành trang quá nặng';
+  return undefined;
+}
 
 export const EXTRA_EVENTS: EventDef[] = [
   // ======================= RESOURCES / DISCOVERY
@@ -457,6 +465,7 @@ export const EXTRA_EVENTS: EventDef[] = [
       !!s.baseRegion &&
       s.location === s.baseRegion &&
       !!shelterAt(s, s.baseRegion) &&
+      Number(s.flags.reinforcedUntil ?? 0) < s.day + 1 &&
       ['rain', 'storm', 'windy'].includes(s.world.tomorrow),
     weight: () => 4,
     text: () => 'Gió chiều thổi mái lều kêu lật phật. Nếu đêm nay hay ngày mai trời trở xấu, mái che sẽ không trụ nổi.',
@@ -494,7 +503,8 @@ export const EXTRA_EVENTS: EventDef[] = [
     risk: 2,
     trigger: 'slot_start',
     cooldownDays: 5,
-    eligible: at('mountain', 'cape'),
+    eligible: (s) => at('mountain', 'cape')(s) && !!ankleCause(s),
+    cause: (s) => ankleCause(s) ?? '',
     weight: () => 1.5,
     text: () => 'Một hòn đá lăn dưới chân, bạn trẹo cổ chân. Cơn đau nhói lên mỗi bước đi.',
     choices: () => [

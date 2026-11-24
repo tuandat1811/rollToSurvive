@@ -12,6 +12,7 @@ Action,ACT-GAT-003,gather,Thu thập vật liệu,Gathering,Tier 1,,,Nhặt gỗ
 Action,ACT-GAT-004,beachcomb,Dạo bờ nhặt đồ trôi dạt,Gathering,Tier 1,,,"Đi dọc mép nước xem sóng đánh dạt vào những gì — mỗi lần một khác: gỗ, dây, chai lọ, cua, rong biển, thỉnh thoảng có món quý."
 Action,ACT-GAT-005,collect_debris,Nhặt đồ trôi dạt,Gathering,Tier 1,,,"Sau bão, bãi biển đầy gỗ và đồ vật trôi dạt. Chỉ có trong ngày hôm nay."
 Action,ACT-GAT-006,object:washed_crate:smash,Đập vỡ thùng (Thùng hàng trôi dạt),Gathering,Tier 1,,,"Lấy đá đập vỡ thùng. Nhanh, không cần dụng cụ — nhưng đồ bên trong có thể hỏng và có thể bị dằm đâm."
+Action,ACT-GAT-007,find_alt_water,Tìm nguồn nước khác,Gathering,Tier 2,,,"Nước suối đang ô nhiễm. Lần theo địa hình tìm nguồn nước khác — mạch ngầm, dây leo nước, hốc đá — hoặc đào hố lọc qua cát sỏi."
 Action,ACT-HUN-001,hunt,Săn thú nhỏ,Hunting & Trapping,Tier 2,,,"Rình bắt heo rừng, thỏ, chim trong rừng. Không có vũ khí rất bất lợi. Thú sẽ cảnh giác hơn nếu bị săn liên tục."
 Action,ACT-HUN-002,set_trap:snare,Đặt bẫy thú,Hunting & Trapping,Tier 2,,,Đặt bẫy trên lối mòn của thú. Quay lại từ ngày hôm sau để thu thịt (không tốn thời gian).
 Action,ACT-HUN-003,check_traps,Thu bẫy,Hunting & Trapping,Tier 2,,,"Kiểm tra các bẫy đã đặt ở khu vực này. Việc nhanh, không tốn thời gian."
@@ -39,6 +40,11 @@ Action,ACT-BLD-006,build:fence,Xây Hàng rào gai,Base Building,Tier 2,,,Bảo 
 Action,ACT-BLD-007,make_fire,Nhóm lửa trại,Base Building,Tier 1,,,"Nhóm một đống lửa ngay tại Bãi biển để nướng đồ ăn, đun sôi nước và sưởi ấm khi ngủ. Có đá lửa — nhóm dễ hơn nhiều. Mưa, gió lớn có thể làm lửa tắt."
 Action,ACT-BLD-008,relight_fire,Nhóm lại lửa trại,Base Building,Tier 1,,,Lửa trại đã tắt. Có đá lửa — dễ dàng.
 Action,ACT-BLD-009,repair,repair,Base Building,Tier 2,,,"Gia cố, thay thế phần hư hỏng."
+Action,ACT-BLD-010,reinforce_shelter,Gia cố nơi trú ẩn,Base Building,Tier 2,,,"Chằng thêm dây, chèn đá, ép mái xuống trước khi thời tiết xấu. Bão và gió lớn tối nay lẫn ngày mai gây ít hư hại hơn nhiều (−70%)."
+Action,ACT-BLD-011,secure_storage,Chằng buộc kho,Base Building,Tier 1,,,"Treo cao thức ăn, buộc chặt nắp và chặn lối vào kho. Thú rừng sẽ không phá được kho trong 2 ngày."
+Action,ACT-BLD-012,stockpile_wood,Tích trữ củi khô,Base Building,Tier 1,,,"Chẻ củi và xếp dưới mái che cho khô. Trong 3 ngày, nhóm lửa không bị phạt vì củi ẩm và dễ hơn (+1)."
+Action,ACT-BLD-013,finish_repair,finish_repair,Base Building,Tier 1,,,"Lần sửa trước mới vá tạm. Bổ sung vật liệu để hoàn thiện — trước đó, mái chưa kín sẽ dột khi trời mưa."
+Action,ACT-BLD-014,shore_up_cave,Chống đỡ cửa hang,Base Building,Tier 2,,,Dựng cột gỗ chống vòm cửa hang đang rạn nứt. Làm kịp thì hang sẽ không sập.
 Action,ACT-COK-001,cook,Nấu ăn,Cooking & Preservation,Tier 1,,,Nướng chín đồ ăn sống bên lửa trại (tối đa 6 phần). Đồ chín no hơn và an toàn.
 Action,ACT-COK-002,smoke_food,Hun khói thực phẩm,Cooking & Preservation,Tier 2,,,Hun khói cá/thịt sống trên giá phơi (tối đa 6 phần). Giữ được 8 ngày — rất hợp để tích trữ cho chuyến ra khơi.
 Action,ACT-COK-003,boil_water,Đun sôi nước,Cooking & Preservation,Tier 1,,,Đun sôi toàn bộ nước chưa xử lý (cả trong kho nếu ở căn cứ) thành nước sạch. Cần lửa trại và nồi/lon thiếc.
@@ -61,16 +67,18 @@ Action,ACT-ESC-004,escape_desperate,Liều mình ra khơi,Escape,Tier 3,,,"Ôm l
 Action,ACT-ESC-005,build:signal_pyre,Xây Đống lửa tín hiệu,Escape,Tier 3,,,"Đống củi lớn sẵn sàng đốt khi có tàu. Xây ở nơi nhìn ra biển; Mũi Hải Đăng là tốt nhất."
 Event,EVT-WTH-001,storm_warning,Dấu hiệu bão,weather,common,world,cooldown 1d,"Chân trời tối sầm lại. Sóng bạc đầu đánh mạnh vào bờ, chim biển bay vội vào đất liền. Ngày mai bão sẽ đổ bộ!
 
-Hãy về nơi trú ẩn, cất đồ vào kho và chuẩn bị đối phó."
+Hãy về nơi trú ẩn, cất đồ vào kho và chuẩn bị: “Gia cố nơi trú ẩn”, “Tích trữ củi khô” (nhóm Căn cứ)."
 Event,EVT-WTH-002,storm_hits,Bão đổ bộ,weather,common,world,,"Cơn bão quét qua hòn đảo suốt đêm và sáng nay. Cây đổ, sóng tràn lên bờ."
 Event,EVT-WTH-003,heatwave,Nắng như đổ lửa,weather,common,world,cooldown 4d,Nắng gắt từ sáng sớm. Hôm nay bạn sẽ mất nước nhanh hơn — hãy mang đủ nước bên mình.
 Event,EVT-WTH-004,damp_fuel,Củi ẩm,weather,common,world,cooldown 3d,Hơi ẩm ngấm vào mọi thứ. Củi hôm nay ẩm sì — nhóm lửa sẽ khó hơn (-3).
-Event,EVT-ECO-001,landslide,Sạt lở,ecology,uncommon,world,cooldown 5d,Mưa dầm làm sạt một mảng đất đá trên sườn núi.
+Event,EVT-ECO-001,landslide,Sạt lở,ecology,uncommon,persistent,cooldown 5d,Những vết nứt hôm trước đã sụp xuống: mưa dầm làm sạt một mảng đất đá trên sườn núi.
 Event,EVT-ECO-002,fish_school,Đàn cá vào bờ,ecology,common,world,cooldown 3d,"Từng đàn cá lớn kéo vào vùng nước nông, chim biển lao xuống kiếm mồi không ngớt."
-Event,EVT-ECO-003,river_contamination,Nước suối đổi màu,ecology,unique,world,once,"Bạn có cảm giác bất an mơ hồ, nhưng không rõ vì sao."
+Event,EVT-ECO-003,river_contamination,Nước suối đổi màu,ecology,unique,action,once,Bạn vừa múc đầy bình thì khựng lại: nước suối có màu đục lạ và thoang thoảng mùi hôi thối. Có thứ gì đó không ổn ở thượng nguồn.
 Event,EVT-ECO-004,mushrooms_after_rain,Nấm mọc sau mưa,ecology,common,world,cooldown 3d,"Sau cơn mưa, những cây nấm trắng mọc kín một thân gỗ mục. Ăn được hay không thì… chưa chắc."
 Event,EVT-ECO-005,falling_fruit,Trái chín rụng,resources,common,world,cooldown 4d,Gió thổi mạnh làm trái chín rụng lộp độp quanh bạn. Chỉ việc nhặt!
-Event,EVT-ECO-006,cave_collapse,Sạt lở cửa hang,ecology,uncommon,world,cooldown 6d,"Sau trận mưa, đất đá trên núi trở nên lỏng lẻo. Tin xấu: cửa hang đá đã bị sạt lở, đất đá lấp kín lối vào."
+Event,EVT-ECO-006,cave_collapse,Sạt lở cửa hang,ecology,uncommon,persistent,,"Sau trận mưa, đất đá trên núi trở nên lỏng lẻo. Tin xấu: cửa hang đá đã bị sạt lở, đất đá lấp kín lối vào."
+Event,EVT-ECO-007,ground_cracks,Đất nứt trên sườn dốc,ecology,common,world,cooldown 5d,"Mưa ngấm làm đất trên sườn dốc nứt thành từng vệt dài, đá vụn lả tả lăn xuống. Nếu mưa còn kéo dài, đường lên núi có thể bị sạt."
+Event,EVT-ECO-008,rockfall_signs,Vách hang rạn nứt,ecology,uncommon,world,cooldown 6d,"Từ vòm cửa hang, đất ướt và đá vụn rơi lộp độp. Những vết nứt mới chạy dọc vách đá phía trên lối vào."
 Event,EVT-RES-001,storm_debris,Đồ trôi dạt sau bão,resources,common,persistent,,"Sóng bão đánh dạt vào bãi biển đủ thứ: gỗ, dây, mảnh vỡ… Xác tàu cũng bị lật thêm, lộ ra những khoang mới."
 Event,EVT-RES-002,coconut_fall,Dừa rụng,resources,common,world,cooldown 3d,Một cơn gió mạnh làm mấy trái dừa rụng lộp độp ngay cạnh bạn.
 Event,EVT-RES-003,bottles_in_sand,Chai lọ trong cát,resources,common,world,cooldown 4d,Sóng rút để lộ mấy chiếc chai thủy tinh vùi trong cát. Thứ đựng nước quý giá!
@@ -98,7 +106,8 @@ Event,EVT-WLD-012,monkey_troop,Bầy khỉ tò mò,wildlife,unique,world,once,"C
 Event,EVT-WLD-013,dolphins_return,Đàn cá heo trở lại,wildlife,common,persistent,,"Một đàn cá heo lượn sát bờ, nhảy lên khỏi mặt nước. Một con nhỏ hơn bơi tách ra, quay vòng trước mặt bạn — là nó!"
 Event,EVT-WLD-014,dolphin_washed,Xác cá heo dạt bờ,wildlife,common,persistent,,Sóng đánh dạt xác chú cá heo hôm trước lên bãi cát. Chim biển đã bắt đầu sà xuống.
 Event,EVT-WLD-015,bird_nest,Tổ chim trên mỏm đá,wildlife,common,action,cooldown 3d,"Bạn trông thấy một tổ chim biển đầy trứng trên một mỏm đá chênh vênh. Chim bố mẹ đang lượn vòng phía trên, kêu inh ỏi."
-Event,EVT-BAS-001,boar_raid,Thú rừng lục lọi trại,base,common,world,cooldown 2d,"Trong lúc bạn vắng mặt, thú rừng đã mò vào căn cứ và lục tung kho thức ăn."
+Event,EVT-BAS-001,boar_raid,Thú rừng lục lọi trại,base,common,persistent,cooldown 2d,"Trong lúc bạn vắng mặt, thú rừng đã mò vào căn cứ và lục tung kho thức ăn."
+Event,EVT-BAS-006,boar_signs,Dấu vết quanh kho,base,common,world,cooldown 3d,"Quanh kho thức ăn, đất bị ủi tung lên thành từng vệt, dấu chân lợn rừng còn mới. Chúng đã đánh hơi thấy mùi đồ ăn — nhiều khả năng đêm nay sẽ quay lại."
 Event,EVT-BAS-002,loose_roof,Mái lều lung lay,base,common,world,cooldown 3d,"Gió chiều thổi mái lều kêu lật phật. Nếu đêm nay hay ngày mai trời trở xấu, mái che sẽ không trụ nổi."
 Event,EVT-BAS-003,boar_tracks_camp,Dấu chân quanh trại,base,common,persistent,,"Quanh chỗ bạn nghỉ chi chít dấu chân lợn rừng, đất bị cày xới. Con lợn bị thương hôm trước — giờ nó đói và liều lĩnh."
 Event,EVT-BAS-004,boar_night_raid,Lợn rừng phá trại,base,common,persistent,,"Nửa đêm, con lợn rừng đói lao vào phá tung kho đồ ăn của bạn."
@@ -107,6 +116,7 @@ Event,EVT-HEA-001,twisted_ankle,Hụt chân,health,uncommon,world,cooldown 5d,"M
 Event,EVT-PSY-001,nightmare,Ác mộng,psychology,common,world,cooldown 2d,"Bạn mơ thấy mình chìm xuống đáy biển cùng con tàu. Tỉnh dậy giữa đêm, tim đập thình thịch."
 Event,EVT-PSY-002,starry_night,Bầu trời đầy sao,psychology,common,world,cooldown 4d,"Đêm quang đãng, dải Ngân Hà vắt ngang bầu trời. Bạn nằm nhìn các vì sao, nhẩm tính phương hướng."
 Event,EVT-PSY-003,rainbow,Cầu vồng sau mưa,psychology,common,world,cooldown 4d,Một dải cầu vồng vắt ngang hòn đảo sau cơn mưa đêm qua. Bạn thấy lòng nhẹ bẫng.
+Event,EVT-PSY-004,second_wind,Chưa phải lúc bỏ cuộc,psychology,common,world,cooldown 4d,"Sau những ngày tồi tệ, sáng nay bạn tỉnh dậy với một sự bình thản lạ lùng. Bạn nhìn lại những sai lầm vừa qua — và biết mình phải làm gì tiếp theo."
 Event,EVT-NAR-001,message_bottle,Chai trôi dạt,narrative,unique,narrative,once,Một chiếc chai thủy tinh bị sóng đánh vào chân bạn. Bên trong là mảnh giấy cũ: “…dòng hải lưu phía tây bắc chảy thẳng về đất liền. Đừng ra khơi khi gió chướng…”
 Event,EVT-NAR-002,copper_locket,Mặt dây chuyền đồng,narrative,unique,narrative,once,Lẫn trong đống mảnh vỡ là một mặt dây chuyền đồng. Bên trong là tấm ảnh nhòe nước của một gia đình đang cười. Bạn chợt nghĩ tới những người đang chờ mình trở về.
 Event,EVT-NAR-003,human_footprints,Dấu chân người!,narrative,uncommon,action,once,"Bạn khựng lại. Trên nền đất ẩm là một dấu chân người — đã cũ, nhưng chắc chắn không phải của bạn. Một hàng dấu chân dẫn sâu vào rừng."

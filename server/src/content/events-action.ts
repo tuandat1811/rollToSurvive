@@ -211,10 +211,9 @@ export const ACTION_EVENTS: EventDef[] = [
     risk: 3,
     trigger: 'day_start',
     notable: true,
-    cooldownDays: 6,
-    eligible: (s) =>
-      s.day >= 3 && found(s, 'mountain', 'cave') && locationAccessible(s, 'cave') && s.world.lastRainDay >= s.day - 1,
-    weight: (s) => (s.world.weather === 'storm' ? 4 : s.world.weather === 'rain' ? 2 : 1),
+    omen: 'rockfall_signs',
+    cause: () => 'Điềm báo: vách hang rạn nứt sau mưa',
+    eligible: (s) => found(s, 'mountain', 'cave') && locationAccessible(s, 'cave') && !s.flags.caveShored,
     text: (s) =>
       `Sau trận mưa, đất đá trên núi trở nên lỏng lẻo. ${s.location === 'mountain' ? 'Bạn nghe một tiếng ầm vang: ' : 'Tin xấu: '}cửa hang đá đã bị sạt lở, đất đá lấp kín lối vào.`,
     passive: (ctx) => {

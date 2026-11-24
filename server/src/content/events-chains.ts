@@ -204,6 +204,7 @@ export const CHAIN_EVENTS: EventDef[] = [
     category: 'base',
     risk: 2,
     trigger: 'night',
+    cause: () => 'Hậu quả: bạn đã bỏ mặc con lợn rừng bị thương và không rào trại',
     notable: true,
     text: (s) =>
       hasStructure(s, 'fence', s.baseRegion ?? s.location) || Number(s.flags.campGuarded ?? 0) >= s.day
@@ -369,6 +370,7 @@ export const CHAIN_EVENTS: EventDef[] = [
     category: 'base',
     risk: 2,
     trigger: 'night',
+    cause: () => 'Hậu quả: bầy khỉ đã thù bạn',
     notable: true,
     text: (s) =>
       hasStructure(s, 'fence', s.baseRegion ?? s.location)

@@ -50,6 +50,10 @@ export const EVENT_FAMILY: Record<string, string> = {
   // discoveries
   freshwater_seep: 'discovery',
   sharp_stone: 'discovery',
+  second_wind: 'mood',
+  boar_signs: 'boar_camp',
+  ground_cracks: 'route_trouble',
+  rockfall_signs: 'route_trouble',
   strange_rock: 'discovery',
   hidden_hollow: 'discovery',
   human_footprints: 'discovery',
@@ -107,3 +111,24 @@ export const PACING_CATEGORY_MULT: Record<'calm' | 'normal' | 'tense', Partial<R
 /** chance that a finished action triggers one of its after-action events */
 export const AFTER_ACTION_CHANCE = 0.22;
 
+
+/**
+ * Controlled randomness: after a run of hardship (misfortune ≥ ROUGH) the Director
+ * damps risky events and favours recovery opportunities. Dice are never touched.
+ */
+export const MISFORTUNE = {
+  rough: 3,
+  max: 10,
+  riskyMult: 0.25, // weight × for risk ≥ 2 events while rough
+  recoveryMult: 2.5, // weight × for recovery events while rough
+  roughEventChance: 0.6, // chance of a day_start event while rough (so recovery can show up)
+  nightKeep: 0.6, // misfortune × each night
+  nightDrop: 0.3,
+  recoveryRelief: 1.5, // misfortune − when a recovery event happens
+};
+
+/** events that give the player breathing room */
+export const RECOVERY_EVENTS = new Set([
+  'fish_school', 'coconut_fall', 'falling_fruit', 'kelp_washup', 'bottles_in_sand', 'mushrooms_after_rain',
+  'wild_yams', 'starry_night', 'rainbow', 'calm_sea', 'boar_friend_visit', 'dolphins_return', 'second_wind',
+]);

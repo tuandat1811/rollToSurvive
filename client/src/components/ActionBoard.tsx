@@ -86,6 +86,7 @@ export default function ActionBoard({ view, onPick }: { view: GameView; onPick: 
             <span key={i} className="badge good" title={`Độ bền ${s.integrity}%`}>
               {s.icon} {s.name}
               {s.id === 'campfire' ? (s.lit ? ' (đang cháy)' : ' (đã tắt)') : ''}
+              {s.unfinished ? ' (vá tạm)' : ''}
             </span>
           ))}
           {region.water && <span className={`badge ${region.water === 'Ô nhiễm!' ? 'bad' : ''}`}>💧 Nước suối: {region.water}</span>}

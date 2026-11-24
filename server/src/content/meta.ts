@@ -54,6 +54,7 @@ export const ACTION_META: Record<string, ActionMeta> = {
   beachcomb: { code: 'ACT-GAT-004', tier: 1 },
   collect_debris: { code: 'ACT-GAT-005', tier: 1 },
   'object:washed_crate:smash': { code: 'ACT-GAT-006', tier: 1 },
+  find_alt_water: { code: 'ACT-GAT-007', tier: 2 },
   // Hunting & trapping
   hunt: { code: 'ACT-HUN-001', tier: 2 },
   'set_trap:snare': { code: 'ACT-HUN-002', tier: 2 },
@@ -85,6 +86,11 @@ export const ACTION_META: Record<string, ActionMeta> = {
   make_fire: { code: 'ACT-BLD-007', tier: 1 },
   relight_fire: { code: 'ACT-BLD-008', tier: 1 },
   repair: { code: 'ACT-BLD-009', tier: 2 },
+  reinforce_shelter: { code: 'ACT-BLD-010', tier: 2 },
+  secure_storage: { code: 'ACT-BLD-011', tier: 1 },
+  stockpile_wood: { code: 'ACT-BLD-012', tier: 1 },
+  finish_repair: { code: 'ACT-BLD-013', tier: 1 },
+  shore_up_cave: { code: 'ACT-BLD-014', tier: 2 },
   // Cooking & preservation
   cook: { code: 'ACT-COK-001', tier: 1 },
   smoke_food: { code: 'ACT-COK-002', tier: 2 },
@@ -135,12 +141,14 @@ export const EVENT_META: Record<string, EventMeta> = {
   heatwave: { code: 'EVT-WTH-003', rarity: 'common', source: 'world' },
   damp_fuel: { code: 'EVT-WTH-004', rarity: 'common', source: 'world' },
   // Ecology
-  landslide: { code: 'EVT-ECO-001', rarity: 'uncommon', source: 'world' },
+  landslide: { code: 'EVT-ECO-001', rarity: 'uncommon', source: 'persistent' },
   fish_school: { code: 'EVT-ECO-002', rarity: 'common', source: 'world' },
-  river_contamination: { code: 'EVT-ECO-003', rarity: 'unique', source: 'world' },
+  river_contamination: { code: 'EVT-ECO-003', rarity: 'unique', source: 'action' },
   mushrooms_after_rain: { code: 'EVT-ECO-004', rarity: 'common', source: 'world' },
   falling_fruit: { code: 'EVT-ECO-005', rarity: 'common', source: 'world' },
-  cave_collapse: { code: 'EVT-ECO-006', rarity: 'uncommon', source: 'world' },
+  cave_collapse: { code: 'EVT-ECO-006', rarity: 'uncommon', source: 'persistent' },
+  ground_cracks: { code: 'EVT-ECO-007', rarity: 'common', source: 'world' },
+  rockfall_signs: { code: 'EVT-ECO-008', rarity: 'uncommon', source: 'world' },
   // Resources
   storm_debris: { code: 'EVT-RES-001', rarity: 'common', source: 'persistent' },
   coconut_fall: { code: 'EVT-RES-002', rarity: 'common', source: 'world' },
@@ -172,7 +180,8 @@ export const EVENT_META: Record<string, EventMeta> = {
   dolphin_washed: { code: 'EVT-WLD-014', rarity: 'common', source: 'persistent' },
   bird_nest: { code: 'EVT-WLD-015', rarity: 'common', source: 'action' },
   // Base
-  boar_raid: { code: 'EVT-BAS-001', rarity: 'common', source: 'world' },
+  boar_raid: { code: 'EVT-BAS-001', rarity: 'common', source: 'persistent' },
+  boar_signs: { code: 'EVT-BAS-006', rarity: 'common', source: 'world' },
   loose_roof: { code: 'EVT-BAS-002', rarity: 'common', source: 'world' },
   boar_tracks_camp: { code: 'EVT-BAS-003', rarity: 'common', source: 'persistent' },
   boar_night_raid: { code: 'EVT-BAS-004', rarity: 'common', source: 'persistent' },
@@ -183,6 +192,7 @@ export const EVENT_META: Record<string, EventMeta> = {
   nightmare: { code: 'EVT-PSY-001', rarity: 'common', source: 'world' },
   starry_night: { code: 'EVT-PSY-002', rarity: 'common', source: 'world' },
   rainbow: { code: 'EVT-PSY-003', rarity: 'common', source: 'world' },
+  second_wind: { code: 'EVT-PSY-004', rarity: 'common', source: 'world' },
   // Narrative
   message_bottle: { code: 'EVT-NAR-001', rarity: 'unique', source: 'narrative' },
   copper_locket: { code: 'EVT-NAR-002', rarity: 'unique', source: 'narrative' },

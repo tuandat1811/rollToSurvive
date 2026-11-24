@@ -86,6 +86,10 @@ const needWater = (s: GameState) => s.vitals.thirst < 40;
 const needFood = (s: GameState) => s.vitals.hunger < 40;
 
 const absSlotOf = (s: GameState) => (s.day - 1) * 4 + s.slot;
+const dryWood = (s: GameState) => s.baseRegion === here(s) && Number(s.flags.dryWoodUntil ?? 0) >= s.day;
+/** the player knows tomorrow brings rough weather (or it is already here) */
+const forecastBad = (s: GameState) =>
+  (s.world.forecastUntil >= s.day + 1 && ['storm', 'windy', 'rain'].includes(s.world.tomorrow)) || ['storm', 'windy'].includes(s.world.weather);
 
 /** soft tiers (GDD Diversity-01): skill/knowledge locks are not hard walls */
 export const UNTRAINED = { penalty: -5, label: 'Chưa thành thạo' };
@@ -1270,6 +1274,154 @@ const actions: ActionDef[] = [
     },
   },
 
+  // ============================== PREPARATION (controlled randomness: foreshadowed threats can be met)
+  {
+    id: 'reinforce_shelter',
+    group: 'base',
+    icon: k('🪵'),
+    name: k('Gia cố nơi trú ẩn'),
+    desc: (s) =>
+      `Chằng thêm dây, chèn đá, ép mái xuống trước khi thời tiết xấu. Bão và gió lớn tối nay lẫn ngày mai gây ít hư hại hơn nhiều (−70%).${
+        forecastBad(s) ? ' ⚠️ Dự báo ngày mai thời tiết xấu!' : ''
+      }`,
+    hint: k('Căn cứ chịu bão/gió tốt hơn tới hết ngày mai'),
+    energy: k(10),
+    visible: (s) => s.baseRegion === here(s) && !!structuresAt(s, here(s)).find((x) => x.id === 'lean_to' || x.id === 'hut'),
+    reqs: (s) => [{ label: 'Chưa gia cố cho đợt này', met: Number(s.flags.reinforcedUntil ?? 0) < s.day + 1 }],
+    materials: k([{ id: 'wood', qty: 2 }, { id: 'fiber', qty: 2 }]),
+    check: k({ label: 'Gia cố nơi trú ẩn', attr: 'STR', skill: 'crafting', dc: 10, crit: 'safe' }),
+    priority: (s) => (forecastBad(s) ? 85 : 8),
+    resolve: (ctx, tier) => {
+      const s = ctx.s;
+      if (!atLeastPartial(tier)) {
+        ctx.say('Dây buộc tuột liên tục, bạn chưa gia cố được bao nhiêu.');
+        return;
+      }
+      ctx.flag('reinforcedUntil', s.day + 1);
+      ctx.change('good', '🪵 Căn cứ đã được gia cố tới hết ngày mai');
+      const sh = structuresAt(s, here(s)).find((x) => x.id === 'lean_to' || x.id === 'hut');
+      if (sh && isSuccess(tier)) sh.integrity = Math.min(100, sh.integrity + 10);
+      ctx.say(isSuccess(tier) ? 'Mái che được ép chặt, cột chống chắc chắn. Cứ để bão tới.' : 'Bạn gia cố được phần lớn — chưa hoàn hảo nhưng đỡ hơn nhiều.');
+    },
+  },
+  {
+    id: 'secure_storage',
+    group: 'base',
+    icon: k('🪢'),
+    name: k('Chằng buộc kho'),
+    desc: k('Treo cao thức ăn, buộc chặt nắp và chặn lối vào kho. Thú rừng sẽ không phá được kho trong 2 ngày.'),
+    hint: k('Kho an toàn trước thú rừng 2 ngày'),
+    energy: k(5),
+    visible: (s) => s.baseRegion === here(s) && s.storage.some((x) => ITEMS[x.id]?.kind === 'food'),
+    reqs: (s) => [{ label: 'Kho chưa được chằng buộc', met: Number(s.flags.campGuarded ?? 0) < s.day + 1 }],
+    materials: k([{ id: 'fiber', qty: 2 }]),
+    priority: (s) => (s.history.some((h) => h.id === 'boar_signs' && absSlotOf(s) - h.at <= 3) ? 85 : 6),
+    resolve: (ctx) => {
+      con(ctx, 'camp_guarded', { days: 2 });
+      ctx.say('Bạn treo thức ăn lên cao và chèn đá kín lối vào kho.');
+      ctx.change('good', '🪢 Kho an toàn trước thú rừng tới hết ngày kia');
+    },
+  },
+  {
+    id: 'stockpile_wood',
+    group: 'base',
+    icon: k('🔥'),
+    name: k('Tích trữ củi khô'),
+    desc: k('Chẻ củi và xếp dưới mái che cho khô. Trong 3 ngày, nhóm lửa không bị phạt vì củi ẩm và dễ hơn (+1).'),
+    hint: k('Nhóm lửa dễ hơn 3 ngày, kể cả khi trời ẩm'),
+    energy: k(4),
+    visible: (s) => s.baseRegion === here(s) && !!shelterAt(s, here(s)),
+    reqs: (s) => [{ label: 'Chưa có củi khô dự trữ', met: Number(s.flags.dryWoodUntil ?? 0) < s.day + 1 }],
+    materials: k([{ id: 'wood', qty: 3 }]),
+    priority: (s) => (forecastBad(s) || s.world.weather === 'humid' ? 50 : 5),
+    resolve: (ctx) => {
+      ctx.flag('dryWoodUntil', ctx.s.day + 3);
+      ctx.say('Một đống củi khô được xếp gọn dưới mái che.');
+      ctx.change('good', '🔥 Có củi khô dự trữ 3 ngày');
+    },
+  },
+  {
+    id: 'shore_up_cave',
+    group: 'base',
+    icon: k('🪵'),
+    name: k('Chống đỡ cửa hang'),
+    desc: k('Dựng cột gỗ chống vòm cửa hang đang rạn nứt. Làm kịp thì hang sẽ không sập.'),
+    hint: k('Ngăn cửa hang bị sạt lở'),
+    energy: k(12),
+    followUp: true,
+    visible: (s) =>
+      here(s) === 'mountain' && found(s, 'cave') && locationAccessible(s, 'cave') && !s.flags.caveShored && Number(s.flags.caveOmenUntil ?? -1) >= absSlotOf(s),
+    materials: k([{ id: 'wood', qty: 3 }]),
+    check: k({ label: 'Chống đỡ cửa hang', attr: 'STR', skill: 'crafting', dc: 11, crit: 'safe', outdoor: true }),
+    priority: k(80),
+    resolve: (ctx, tier) => {
+      if (atLeastPartial(tier)) {
+        ctx.flag('caveShored');
+        ctx.say(tier === 'partial' ? 'Cột chống hơi xiêu, nhưng giữ được vòm đá.' : 'Ba cột gỗ chắc chắn đỡ lấy vòm đá. Hang sẽ không sập.');
+        ctx.change('good', '🕳️ Cửa hang đã được chống đỡ');
+        if (tier === 'partial') ctx.vital('energy', -6, 'Làm việc quá sức');
+      } else ctx.say('Cột gỗ trượt khỏi nền đá ướt. Phải thử lại.');
+    },
+  },
+  {
+    id: 'find_alt_water',
+    group: 'survival',
+    icon: k('🧭'),
+    name: k('Tìm nguồn nước khác'),
+    desc: k('Nước suối đang ô nhiễm. Lần theo địa hình tìm nguồn nước khác — mạch ngầm, dây leo nước, hốc đá — hoặc đào hố lọc qua cát sỏi.'),
+    hint: k('Phát hiện nguồn nước mới hoặc lọc được nước'),
+    energy: k(10),
+    followUp: true,
+    visible: (s) => here(s) === 'river' && s.regions.river.water === 'contaminated' && s.regions.river.waterKnown,
+    check: k({ label: 'Tìm nguồn nước', attr: 'PER', skill: 'survival', dc: 12, outdoor: true }),
+    priority: k(65),
+    resolve: (ctx, tier) => {
+      const s = ctx.s;
+      if (isSuccess(tier)) {
+        const options = (['waterfall', 'water_vine', 'rain_pool', 'seep'] as const).filter(
+          (l) => !found(s, l) && s.regions[LOCATION_DEFS[l].region].explorePool.includes(`loc:${l}`),
+        );
+        if (options.length) {
+          const loc = ctx.rng.pick(options);
+          ctx.say(`Lần theo những vệt rêu ẩm, bạn tìm ra ${LOCATION_DEFS[loc].name} (${REGION_DEFS[LOCATION_DEFS[loc].region].name}).`);
+          con(ctx, 'discover_location', { loc });
+          return;
+        }
+      }
+      if (atLeastPartial(tier)) {
+        ctx.say('Bạn đào một hố cạnh bờ suối, để nước thấm qua lớp cát sỏi. Nước lọc trong hơn hẳn.');
+        con(ctx, 'gain_item', { item: 'water_raw', qty: tier === 'partial' ? 1 : 2, risk: tier === 'partial' ? 0.15 : 0.08 });
+      } else ctx.say('Mọi nơi bạn tìm đều khô cạn hoặc cũng đục ngầu.');
+    },
+  },
+  {
+    id: 'finish_repair',
+    group: 'base',
+    icon: k('🧩'),
+    name: (s, p) => {
+      const st = s.structures.find((x) => String(x.uid) === p)!;
+      return `Hoàn thiện sửa ${STRUCTURES.find((d) => d.id === st.id)!.name}`;
+    },
+    desc: k('Lần sửa trước mới vá tạm. Bổ sung vật liệu để hoàn thiện — trước đó, mái chưa kín sẽ dột khi trời mưa.'),
+    hint: k('Độ bền +25%, hết dột'),
+    energy: k(4),
+    followUp: true,
+    variants: (s) => s.structures.filter((x) => x.region === here(s) && x.unfinished).map((x) => String(x.uid)),
+    visible: k(true),
+    materials: (s, p) => {
+      const st = s.structures.find((x) => String(x.uid) === p)!;
+      return st.id === 'lean_to' || st.id === 'hut' ? [{ id: 'palm', qty: 2 }, { id: 'fiber', qty: 1 }] : [{ id: 'wood', qty: 1 }, { id: 'fiber', qty: 1 }];
+    },
+    priority: k(55),
+    resolve: (ctx, _tier, p) => {
+      const st = ctx.s.structures.find((x) => String(x.uid) === p)!;
+      st.unfinished = undefined;
+      st.integrity = Math.min(100, st.integrity + 25);
+      ctx.say('Bạn bổ sung nốt vật liệu, phần vá tạm giờ đã chắc chắn.');
+      ctx.change('good', `Đã hoàn thiện sửa chữa — độ bền ${st.integrity}%`);
+    },
+  },
+
   // ============================== CRAFTING
   {
     id: 'craft',
@@ -1433,7 +1585,8 @@ const actions: ActionDef[] = [
       mods: mods(
         countBoth(s, 'flint') > 0 && { label: 'Đá lửa', value: 5 },
         hasTag(s, 'fire') && { label: 'Đuốc', value: 5 },
-        s.flags.dampDay === s.day && { label: 'Củi ẩm', value: -3 },
+        s.flags.dampDay === s.day && !dryWood(s) && { label: 'Củi ẩm', value: -3 },
+        dryWood(s) && { label: 'Củi khô dự trữ', value: 1 },
       ),
     }),
     priority: (s) => (rawCookable(s).length > 0 || countBoth(s, 'water_raw') > 0 ? 78 : 40),
@@ -1471,7 +1624,8 @@ const actions: ActionDef[] = [
       mods: mods(
         countBoth(s, 'flint') > 0 && { label: 'Đá lửa', value: 5 },
         hasTag(s, 'fire') && { label: 'Đuốc', value: 5 },
-        s.flags.dampDay === s.day && { label: 'Củi ẩm', value: -3 },
+        s.flags.dampDay === s.day && !dryWood(s) && { label: 'Củi ẩm', value: -3 },
+        dryWood(s) && { label: 'Củi khô dự trữ', value: 1 },
       ),
     }),
     priority: k(66),
@@ -1513,6 +1667,11 @@ const actions: ActionDef[] = [
       if (add) {
         st.integrity = Math.min(100, st.integrity + add);
         ctx.change('good', `Độ bền: ${st.integrity}%`);
+        if (tier === 'partial') {
+          st.unfinished = true;
+          ctx.say('Bạn chỉ vá tạm được một phần — vẫn còn chỗ hở, cần thêm vật liệu để hoàn thiện.');
+          ctx.change('bad', '🧩 Sửa chữa chưa hoàn chỉnh: cần thêm vật liệu');
+        } else st.unfinished = undefined;
       } else ctx.say('Bạn loay hoay mà không gia cố được.');
     },
   },
