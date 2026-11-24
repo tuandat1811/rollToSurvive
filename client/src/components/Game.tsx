@@ -21,22 +21,6 @@ import Vitals from './Vitals.tsx';
 type SideTab = 'map' | 'inv' | 'base' | 'journal';
 type MobileTab = 'actions' | 'status' | 'map' | 'inv' | 'journal';
 
-function readPref(key: string): string | null {
-  try {
-    return localStorage.getItem(key);
-  } catch {
-    return null;
-  }
-}
-function writePref(key: string, value: string | null) {
-  try {
-    if (value === null) localStorage.removeItem(key);
-    else localStorage.setItem(key, value);
-  } catch {
-    /* storage unavailable */
-  }
-}
-
 export type Act =(path: string, body: Record<string, unknown>, opts?: { quiet?: boolean }) => Promise<boolean>;
 
 export default function Game({ initial, onExit, onNew }: { initial: GameView; onExit: () => void; onNew: () => void }) {
@@ -49,7 +33,7 @@ export default function Game({ initial, onExit, onNew }: { initial: GameView; on
   const [mobile, setMobile] = useState<MobileTab>('actions');
   const [showEnd, setShowEnd] = useState(true);
   const isFresh = initial.day === 1 && initial.slot === 0 && initial.version === 0;
-  const [introOpen, setIntroOpen] = useState(() => isFresh && !readPref('rts.introSeen'));
+  const [introOpen, setIntroOpen] = useState(isFresh); // the feature guide opens at the start of every new run
   const [planner, setPlanner] = useState<{ method?: 'raft' | 'desperate' | 'signal' } | null>(null);
   // escape actions open the escape planner (difficulty + penalties) instead of a bare confirm
   const pickAction = (a: ActionView) => {
@@ -58,10 +42,7 @@ export default function Game({ initial, onExit, onNew }: { initial: GameView; on
     setSelected(a);
   };
 
-  const closeIntro = () => {
-    writePref('rts.introSeen', '1');
-    setIntroOpen(false);
-  };
+  const closeIntro = () => setIntroOpen(false);
 
   useEffect(() => {
     if (!toast) return;

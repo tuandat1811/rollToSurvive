@@ -73,7 +73,7 @@ const SLIDES: Slide[] = [
           <div>
             <span>💧 Nước</span>
             <Bar value={40} color="var(--thirst)" />
-            <small>Giảm nhanh nhất. Về 0: mất Sức khỏe rất nhanh.</small>
+            <small>Giảm nhanh nhất. Lấy nước ở suối, hứng nước mưa, hoặc uống nước dừa ở bãi biển.</small>
           </div>
           <div>
             <span>⚡ Năng lượng</span>
@@ -149,7 +149,10 @@ const SLIDES: Slide[] = [
           <b>Thời tiết</b> thay đổi mỗi ngày. Bão rất nguy hiểm nhưng luôn có dấu hiệu báo trước.
         </li>
         <li>
-          <b>Sự kiện bất ngờ</b> xuất hiện dưới dạng thẻ — bạn chọn cách phản ứng.
+          <b>Sự kiện bất ngờ</b> xuất hiện dưới dạng thẻ — bạn chọn cách phản ứng. Mối nguy lớn (lợn rừng phá trại, sạt lở, sập hang) luôn có <b>điềm báo</b> trước — kịp phòng bị thì thiệt hại nhỏ hơn nhiều.
+        </li>
+        <li>
+          Gặp chuỗi xui? Đảo đôi khi cũng mở ra <b>cơ hội hồi phục</b>. Đồ trôi dạt hay kho đồ cũ chỉ ở đó vài ngày — đừng để lỡ.
         </li>
         <li>
           Tài nguyên khai thác quá mức sẽ cạn dần và cần thời gian hồi phục. Thế giới nhớ những gì bạn đã làm.
@@ -195,7 +198,9 @@ const SLIDES: Slide[] = [
           </div>
           <div>
             <b>🎲 Bảng hành động</b>
-            <span>Các việc làm được ở nơi bạn đứng, chia theo nhóm. Mỗi thẻ ghi số buổi, năng lượng và điểm cần tung (ví dụ "d20 ≥ 8").</span>
+<span>
+              Tab <b>📋 Tất cả hành động</b> liệt kê mọi việc làm được ở nơi bạn đứng, chia theo nhóm; <b>⭐ Đề xuất</b> gợi ý việc nên làm lúc này. Mỗi thẻ ghi số buổi, năng lượng và điểm cần tung (ví dụ "d20 ≥ 8").
+            </span>
           </div>
           <div>
             <b>🗺️ Bản đồ · 🎒 Hành trang · ⛺ Căn cứ · 📓 Nhật ký</b>
@@ -209,6 +214,25 @@ const SLIDES: Slide[] = [
         <p className="muted small">
           Bấm <b>📖 Hướng dẫn</b> trên thanh trên cùng để xem lại các trang này bất cứ lúc nào.
         </p>
+      </>
+    ),
+  },
+  {
+    icon: '🏕️',
+    title: 'Nhiệm vụ đầu tiên: dựng lều tạm',
+    body: (
+      <>
+        <p className="narr">Đêm đầu tiên trên đảo sẽ rất khắc nghiệt nếu không có chỗ trú. Trước khi làm gì khác, hãy dựng một căn cứ.</p>
+        <ul className="guide-list">
+          <li>
+            <b>Thu thập</b> ở Bãi biển để có <b>gỗ, lá cọ và xơ dừa</b>.
+          </li>
+          <li>
+            Đủ vật liệu thì chọn <b>Dựng lều tạm</b> — nơi đó trở thành căn cứ của bạn.
+          </li>
+          <li>Trong ngày 1, chỉ những việc dẫn tới căn cứ được mở khóa. Dựng xong lều, cả hòn đảo mở ra.</li>
+        </ul>
+        <p className="muted small">Thẻ nhiệm vụ ở đầu bảng hành động cho biết bạn còn thiếu gì. Nếu trời tối mà chưa xong, bạn sẽ dựng vội một chiếc lều tạm bợ.</p>
       </>
     ),
   },
