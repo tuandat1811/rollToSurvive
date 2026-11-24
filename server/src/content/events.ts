@@ -8,6 +8,7 @@ import {
 import { Ctx, count, countBoth, hasStructure, regionName, shelterAt, structuresAt } from '../engine/ctx.js';
 import type { CheckSpec, GameState, Req, Tier } from '../engine/types.js';
 import { REGION_DEFS, SLOT_NAMES } from './defs.js';
+import { CHAIN_EVENTS } from './events-chains.js';
 import { EXTRA_EVENTS } from './events-extra.js';
 import { ITEMS } from './items.js';
 
@@ -478,7 +479,7 @@ const list: EventDef[] = [
     notable: true,
     cooldownDays: 3,
     eligible: (s) => s.location === 'jungle' && carriedFood(s) > 0,
-    weight: () => 3,
+    weight: (s) => (s.flags.chain_monkey === 'neutral' ? 6 : 3),
     text: () => 'Một con khỉ từ trên cây phóng xuống, giật lấy đồ ăn trong túi bạn rồi chạy biến!',
     choices: () => [
       {
@@ -576,7 +577,7 @@ const list: EventDef[] = [
       !!s.baseRegion &&
       !hasStructure(s, 'fence', s.baseRegion) &&
       s.storage.some((x) => ITEMS[x.id]?.kind === 'food'),
-    weight: (s) => (s.baseRegion && hasStructure(s, 'storage_rack', s.baseRegion) ? 1.5 : 4),
+    weight: (s) => (s.flags.boarFriend ? 0 : s.baseRegion && hasStructure(s, 'storage_rack', s.baseRegion) ? 1.5 : 4),
     text: (s) =>
       s.location === s.baseRegion
         ? 'Nửa đêm, tiếng sột soạt đánh thức bạn. Một con lợn rừng đang lục kho thức ăn! Bạn vung đuốc xua nó đi kịp lúc.'
@@ -752,5 +753,5 @@ const STRUCT_NAMES: Record<string, string> = {
   signal_pyre: 'Đống lửa tín hiệu',
 };
 
-export const EVENTS: Record<string, EventDef> = Object.fromEntries([...list, ...EXTRA_EVENTS].map((e) => [e.id, e]));
+export const EVENTS: Record<string, EventDef> = Object.fromEntries([...list, ...EXTRA_EVENTS, ...CHAIN_EVENTS].map((e) => [e.id, e]));
 export { SLOT_NAMES };

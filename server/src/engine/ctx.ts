@@ -403,8 +403,18 @@ export class Ctx {
     if (sk.lvl >= max) sk.xp = 0;
   }
 
-  schedule(eventId: string, inSlots: number, data?: Record<string, unknown>) {
-    this.s.scheduled.push({ eventId, at: this.now + inSlots, data });
+  /**
+   * Schedule a follow-up event in `inSlots` slots. If its context does not fit
+   * when it comes due, it waits up to `windowSlots` more before lapsing.
+   */
+  schedule(eventId: string, inSlots: number, data?: Record<string, unknown>, windowSlots = 16) {
+    const at = this.now + inSlots;
+    this.s.scheduled.push({ eventId, at, expires: at + windowSlots, data });
+  }
+
+  /** event memory: the last recorded choice/outcome for an event, if any */
+  memory(eventId: string) {
+    return [...this.s.history].reverse().find((h) => h.id === eventId);
   }
 }
 

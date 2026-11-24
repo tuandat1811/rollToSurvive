@@ -116,7 +116,17 @@ export interface ChainState {
 export interface ScheduledEvent {
   eventId: string;
   at: number;
+  /** absolute slot after which a not-yet-eligible follow-up lapses (default at + 4 days) */
+  expires?: number;
   data?: Record<string, unknown>;
+}
+
+/** event memory: what happened, what the player chose and how it went */
+export interface EventMemory {
+  id: string;
+  at: number;
+  choice?: string;
+  tier?: Tier;
 }
 
 export interface Change {
@@ -211,7 +221,7 @@ export interface GameState {
     campPool: string[];
   };
   flags: Record<string, number | boolean | string>;
-  history: { id: string; at: number }[];
+  history: EventMemory[];
   chains: Record<string, ChainState>;
   scheduled: ScheduledEvent[];
   pending: PendingEvent | null;

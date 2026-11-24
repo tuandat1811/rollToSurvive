@@ -347,8 +347,10 @@ export const EXTRA_EVENTS: EventDef[] = [
           if (tier === 'failure' || tier === 'crit_failure') {
             ctx.say('Bạn cố hết sức nhưng không đẩy nổi. Chú cá heo dần lịm đi trong vòng tay bạn.');
             ctx.addCondition('shaken', 1, 6);
+            ctx.schedule('dolphin_washed', ctx.rng.int(4, 8));
             return;
           }
+          ctx.schedule('dolphins_return', ctx.rng.int(16, 28));
           if (tier === 'partial') {
             ctx.say('Bạn đẩy được nó ra biển, nhưng trượt ngã trên đá.');
             ctx.addCondition('injury', 1);
@@ -359,7 +361,13 @@ export const EXTRA_EVENTS: EventDef[] = [
           ctx.journal('Cứu một chú cá heo mắc cạn. Từ đó, đàn cá heo thường bơi gần bờ.', 'event');
         },
       },
-      ignore('Quay đi', 'Bạn còn không lo nổi cho mình. Bạn quay đi, cố không nghe tiếng thở yếu ớt phía sau.'),
+      {
+        ...ignore('Quay đi', 'Bạn còn không lo nổi cho mình. Bạn quay đi, cố không nghe tiếng thở yếu ớt phía sau.'),
+        resolve: (ctx) => {
+          ctx.say('Bạn còn không lo nổi cho mình. Bạn quay đi, cố không nghe tiếng thở yếu ớt phía sau.');
+          ctx.schedule('dolphin_washed', ctx.rng.int(4, 8));
+        },
+      },
     ],
   },
   {

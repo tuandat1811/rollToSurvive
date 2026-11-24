@@ -52,7 +52,10 @@ function eatDrink(s: GameState): GameState {
 
 function step(s: GameState, rng: Rng): GameState {
   s = eatDrink(s);
-  if (s.attrPoints > 0) s = allocateAttr(s, rng.pick(['STR', 'AGI', 'END', 'INT', 'PER'] as const)).state;
+  if (s.attrPoints > 0) {
+    const open = (['STR', 'AGI', 'END', 'INT', 'PER'] as const).filter((a) => s.attrs[a] < 6);
+    if (open.length) s = allocateAttr(s, rng.pick(open)).state;
+  }
   const view = buildView('sim', s);
   if (view.pending) {
     const ok = view.pending.choices.filter((c) => c.available);

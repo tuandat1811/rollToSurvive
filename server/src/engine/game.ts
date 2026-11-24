@@ -401,6 +401,12 @@ export function chooseEvent(prev: GameState, choiceId: string) {
     ctx.res.roll = info;
     tier = info.tier;
   }
+  // event memory: remember what the player chose and how it went
+  const mem = [...s.history].reverse().find((h) => h.id === def.id && !h.choice);
+  if (mem) {
+    mem.choice = choice.id;
+    if (choice.check) mem.tier = tier;
+  }
   choice.resolve(ctx, tier, data);
   if (choice.check && ctx.res.roll) awardXp(ctx, choice.check, ctx.res.roll, `event:${def.id}:${choice.id}`);
   if (s.status === 'playing' && choice.slots > 0) advanceSlots(ctx, choice.slots);

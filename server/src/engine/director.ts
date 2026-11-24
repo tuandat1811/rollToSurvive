@@ -1,6 +1,7 @@
 import { BALANCE } from '../content/balance.js';
 import { REGION_DEFS } from '../content/defs.js';
 import { EVENTS, type EventDef, type EventTrigger } from '../content/events.js';
+import { FAMILY_COOLDOWN_DAYS, NOVELTY, familyOf } from '../content/families.js';
 import { traitEventMult } from '../content/traits.js';
 import type { Ctx } from './ctx.js';
 
@@ -15,13 +16,17 @@ export function runTrigger(ctx: Ctx, trigger: EventTrigger) {
 
   if (trigger === 'slot_start') handleShips(ctx);
 
-  // scheduled follow-ups
+  // scheduled follow-ups (event chains). A follow-up waits until its context fits
+  // (e.g. the player is back at camp) and lapses after its window expires.
   const due = s.scheduled.filter((e) => e.at <= ctx.now && EVENTS[e.eventId] && (EVENTS[e.eventId].trigger === trigger || trigger !== 'night'));
   for (const e of due) {
     const def = EVENTS[e.eventId];
     if (def.choices && s.pending) continue; // wait until the current card is resolved
+    if (def.eligible && !def.eligible(s, e.data)) {
+      if (ctx.now > (e.expires ?? e.at + 16)) s.scheduled = s.scheduled.filter((x) => x !== e);
+      continue;
+    }
     s.scheduled = s.scheduled.filter((x) => x !== e);
-    if (def.eligible && !def.eligible(s, e.data)) continue;
     fire(ctx, def, e.data);
   }
 
@@ -41,11 +46,30 @@ export function runTrigger(ctx: Ctx, trigger: EventTrigger) {
   if (s.day === 1 && s.slot === 0) p = 0; // let the player get their bearings
   if (!ctx.rng.chance(p)) return;
   const pool = Object.values(EVENTS)
-    .filter((d) => d.trigger === trigger && !d.forced && d.weight && available(ctx, d))
-    .map((d) => [d, d.weight!(s) * traitEventMult(s, d.id)] as const)
+    .filter((d) => d.trigger === trigger && !d.forced && d.weight && available(ctx, d) && !familyOnCooldown(ctx, d.id))
+    .map((d) => [d, d.weight!(s) * traitEventMult(s, d.id) * novelty(ctx, d.id)] as const)
     .filter(([, w]) => w > 0);
   const pick = ctx.rng.weighted(pool);
   if (pick) fire(ctx, pick);
+}
+
+/** anti-repetition: no two random events of the same family within its cooldown */
+export function familyOnCooldown(ctx: Ctx, eventId: string): boolean {
+  const fam = familyOf(eventId);
+  const days = FAMILY_COOLDOWN_DAYS[fam];
+  if (!days) return false;
+  const last = [...ctx.s.history].reverse().find((h) => familyOf(h.id) === fam);
+  return !!last && ctx.now - last.at < days * 4;
+}
+
+/** novelty weighting: favour unseen events, damp repeats and recently-seen families */
+export function novelty(ctx: Ctx, eventId: string): number {
+  const s = ctx.s;
+  const fam = familyOf(eventId);
+  const seen = s.history.filter((h) => h.id === eventId).length;
+  const recentFamily = s.history.filter((h) => familyOf(h.id) === fam && ctx.now - h.at < NOVELTY.familyWindowDays * 4).length;
+  const base = seen === 0 ? NOVELTY.neverSeen : 1 / (1 + NOVELTY.perTimeSeen * seen);
+  return base / (1 + NOVELTY.perRecentFamily * recentFamily);
 }
 
 function available(ctx: Ctx, def: EventDef): boolean {

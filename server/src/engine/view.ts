@@ -117,7 +117,13 @@ export function buildView(id: string, s: GameState): GameView {
   if (s.pending && s.status === 'playing') {
     const def = EVENTS[s.pending.eventId];
     const choices: ChoiceView[] = eventChoices(s).map((c) => {
-      const reasons = (c.reqs ?? []).filter((r) => !r.met).map((r) => r.label);
+      // materials a choice consumes are shown (and checked) like any other requirement
+      const matReqs = materialStatus(s, c.materials ?? []).map((m) => ({
+        label: `Cần ${m.qty} ${ITEMS[m.id].icon} ${ITEMS[m.id].name} (có ${m.have})`,
+        met: m.have >= m.qty,
+      }));
+      const reqs = [...(c.reqs ?? []), ...matReqs];
+      const reasons = reqs.filter((r) => !r.met).map((r) => r.label);
       if ((c.energy ?? 0) > s.vitals.energy) reasons.push(`Không đủ năng lượng (cần ${c.energy})`);
       return {
         id: c.id,
@@ -126,7 +132,7 @@ export function buildView(id: string, s: GameState): GameView {
         desc: c.desc,
         slots: c.slots,
         energy: c.energy ?? 0,
-        reqs: c.reqs ?? [],
+        reqs,
         available: reasons.length === 0,
         reasons,
         check: c.check ? checkView(s, c.check) : undefined,

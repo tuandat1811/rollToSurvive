@@ -7,6 +7,8 @@ import { EVENTS } from '../src/content/events.js';
 import { ITEMS } from '../src/content/items.js';
 import { TRAITS, traitDefs, traitSea } from '../src/content/traits.js';
 import { bands, resolveCheck, successFace, tierFor } from '../src/engine/check.js';
+import { Ctx } from '../src/engine/ctx.js';
+import { familyOnCooldown, novelty } from '../src/engine/director.js';
 import { GameError, actionEnergy, chooseEvent, consume, escapeStep, findInstance, newGame, performAction } from '../src/engine/game.js';
 import type { GameState } from '../src/engine/types.js';
 import { buildView } from '../src/engine/view.js';
@@ -230,6 +232,81 @@ describe('run variety', () => {
     expect(sea.some((m) => m.value === -1)).toBe(true);
     s.traits = ['calm'];
     expect(traitSea(s)[0].value).toBe(1);
+  });
+});
+
+describe('event director: anti-repetition and chains', () => {
+  const startEvent = (s: GameState, eventId: string) => {
+    s.history.push({ id: eventId, at: (s.day - 1) * 4 + s.slot });
+    s.pending = { uid: 999, eventId };
+  };
+
+  it('blocks a whole family for its cooldown, not just the same event', () => {
+    const s = fresh();
+    const ctx = new Ctx(s);
+    expect(familyOnCooldown(ctx, 'wounded_boar')).toBe(false);
+    s.history.push({ id: 'bush_noise', at: ctx.now }); // a boar encounter just happened
+    expect(familyOnCooldown(ctx, 'wounded_boar')).toBe(true); // same family → blocked
+    expect(familyOnCooldown(ctx, 'snake_at_spring')).toBe(false); // other family → fine
+    s.day += 4; // 3-day boar cooldown has passed
+    expect(familyOnCooldown(new Ctx(s), 'wounded_boar')).toBe(false);
+  });
+
+  it('favours unseen events and damps recently seen families', () => {
+    const s = fresh();
+    const ctx = new Ctx(s);
+    const fresh1 = novelty(ctx, 'kelp_washup');
+    s.history.push({ id: 'kelp_washup', at: ctx.now });
+    const afterSeen = novelty(ctx, 'kelp_washup');
+    const sameFamily = novelty(ctx, 'bottles_in_sand'); // windfall family seen recently
+    expect(afterSeen).toBeLessThan(fresh1);
+    expect(sameFamily).toBeLessThan(fresh1);
+  });
+
+  it('remembers the choice and outcome of an event', () => {
+    const s = fresh();
+    startEvent(s, 'monkey_troop');
+    const { state } = chooseEvent(s, 'ignore');
+    const mem = [...state.history].reverse().find((h) => h.id === 'monkey_troop')!;
+    expect(mem.choice).toBe('ignore');
+    expect(state.flags.chain_monkey).toBe('neutral');
+  });
+
+  it('chain: leaving the injured boar leads to tracks at camp, then a night raid', () => {
+    let s = fresh(11);
+    s.location = 'jungle';
+    startEvent(s, 'injured_boar');
+    s = chooseEvent(s, 'ignore').state;
+    expect(s.flags.chain_boar).toBe('abandoned');
+    const follow = s.scheduled.find((e) => e.eventId === 'boar_tracks_camp')!;
+    expect(follow).toBeDefined();
+    // jump to when it is due, while standing in the jungle
+    const now = (s.day - 1) * 4 + s.slot;
+    follow.at = now + 1;
+    s.vitals.energy = 100;
+    s = performAction(s, 'rest').state;
+    expect(s.pending?.eventId).toBe('boar_tracks_camp');
+    s = chooseEvent(s, 'ignore').state;
+    expect(s.scheduled.some((e) => e.eventId === 'boar_night_raid')).toBe(true);
+  });
+
+  it('marks event choices unavailable when their materials are missing', () => {
+    const s = fresh();
+    s.location = 'jungle';
+    s.history.push({ id: 'boar_tracks_camp', at: 0 });
+    s.pending = { uid: 1, eventId: 'boar_tracks_camp' };
+    const fortify = buildView('x', s).pending!.choices.find((c) => c.id === 'fortify')!;
+    expect(fortify.available).toBe(false);
+    expect(fortify.reasons.some((r) => r.includes('Gỗ'))).toBe(true);
+  });
+
+  it('chain: a follow-up waits for the right place instead of firing out of context', () => {
+    let s = fresh(12);
+    s.location = 'coast'; // no base, not in the jungle
+    s.scheduled.push({ eventId: 'boar_friend_visit', at: 0, expires: 100 });
+    s = performAction(s, 'rest').state;
+    expect(s.pending?.eventId).not.toBe('boar_friend_visit');
+    expect(s.scheduled.some((e) => e.eventId === 'boar_friend_visit')).toBe(true);
   });
 });
 

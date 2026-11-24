@@ -474,6 +474,7 @@ const actions: ActionDef[] = [
       mods: mods(
         hasTag(s, 'spear') ? { label: 'Giáo gỗ', value: 2 } : { label: 'Không có vũ khí', value: -3 },
         Number(s.flags.huntBonusUntil ?? -1) >= (s.day - 1) * 4 + s.slot && { label: 'Biết lối mòn thú', value: 2 },
+        Number(s.flags.jungleDangerUntil ?? -1) >= (s.day - 1) * 4 + s.slot && { label: 'Lợn mẹ đang rình', value: -3 },
       ),
     }),
     priority: (s) => (needFood(s) ? 50 : 25),
