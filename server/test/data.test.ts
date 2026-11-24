@@ -28,7 +28,12 @@ import { buildView } from '../src/engine/view.js';
 import { readWorkbook, writeWorkbook } from '../scripts/lib/workbook.js';
 
 const ATTRS = { STR: 2, AGI: 2, END: 2, INT: 2, PER: 2 };
-const fresh = (seed = 42) => newGame('Test', ATTRS, seed);
+/** a new game past the day-1 camp tutorial (tested on its own in tutorial.test.ts) */
+const fresh = (seed = 42) => {
+  const s = newGame('Test', ATTRS, seed);
+  delete s.flags.tutorial;
+  return s;
+};
 const clone = (p: ContentPack): ContentPack => JSON.parse(JSON.stringify(p));
 
 describe('mini-syntax', () => {

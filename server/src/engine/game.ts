@@ -10,6 +10,7 @@ import { awardXp, roll } from './check.js';
 import { Ctx, absSlot, count, countBoth, storageWaterCap, waterCount, containerCap, carryMax, weightOf } from './ctx.js';
 import { escapeDecision } from './escape.js';
 import { runAfterAction } from './director.js';
+import { CAMP, LOCKED_REASON, TUTORIAL_FLAG, campTutorial, tutorialAllows } from '../content/tutorial.js';
 import { Rng } from './rng.js';
 import { advanceSlots, checkDeath, rollWeather } from './time.js';
 import { pickTraits, traitDefs } from '../content/traits.js';
@@ -216,7 +217,7 @@ export function newGame(name: string, attrs: Record<AttrId, number>, seed: numbe
       ruinsPool: ruins,
       campPool: camp,
     },
-    flags: {},
+    flags: { [TUTORIAL_FLAG]: CAMP },
     history: [],
     chains: {},
     scheduled: [],
@@ -312,6 +313,7 @@ export function actionEnergy(s: GameState, def: ActionDef, param: string): numbe
 export function unmetReasons(s: GameState, inst: ActionInstance): string[] {
   const { def, param } = inst;
   const out: string[] = [];
+  if (campTutorial(s) && !tutorialAllows(inst.key)) out.push(LOCKED_REASON);
   for (const r of def.reqs?.(s, param) ?? []) if (!r.met) out.push(r.label);
   for (const m of materialStatus(s, def.materials?.(s, param) ?? [])) if (m.have < m.qty) out.push(`Thiếu ${ITEMS[m.id].name} (${m.have}/${m.qty})`);
   const e = actionEnergy(s, def, param);

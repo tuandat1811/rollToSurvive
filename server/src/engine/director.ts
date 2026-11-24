@@ -4,6 +4,7 @@ import { EVENTS, type EventDef, type EventTrigger } from '../content/events.js';
 import { AFTER_ACTION_CHANCE, FAMILY_COOLDOWN_DAYS, MISFORTUNE, NOVELTY, PACING_CATEGORY_MULT, RECOVERY_EVENTS, familyOf } from '../content/families.js';
 import { EVENT_META, RARITY_WEIGHT } from '../content/meta.js';
 import { type Bag, grantBag } from '../content/expeditions.js';
+import { campTutorial } from '../content/tutorial.js';
 import { traitEventMult } from '../content/traits.js';
 import type { Ctx } from './ctx.js';
 
@@ -40,8 +41,8 @@ export function runTrigger(ctx: Ctx, trigger: EventTrigger) {
     if (def.forced(s)) fire(ctx, def);
   }
 
-  // random notable
-  if (s.pending) return;
+  // random notable (held back while the day-1 camp tutorial runs)
+  if (s.pending || campTutorial(s)) return;
   const E = BALANCE.events;
   let p = trigger === 'night' ? 0.3 : trigger === 'day_start' ? 0.25 : E.pacingChance[s.world.pacing];
   if (s.world.notableToday >= E.softCap) p *= E.overCapMult;
@@ -85,7 +86,7 @@ function hardship(s: { world: { misfortune?: number } }, def: EventDef): number 
 /** Action events: what the player just did can trigger an event (fishing → snagged net…) */
 export function runAfterAction(ctx: Ctx, actionId: string) {
   const s = ctx.s;
-  if (s.status !== 'playing' || s.escape || s.pending) return;
+  if (s.status !== 'playing' || s.escape || s.pending || campTutorial(s)) return;
   const E = BALANCE.events;
   let p = AFTER_ACTION_CHANCE;
   if (s.world.notableToday >= E.softCap) p *= E.overCapMult;

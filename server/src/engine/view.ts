@@ -15,6 +15,7 @@ import { actionEnergy, eventChoices, instances, materialStatus, sacrificesFor, u
 import { EVENT_META, actionMeta } from '../content/meta.js';
 import { OBJECT_DEFS } from '../content/objects.js';
 import { locationStateDef } from '../content/locationStates.js';
+import { campObjective } from '../content/tutorial.js';
 import { ATTRS, REGIONS, SKILLS, type CheckSpec, type GameState, type ItemStack } from './types.js';
 
 function checkView(s: GameState, spec: CheckSpec): CheckView {
@@ -324,6 +325,7 @@ export function buildView(id: string, s: GameState): GameView {
           detour: !!r.detour,
         })),
     },
+    objective: campObjective(s),
     actions,
     pending,
     escape,

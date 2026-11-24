@@ -6,6 +6,7 @@ import { runTrigger } from './director.js';
 import { processDelayed } from './consequence.js';
 import { OBJECT_DEFS } from '../content/objects.js';
 import { MISFORTUNE } from '../content/families.js';
+import { forceCamp } from '../content/tutorial.js';
 import { traitWeatherMult } from '../content/traits.js';
 import type { Rng } from './rng.js';
 import type { GameState, ItemStack, Pacing, WeatherId } from './types.js';
@@ -61,6 +62,7 @@ export function checkDeath(ctx: Ctx): boolean {
 
 function night(ctx: Ctx) {
   const s = ctx.s;
+  const camp = ctx.capture(() => forceCamp(ctx));
   const N = BALANCE.night;
   const shelter = shelterAt(s, s.location);
   const atBase = s.baseRegion === s.location;
@@ -141,7 +143,7 @@ function night(ctx: Ctx) {
     title: `Đêm thứ ${s.day}`,
     icon: '🌙',
     text: `Bạn ngủ ${where} tại ${REGION_DEFS[s.location].name}${fire ? ', cạnh đống lửa ấm' : ''}.`,
-    changes: nightChanges.changes,
+    changes: [...camp.changes, ...nightChanges.changes],
   });
 }
 

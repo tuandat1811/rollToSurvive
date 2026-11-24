@@ -317,6 +317,8 @@ export interface GameView {
   traits: { id: string; name: string; icon: string; desc: string; mood: 'good' | 'bad' | 'mixed' }[];
   knowledge: { currents: number; shipNext?: { day: number; slot: number }; shipKnown: boolean; recipes: string[] };
   map: { regions: RegionView[]; routes: RouteView[] };
+  /** pinned objective (day-1 camp tutorial) */
+  objective?: { title: string; text: string; steps: { label: string; done: boolean }[]; note: string };
   actions: ActionView[];
   pending: EventView | null;
   escape: EscapeView | null;

@@ -109,7 +109,7 @@ export const STRUCTURES: StructureDef[] = [
   {
     id: 'lean_to', name: 'Lều tạm', icon: '⛺', where: 'shelter', energy: 14,
     desc: 'Mái che đơn sơ. Lập căn cứ tại đây, ngủ đêm hồi phục tốt hơn, tránh mưa.',
-    inputs: [{ id: 'wood', qty: 4 }, { id: 'palm', qty: 5 }, { id: 'fiber', qty: 2 }],
+    inputs: [{ id: 'wood', qty: 3 }, { id: 'palm', qty: 4 }, { id: 'fiber', qty: 2 }],
     attr: 'STR', skill: 'crafting', dc: 9,
   },
   {

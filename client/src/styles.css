@@ -519,3 +519,10 @@ p { margin: 0 0 8px; }
 .sac-opt { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 8px; cursor: pointer; font-size: 13px; }
 .sac-opt.on { background: var(--panel-2); }
 .sac-opt.off { opacity: 0.5; cursor: not-allowed; }
+
+.objective { border: 1px solid var(--sand); background: linear-gradient(180deg, rgba(233, 196, 106, 0.12), transparent); }
+.objective h3 { margin: 0 0 6px; color: var(--sand); }
+.obj-steps { list-style: none; padding: 0; margin: 8px 0; display: grid; gap: 4px; font-size: 13px; }
+.obj-steps li.done { color: var(--good); }
+.board-section + .board-section { margin-top: 14px; }
+.board-section .section-title { margin-bottom: 8px; }

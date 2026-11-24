@@ -14,7 +14,12 @@ import type { GameState } from '../src/engine/types.js';
 import { buildView } from '../src/engine/view.js';
 
 const ATTRS = { STR: 2, AGI: 2, END: 2, INT: 2, PER: 2 };
-const fresh = (seed = 42) => newGame('Test', ATTRS, seed);
+/** a new game past the day-1 camp tutorial (tested on its own in tutorial.test.ts) */
+const fresh = (seed = 42) => {
+  const s = newGame('Test', ATTRS, seed);
+  delete s.flags.tutorial;
+  return s;
+};
 
 describe('new game', () => {
   it('creates a playable island', () => {
@@ -359,6 +364,7 @@ describe('escape', () => {
     let wins = 0;
     for (let seed = 0; seed < 40; seed++) {
       let s = newGame('Sailor', { STR: 3, AGI: 1, END: 3, INT: 2, PER: 1 }, seed);
+      delete s.flags.tutorial;
       s.projects.push({ id: 'raft', region: 'coast', stage: 3, integrity: 100 });
       s.world.currents = 3;
       s.inventory.push({ id: 'water_safe', qty: 1 }, { id: 'canned', qty: 3 });
@@ -377,9 +383,9 @@ describe('API', () => {
     const created = await app.inject({ method: 'POST', url: '/api/runs', payload: { name: 'API', attrs: ATTRS } });
     expect(created.statusCode).toBe(200);
     const view = created.json().view;
-    const ok = await app.inject({ method: 'POST', url: `/api/runs/${view.id}/action`, payload: { key: 'search_wreck', version: view.version } });
+    const ok = await app.inject({ method: 'POST', url: `/api/runs/${view.id}/action`, payload: { key: 'gather', version: view.version } });
     expect(ok.statusCode).toBe(200);
-    const dup = await app.inject({ method: 'POST', url: `/api/runs/${view.id}/action`, payload: { key: 'search_wreck', version: view.version } });
+    const dup = await app.inject({ method: 'POST', url: `/api/runs/${view.id}/action`, payload: { key: 'gather', version: view.version } });
     expect(dup.statusCode).toBe(409);
     const bad = await app.inject({ method: 'POST', url: `/api/runs/${view.id}/action`, payload: { key: 'build:hut', version: ok.json().view.version } });
     expect(bad.statusCode).toBe(422);

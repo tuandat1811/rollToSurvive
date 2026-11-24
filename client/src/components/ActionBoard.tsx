@@ -30,7 +30,7 @@ export function ActionCard({ a, onPick }: { a: ActionView; onPick: (a: ActionVie
 }
 
 export default function ActionBoard({ view, onPick }: { view: GameView; onPick: (a: ActionView) => void }) {
-  const [group, setGroup] = useState<string>('suggest');
+  const [group, setGroup] = useState<string>('all');
   const [showLocked, setShowLocked] = useState(true);
 
   const groups = useMemo(() => {
@@ -53,16 +53,37 @@ export default function ActionBoard({ view, onPick }: { view: GameView; onPick: 
   }, [view.actions]);
 
   // in a group tab: doable actions first, then the ones still missing something (dimmed, with the reason)
+  const byAvail = (items: ActionView[]) => [...items].sort((a, b) => Number(b.available) - Number(a.available));
   const current =
-    group === 'suggest'
-      ? suggested
-      : [...(groups.find((g) => g.id === group)?.items ?? [])].sort((a, b) => Number(b.available) - Number(a.available));
+    group === 'suggest' ? suggested : group === 'all' ? view.actions : byAvail(groups.find((g) => g.id === group)?.items ?? []);
   const list = group === 'suggest' || showLocked ? current : current.filter((a) => a.available);
   const lockedCount = current.length - current.filter((a) => a.available).length;
+  // "Tất cả": every action, in sections per group (doable first inside each section)
+  const sections =
+    group === 'all'
+      ? groups
+          .map((g) => ({ ...g, items: byAvail(g.items).filter((a) => showLocked || a.available) }))
+          .filter((g) => g.items.length > 0)
+      : [];
+  const availCount = view.actions.filter((a) => a.available).length;
   const region = view.map.regions.find((r) => r.here)!;
 
   return (
     <>
+      {view.objective && (
+        <div className="card objective">
+          <h3>🏕️ {view.objective.title}</h3>
+          <p className="small">{view.objective.text}</p>
+          <ul className="obj-steps">
+            {view.objective.steps.map((st, i) => (
+              <li key={i} className={st.done ? 'done' : ''}>
+                {st.done ? '✅' : '⬜'} {st.label}
+              </li>
+            ))}
+          </ul>
+          <p className="tiny faint">{view.objective.note}</p>
+        </div>
+      )}
       <div className="card location">
         <div className="scene">{SCENE[view.location.id]}</div>
         <h2>
@@ -96,6 +117,10 @@ export default function ActionBoard({ view, onPick }: { view: GameView; onPick: 
 
       <div className="card board">
         <div className="chips">
+          <button className={`chip ${group === 'all' ? 'on' : ''}`} onClick={() => setGroup('all')}>
+            📋 Tất cả hành động
+            <span className="n">{availCount}</span>
+          </button>
           <button className={`chip ${group === 'suggest' ? 'on' : ''}`} onClick={() => setGroup('suggest')}>
             ⭐ Đề xuất
           </button>
@@ -110,11 +135,26 @@ export default function ActionBoard({ view, onPick }: { view: GameView; onPick: 
         {view.status === 'playing' && list.length === 0 && (
           <div className="empty">{view.pending || view.escape ? 'Hãy giải quyết tình huống đang diễn ra.' : 'Không có hành động khả dụng trong nhóm này.'}</div>
         )}
-        <div className="actions-grid">
-          {list.map((a) => (
-            <ActionCard key={a.key} a={a} onPick={onPick} />
-          ))}
-        </div>
+        {group === 'all' ? (
+          sections.map((g) => (
+            <section key={g.id} className="board-section">
+              <div className="section-title">
+                {g.name} <span className="faint">· {g.items.filter((a) => a.available).length} có thể làm</span>
+              </div>
+              <div className="actions-grid">
+                {g.items.map((a) => (
+                  <ActionCard key={a.key} a={a} onPick={onPick} />
+                ))}
+              </div>
+            </section>
+          ))
+        ) : (
+          <div className="actions-grid">
+            {list.map((a) => (
+              <ActionCard key={a.key} a={a} onPick={onPick} />
+            ))}
+          </div>
+        )}
         {group !== 'suggest' && lockedCount > 0 && (
           <div style={{ marginTop: 10, textAlign: 'center' }}>
             <button className="btn ghost sm" onClick={() => setShowLocked(!showLocked)}>

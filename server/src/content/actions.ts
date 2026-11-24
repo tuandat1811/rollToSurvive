@@ -32,6 +32,7 @@ import { OBJECT_DEFS, objectsAt } from './objects.js';
 import { LOCATION_STATES, locationAccessible, locationState } from './locationStates.js';
 import { PREPS, PREP_BY_TAG, prepFlag } from './prep.js';
 import { DATA_ACTIONS } from './data/loader.js';
+import { campTutorial, completeCamp } from './tutorial.js';
 import { EXPEDITIONS, EXPEDITION_BY_ID, resolveStep, runsFlag } from './expeditions.js';
 
 export type ActionGroup = 'survival' | 'explore' | 'food' | 'craft' | 'base' | 'medical' | 'escape' | 'travel';
@@ -318,7 +319,7 @@ const actions: ActionDef[] = [
     name: k('Thu thập vật liệu'),
     desc: (s) => {
       const t: Record<RegionId, string> = {
-        coast: 'Nhặt gỗ trôi dạt và lá cọ dọc bãi biển.',
+        coast: 'Nhặt gỗ trôi dạt, lá cọ và tước xơ dừa dọc bãi biển.',
         jungle: 'Chặt cành, tước dây leo, hái lá cọ, lấy nhựa cây.',
         river: `Nhặt đá cuội và đá lửa dưới lòng suối.${found(s, 'flint_bed') ? ' Bãi đá lửa luôn có đá lửa.' : ''}`,
         mountain: 'Ghè đá và tìm đá lửa trên sườn núi.',
@@ -328,7 +329,7 @@ const actions: ActionDef[] = [
     },
     hint: (s) => {
       const t: Record<RegionId, string> = {
-        coast: 'Gỗ, lá cọ',
+        coast: 'Gỗ, lá cọ, xơ dừa (sợi)',
         jungle: 'Gỗ, sợi dây leo, lá cọ, nhựa cây',
         river: 'Đá, đá lửa, sợi',
         mountain: 'Đá, đá lửa',
@@ -341,23 +342,27 @@ const actions: ActionDef[] = [
     check: (s) => ({
       label: 'Thu thập vật liệu',
       tags: ['gather'],
+      crit: campTutorial(s) ? 'safe' : undefined,
       attr: 'STR',
       skill: 'survival',
       dc: here(s) === 'mountain' ? 11 : 10,
       outdoor: true,
       mods: mods((here(s) === 'jungle' || here(s) === 'coast') && tool(s, 'axe', 2, 'Rìu đá')),
     }),
-    priority: (s) => (s.day <= 2 ? 45 : 30),
+    priority: (s) => (campTutorial(s) ? 90 : s.day <= 2 ? 45 : 30),
     resolve: (ctx, tier) => {
       const s = ctx.s;
       const r = here(s);
-      const m = tierYield(tier, { crit_success: 1.5, success: 1, partial: 0.6, failure: 0.25 });
+      // guided day 1: even a clumsy attempt brings back something for the lean-to
+      const yieldTier = campTutorial(s) && tier === 'failure' ? 'partial' : tier;
+      const m = tierYield(yieldTier, { crit_success: 1.5, success: 1, partial: 0.6, failure: 0.25 });
       const woodM = abundanceMult(s, r, 'wood');
       const axe = hasTag(s, 'axe') && (r === 'jungle' || r === 'coast');
       const add = (id: string, n: number) => ctx.addItem(id, ctx.rng.round(n * m));
       if (r === 'coast') {
-        add('wood', (2.5 + (axe ? 1 : 0)) * woodM);
+        add('wood', (3 + (axe ? 1 : 0)) * woodM);
         add('palm', 2.5);
+        add('fiber', 1.5); // coconut husk fibre
       } else if (r === 'jungle') {
         add('wood', (2.5 + (axe ? 1.5 : 0)) * woodM);
         add('fiber', 3.5);
@@ -1584,6 +1589,7 @@ const actions: ActionDef[] = [
     untrained: structureLocked,
     notes: (s, p) => (structureLocked(s, p) ? [untrainedNote(STRUCTURES.find((x) => x.id === p)!.lockText)] : []),
     priority: (s, p) => {
+      if (p === 'lean_to' && campTutorial(s)) return 100;
       const pr: Record<string, number> = { lean_to: 70, campfire: 68, rain_collector: 45, storage_rack: 30, fence: 25, hut: 35, signal_pyre: here(s) === 'cape' ? 60 : 25 };
       return pr[p] ?? 20;
     },
@@ -1596,6 +1602,11 @@ const actions: ActionDef[] = [
         con(ctx, 'injury', { sev: 1 });
         return;
       }
+      // the guided first lean-to never collapses: a failed attempt still stands, just shakily
+      if (p === 'lean_to' && campTutorial(s) && !atLeastPartial(tier)) {
+        tier = 'partial';
+        ctx.say('Lều hơi xiêu vẹo, nhưng vẫn đứng được.');
+      }
       if (!atLeastPartial(tier)) {
         ctx.say(p === 'campfire' ? 'Bạn cọ xát mãi mà ngọn lửa không chịu bén.' : 'Công trình đổ sụp giữa chừng.');
         if (p !== 'campfire') refundHalf(ctx, d.inputs);
@@ -1605,6 +1616,7 @@ const actions: ActionDef[] = [
       const loc = here(s);
       if (d.where === 'shelter' && !s.baseRegion) {
         s.baseRegion = loc;
+        completeCamp(ctx);
         ctx.change('good', `⚑ Lập căn cứ tại ${REGION_DEFS[loc].name}`);
         ctx.journal(`Lập căn cứ tại ${REGION_DEFS[loc].name}.`, 'milestone');
       }

@@ -10,7 +10,12 @@ import type { CheckSpec, GameState } from '../src/engine/types.js';
 import { buildView } from '../src/engine/view.js';
 
 const ATTRS = { STR: 2, AGI: 2, END: 2, INT: 2, PER: 2 };
-const fresh = (seed = 42) => newGame('Test', ATTRS, seed);
+/** a new game past the day-1 camp tutorial (tested on its own in tutorial.test.ts) */
+const fresh = (seed = 42) => {
+  const s = newGame('Test', ATTRS, seed);
+  delete s.flags.tutorial;
+  return s;
+};
 
 describe('opposed checks', () => {
   const spec: CheckSpec = { label: 'Đấu', attr: 'STR', dc: 14, opposed: { label: 'Lợn mẹ', icon: '🐗', bonus: 3 } };
