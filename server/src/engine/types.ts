@@ -164,6 +164,10 @@ export interface RollInfo {
   /** score thresholds at the time of the roll (absent on saves made before this field existed) */
   bands?: Band[];
   crit?: CritPolicy;
+  /** opposed check: the opponent's roll */
+  opp?: { label: string; icon?: string; bonus: number; die: number; total: number };
+  /** preparation used up by this roll (gave advantage) */
+  prepared?: string;
 }
 
 export interface Band {
@@ -279,6 +283,8 @@ export interface CheckSpec {
   tags?: string[];
   /** when false, no XP is granted */
   xp?: boolean;
+  /** opposed check: an opponent rolls d20 + bonus instead of a fixed DC (dc is then only the average) */
+  opposed?: { label: string; icon?: string; bonus: number };
 }
 
 export interface Req {

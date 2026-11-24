@@ -47,6 +47,9 @@ export const ACTION_META: Record<string, ActionMeta> = {
   'object:washed_crate:pry': { code: 'ACT-EXP-005', tier: 1 },
   'object:old_cache:open': { code: 'ACT-EXP-006', tier: 1 },
   'clear_location:cave': { code: 'ACT-EXP-007', tier: 2 },
+  'expedition:wreck_hold': { code: 'ACT-EXP-008', tier: 2 },
+  'expedition:deep_cave': { code: 'ACT-EXP-009', tier: 3 },
+  'prepare:climb': { code: 'ACT-EXP-010', tier: 1 },
   // Gathering
   collect_water: { code: 'ACT-GAT-001', tier: 1 },
   forage: { code: 'ACT-GAT-002', tier: 1 },
@@ -59,9 +62,11 @@ export const ACTION_META: Record<string, ActionMeta> = {
   hunt: { code: 'ACT-HUN-001', tier: 2 },
   'set_trap:snare': { code: 'ACT-HUN-002', tier: 2 },
   check_traps: { code: 'ACT-HUN-003', tier: 2 },
+  'prepare:hunting': { code: 'ACT-HUN-004', tier: 1 },
   // Fishing
   fish: { code: 'ACT-FSH-001', tier: 1 },
   'set_trap:fish_trap': { code: 'ACT-FSH-002', tier: 2 },
+  'prepare:fishing': { code: 'ACT-FSH-003', tier: 1 },
   // Crafting
   'craft:stone_knife': { code: 'ACT-CRF-001', tier: 1 },
   'craft:stone_axe': { code: 'ACT-CRF-002', tier: 2 },
@@ -163,6 +168,7 @@ export const EVENT_META: Record<string, EventMeta> = {
   monkeys_lead: { code: 'EVT-DIS-002', rarity: 'common', source: 'persistent' },
   strange_rock: { code: 'EVT-DIS-003', rarity: 'uncommon', source: 'action' },
   hidden_hollow: { code: 'EVT-DIS-004', rarity: 'uncommon', source: 'action' },
+  expedition_step: { code: 'EVT-DIS-005', rarity: 'common', source: 'action' },
   // Wildlife
   bush_noise: { code: 'EVT-WLD-001', rarity: 'common', source: 'world' },
   monkey_thief: { code: 'EVT-WLD-002', rarity: 'common', source: 'world' },

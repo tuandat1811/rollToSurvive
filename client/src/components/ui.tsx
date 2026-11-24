@@ -44,10 +44,11 @@ export function Bar({ value, max = 100, color }: { value: number; max?: number; 
   );
 }
 
-const sign = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
+export const sign = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
 
 /** short "what do I need to roll" label for cards and badges */
 export function needLabel(c: CheckView): string {
+  if (c.opposed) return `Đấu ${c.opposed.icon ?? ''} ${c.opposed.label}`;
   if (c.successFace === null) return 'Không thể thành công';
   if (c.successFace <= 1) return 'Chắc chắn thành công';
   return `${c.dice === 2 ? '2d20' : 'd20'} ≥ ${c.successFace}`;
@@ -101,7 +102,7 @@ export function ThresholdTable({ bands, crit, highlight, compact }: { bands: Ban
   );
 }
 
-export function Formula({ check, natural }: { check: { attr: string; attrName?: string; attrMod: number; skillName?: string; skill?: string; skillMod: number; mods: { label: string; value: number }[]; dc: number; adv: number }; natural?: number }) {
+export function Formula({ check, natural, vs }: { check: { attr: string; attrName?: string; attrMod: number; skillName?: string; skill?: string; skillMod: number; mods: { label: string; value: number }[]; dc: number; adv: number }; natural?: number; vs?: string }) {
   return (
     <div className="formula">
       <span className="term die">{natural ?? 'd20'}{check.adv > 0 ? ' (lợi thế)' : check.adv < 0 ? ' (bất lợi)' : ''}</span>
@@ -119,7 +120,47 @@ export function Formula({ check, natural }: { check: { attr: string; attrName?: 
         </span>
       ))}
       <span className="faint">so với</span>
-      <span className="term dc">DC {check.dc}</span>
+      <span className="term dc">{vs ?? `DC ${check.dc}`}</span>
+    </div>
+  );
+}
+
+/** opposed check: outcome depends on how far you beat (or trail) the opponent's total */
+export function OpposedTable({ check }: { check: CheckView }) {
+  const o = check.opposed!;
+  const rows: [Tier, string][] = [
+    ['crit_success', 'Hơn đối thủ từ 10 điểm trở lên'],
+    ['success', 'Bằng hoặc hơn đối thủ (0 – 9 điểm)'],
+    ['partial', 'Kém đối thủ 1 – 4 điểm'],
+    ['failure', 'Kém đối thủ 5 – 9 điểm'],
+    ['crit_failure', 'Kém đối thủ từ 10 điểm trở lên'],
+  ];
+  const typical = 11 + o.bonus;
+  const need = typical - check.totalMod;
+  return (
+    <div className="thresholds">
+      <table>
+        <thead>
+          <tr>
+            <th>Kết quả</th>
+            <th>Tổng của bạn so với đối thủ</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.filter(([t]) => check.crit !== 'safe' || t !== 'crit_failure').map(([t, txt]) => (
+            <tr key={t}>
+              <td>
+                <i className={`dot t-${t}`} />
+                {TIER_NAMES[t]}
+              </td>
+              <td>{txt}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="tiny faint">
+        Đối thủ tung trung bình ra 10–11 → tổng khoảng {typical}. Muốn thắng một lần tung trung bình, bạn cần mặt xúc xắc ≥ {Math.max(1, Math.min(20, need))}. {critNote(check.crit)}
+      </div>
     </div>
   );
 }
@@ -153,15 +194,22 @@ export function CheckBox({ check, compact }: { check: CheckView; compact?: boole
       {!compact && (
         <div className="row wrap" style={{ justifyContent: 'space-between', marginBottom: 8 }}>
           <b>🎲 {check.label || 'Kiểm tra D20'}</b>
-          <span className="badge dice">
-            Độ khó: {check.dcLabel} · DC {check.dc}
-          </span>
+          {check.opposed ? (
+            <span className="badge warn">
+              ⚔️ Đối kháng: {check.opposed.icon} {check.opposed.label}
+            </span>
+          ) : (
+            <span className="badge dice">
+              Độ khó: {check.dcLabel} · DC {check.dc}
+            </span>
+          )}
         </div>
       )}
       <dl className="check-lines">
         <dt>Tung</dt>
         <dd>
           <b>{diceText(check.dice, check.adv)}</b>
+          {check.prepared && <div className="small" style={{ color: 'var(--good)' }}>⭐ {check.prepared} — được lợi thế</div>}
         </dd>
         <dt>Cộng điểm</dt>
         <dd>
@@ -169,10 +217,18 @@ export function CheckBox({ check, compact }: { check: CheckView; compact?: boole
         </dd>
         <dt>Tổng điểm</dt>
         <dd>
-          Mặt xúc xắc <b>{sign(check.totalMod)}</b>, so với <b>DC {check.dc}</b>
+          {check.opposed ? (
+            <>
+              Mặt xúc xắc <b>{sign(check.totalMod)}</b>, so với <b>{check.opposed.icon} {check.opposed.label}: d20 {sign(check.opposed.bonus)}</b>
+            </>
+          ) : (
+            <>
+              Mặt xúc xắc <b>{sign(check.totalMod)}</b>, so với <b>DC {check.dc}</b>
+            </>
+          )}
         </dd>
       </dl>
-      <ThresholdTable bands={check.bands} crit={check.crit} compact={compact} />
+      {check.opposed ? <OpposedTable check={check} /> : <ThresholdTable bands={check.bands} crit={check.crit} compact={compact} />}
     </div>
   );
 }

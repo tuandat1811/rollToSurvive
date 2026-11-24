@@ -513,3 +513,10 @@ p { margin: 0 0 8px; }
 .trait-mixed { border-left-color: var(--sand); }
 
 .cause { margin: 0 0 8px; padding: 6px 10px; border-left: 3px solid var(--line); background: var(--panel-2); border-radius: 6px; }
+
+.opp-roll { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 8px; font-size: 14px; }
+.opp-roll .d20 { transform: scale(0.7); }
+.sacrifice { display: flex; flex-direction: column; gap: 6px; }
+.sac-opt { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+.sac-opt.on { background: var(--panel-2); }
+.sac-opt.off { opacity: 0.5; cursor: not-allowed; }

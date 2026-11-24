@@ -260,6 +260,7 @@ export const CHAIN_EVENTS: EventDef[] = [
           attr: 'STR',
           skill: 'hunting',
           dc: 15,
+          opposed: { label: 'Lợn mẹ', icon: '🐗', bonus: 4 },
           outdoor: true,
           tags: ['hunting'],
           mods: s.inventory.some((x) => x.id === 'spear') ? [{ label: 'Giáo gỗ', value: 2 }] : [{ label: 'Tay không', value: -3 }],
@@ -332,7 +333,7 @@ export const CHAIN_EVENTS: EventDef[] = [
         icon: '🪵',
         slots: 0,
         energy: 4,
-        check: { label: 'Xua bầy khỉ', attr: 'STR', skill: 'survival', dc: 10, outdoor: true },
+        check: { label: 'Xua bầy khỉ', attr: 'STR', skill: 'survival', dc: 10, outdoor: true, opposed: { label: 'Bầy khỉ', icon: '🐒', bonus: -1 } },
         resolve: (ctx, tier) => {
           ctx.say(isSuccess(tier) ? 'Bầy khỉ la hét bỏ chạy.' : 'Bầy khỉ chạy đi nhưng ném trả cả trái cây thối vào bạn.');
           con(ctx, 'chain_state', { chain: 'monkey', state: 'hostile' });

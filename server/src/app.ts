@@ -111,7 +111,7 @@ export function buildApp(store = new Store()) {
 
   const v = z.number().int().nonnegative();
   const routes: [string, z.ZodTypeAny, (s: GameState, b: any) => { state: GameState; result: TurnResult }][] = [
-    ['action', z.object({ version: v, key: z.string().max(80) }), (s, b) => performAction(s, b.key)],
+    ['action', z.object({ version: v, key: z.string().max(80), sacrifice: z.string().max(40).optional() }), (s, b) => performAction(s, b.key, { sacrifice: b.sacrifice })],
     ['choice', z.object({ version: v, choiceId: z.string().max(40) }), (s, b) => chooseEvent(s, b.choiceId)],
     ['escape', z.object({ version: v, decision: z.enum(['roll', 'return']) }), (s, b) => escapeStep(s, b.decision)],
     ['consume', z.object({ version: v, itemId: z.string().max(40), from: z.enum(['inv', 'storage']) }), (s, b) => consume(s, b.itemId, b.from)],

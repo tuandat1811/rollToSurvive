@@ -1,6 +1,7 @@
 import { BALANCE } from '../content/balance.js';
 import { CONDITIONS } from '../content/conditions.js';
 import { WEATHER_DEFS } from '../content/weather.js';
+import { activePrep, prepFlag } from '../content/prep.js';
 import { Ctx } from './ctx.js';
 import type { Band, CheckSpec, GameState, RollInfo, SkillId, Tier } from './types.js';
 
@@ -22,6 +23,9 @@ export interface ResolvedCheck {
   totalMod: number;
   dc: number;
   adv: number;
+  /** preparation that grants advantage on this check */
+  prepared?: string;
+  prepTag?: string;
 }
 
 /** situational modifiers derived from the character and the world */
@@ -50,7 +54,10 @@ export function resolveCheck(s: GameState, spec: CheckSpec): ResolvedCheck {
   const skillMod = spec.skill ? s.skills[spec.skill].lvl : 0;
   const mods = [...(spec.mods ?? []).filter((m) => m.value !== 0), ...situationalMods(s, spec)];
   const totalMod = attrMod + skillMod + mods.reduce((a, m) => a + m.value, 0);
-  return { spec, attrMod, skillMod, mods, totalMod, dc: spec.dc, adv: Math.sign(spec.adv ?? 0) };
+  const prep = activePrep(s, spec.tags, (s.day - 1) * 4 + s.slot);
+  const adv = Math.sign((spec.adv ?? 0) + (prep ? 1 : 0));
+  const dc = spec.opposed ? 11 + spec.opposed.bonus : spec.dc;
+  return { spec, attrMod, skillMod, mods, totalMod, dc, adv, prepared: prep?.label, prepTag: prep?.tag };
 }
 
 export function tierFor(nat: number, total: number, dc: number, crit: CheckSpec['crit'] = 'standard'): Tier {
@@ -66,6 +73,14 @@ export function tierFor(nat: number, total: number, dc: number, crit: CheckSpec[
 
 /** exact probability distribution of tiers */
 export function odds(rc: ResolvedCheck): Record<Tier, number> {
+  if (rc.spec.opposed) {
+    const acc: Record<Tier, number> = { crit_failure: 0, failure: 0, partial: 0, success: 0, crit_success: 0 };
+    for (let o = 1; o <= 20; o++) {
+      const part = odds({ ...rc, spec: { ...rc.spec, opposed: undefined }, dc: o + rc.spec.opposed.bonus });
+      for (const t of TIER_ORDER) acc[t] += part[t] / 20;
+    }
+    return acc;
+  }
   const out: Record<Tier, number> = { crit_failure: 0, failure: 0, partial: 0, success: 0, crit_success: 0 };
   for (let a = 1; a <= 20; a++) {
     if (rc.adv === 0) {
@@ -109,8 +124,18 @@ export function roll(ctx: Ctx, spec: CheckSpec): RollInfo {
   const dice = rc.adv === 0 ? [ctx.rng.d20()] : [ctx.rng.d20(), ctx.rng.d20()];
   const natural = rc.adv > 0 ? Math.max(...dice) : rc.adv < 0 ? Math.min(...dice) : dice[0];
   const total = natural + rc.totalMod;
+  let opp: RollInfo['opp'];
+  if (spec.opposed) {
+    const die = ctx.rng.d20();
+    opp = { label: spec.opposed.label, icon: spec.opposed.icon, bonus: spec.opposed.bonus, die, total: die + spec.opposed.bonus };
+    rc.dc = opp.total;
+  }
   const tier = tierFor(natural, total, rc.dc, spec.crit);
   const s = ctx.s;
+  if (rc.prepTag) {
+    delete s.flags[prepFlag(rc.prepTag)];
+    ctx.change('info', `⭐ Đã dùng lợi thế: ${rc.prepared}`);
+  }
   s.stats.checks++;
   if (tier === 'crit_success') s.stats.crits++;
   if (tier === 'crit_failure') s.stats.critFails++;
@@ -129,6 +154,8 @@ export function roll(ctx: Ctx, spec: CheckSpec): RollInfo {
     tier,
     bands: bands(rc.totalMod, rc.dc, spec.crit),
     crit: spec.crit ?? 'standard',
+    opp,
+    prepared: rc.prepared,
   };
 }
 

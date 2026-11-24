@@ -118,6 +118,26 @@ const SLIDES: Slide[] = [
     ),
   },
   {
+    icon: '⚔️',
+    title: 'Nhiều kiểu thử thách',
+    body: (
+      <ul className="guide-list">
+        <li>
+          <b>Đối kháng:</b> khi đuổi khỉ hay đối đầu lợn rừng, đối thủ cũng tung xúc xắc — bạn cần tổng điểm cao hơn tổng của nó.
+        </li>
+        <li>
+          <b>Chuẩn bị:</b> dành một buổi theo dõi lối mòn thú, bắt mồi hay khảo sát đường leo → lần thử tiếp theo được <b>tung 2 viên, lấy viên cao</b>.
+        </li>
+        <li>
+          <b>Hy sinh tài nguyên:</b> trước khi tung, có thể đốt dầu đèn, dùng mồi, buộc thêm dây… để cộng điểm.
+        </li>
+        <li>
+          <b>Leo thang rủi ro:</b> lặn vào khoang tàu chìm hay thám hiểm hang sâu — mỗi chặng sâu hơn nhiều đồ quý hơn, nhưng thất bại là đánh rơi đồ. Biết dừng đúng lúc!
+        </li>
+      </ul>
+    ),
+  },
+  {
     icon: '🗺️',
     title: 'Một hòn đảo biết thay đổi',
     body: (

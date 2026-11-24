@@ -29,6 +29,10 @@ export interface RollInfo {
   tier: Tier;
   bands?: Band[];
   crit?: CritPolicy;
+  /** opposed check: the opponent's roll */
+  opp?: { label: string; icon?: string; bonus: number; die: number; total: number };
+  /** preparation used up by this roll */
+  prepared?: string;
 }
 
 export type CritPolicy = 'standard' | 'safe' | 'none';
@@ -79,6 +83,10 @@ export interface CheckView {
   /** lowest kept-die face for Success or better; null = impossible */
   successFace: number | null;
   crit: CritPolicy;
+  /** opposed check: an opponent rolls d20 + bonus instead of a fixed DC */
+  opposed?: { label: string; icon?: string; bonus: number };
+  /** a preparation gives advantage on this check */
+  prepared?: string;
 }
 
 export interface MaterialView {
@@ -116,6 +124,21 @@ export interface ActionView {
   untrained?: boolean;
   /** set on actions that belong to a world object */
   objectUid?: number;
+  /** resources the player may sacrifice for a bonus (one at a time) */
+  sacrifices?: SacrificeView[];
+}
+
+export interface SacrificeView {
+  id: string;
+  label: string;
+  icon: string;
+  itemName: string;
+  qty: number;
+  have: number;
+  bonus: number;
+  available: boolean;
+  /** the check with this sacrifice applied */
+  check: CheckView;
 }
 
 export interface ChoiceView {

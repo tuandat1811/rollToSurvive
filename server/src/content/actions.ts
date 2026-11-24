@@ -30,6 +30,8 @@ import { traitDefs } from './traits.js';
 import { con } from '../engine/consequence.js';
 import { OBJECT_DEFS, objectsAt } from './objects.js';
 import { LOCATION_STATES, locationAccessible, locationState } from './locationStates.js';
+import { PREPS, PREP_BY_TAG, prepFlag } from './prep.js';
+import { EXPEDITIONS, EXPEDITION_BY_ID, resolveStep, runsFlag } from './expeditions.js';
 
 export type ActionGroup = 'survival' | 'explore' | 'food' | 'craft' | 'base' | 'medical' | 'escape' | 'travel';
 
@@ -1419,6 +1421,56 @@ const actions: ActionDef[] = [
       st.integrity = Math.min(100, st.integrity + 25);
       ctx.say('Bạn bổ sung nốt vật liệu, phần vá tạm giờ đã chắc chắn.');
       ctx.change('good', `Đã hoàn thiện sửa chữa — độ bền ${st.integrity}%`);
+    },
+  },
+
+  // ============================== RESOLUTION VARIETY: preparation & expeditions
+  {
+    id: 'prepare',
+    group: 'food',
+    icon: (s, p) => PREP_BY_TAG[p].icon,
+    name: (s, p) => PREP_BY_TAG[p].name,
+    desc: (s, p) => `${PREP_BY_TAG[p].desc} (Hiệu lực khoảng ${PREP_BY_TAG[p].slots / 4} ngày.)`,
+    hint: k('Lần kiểm tra tiếp theo: tung 2 viên d20, lấy viên cao'),
+    energy: (s, p) => PREP_BY_TAG[p].energy,
+    variants: () => PREPS.map((x) => x.tag),
+    visible: (s, p) => PREP_BY_TAG[p].regions.includes(here(s)) && Number(s.flags[prepFlag(p)] ?? -1) < absSlotOf(s),
+    priority: k(12),
+    resolve: (ctx, _tier, p) => {
+      const d = PREP_BY_TAG[p];
+      ctx.flag(prepFlag(p), ctx.now + d.slots);
+      ctx.say('Bạn dành thời gian chuẩn bị kỹ lưỡng.');
+      ctx.change('good', `⭐ ${d.label}: lần tới có lợi thế`);
+    },
+  },
+  {
+    id: 'expedition',
+    group: 'explore',
+    icon: (s, p) => EXPEDITION_BY_ID[p].icon,
+    name: (s, p) => EXPEDITION_BY_ID[p].name,
+    desc: (s, p) => {
+      const e = EXPEDITION_BY_ID[p];
+      const left = e.runs - Number(s.flags[runsFlag(p)] ?? 0);
+      return `${e.desc} (Còn khám phá được ${left} lần.)`;
+    },
+    hint: k('Càng vào sâu càng nhiều đồ quý — dừng lúc nào cũng được'),
+    energy: (s, p) => EXPEDITION_BY_ID[p].energy,
+    variants: () => EXPEDITIONS.map((e) => e.id),
+    visible: (s, p) => EXPEDITION_BY_ID[p].visible(s) && Number(s.flags[runsFlag(p)] ?? 0) < EXPEDITION_BY_ID[p].runs,
+    check: (s, p) => EXPEDITION_BY_ID[p].steps[0].check(s),
+    notes: (s, p) => {
+      const e = EXPEDITION_BY_ID[p];
+      return [
+        '⚠️ Leo thang rủi ro: sau mỗi chặng, chọn đi sâu hơn hoặc quay ra. Thất bại → đánh rơi một nửa đồ trong túi; thất bại thảm hại → mất hết.',
+        `Các chặng: ${e.steps.map((st, i) => `${i + 1}. ${st.name} (DC ${st.check(s).dc})`).join(' → ')}`,
+      ];
+    },
+    priority: k(30),
+    resolve: (ctx, tier, p) => {
+      const e = EXPEDITION_BY_ID[p];
+      ctx.flag(runsFlag(p), Number(ctx.s.flags[runsFlag(p)] ?? 0) + 1);
+      const bag = resolveStep(ctx, e, 0, tier, {});
+      if (bag) ctx.s.pending = { uid: ctx.nextUid(), eventId: 'expedition_step', data: { exp: p, step: 1, bag } };
     },
   },
 

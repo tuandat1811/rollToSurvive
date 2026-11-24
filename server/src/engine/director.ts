@@ -3,6 +3,7 @@ import { REGION_DEFS } from '../content/defs.js';
 import { EVENTS, type EventDef, type EventTrigger } from '../content/events.js';
 import { AFTER_ACTION_CHANCE, FAMILY_COOLDOWN_DAYS, MISFORTUNE, NOVELTY, PACING_CATEGORY_MULT, RECOVERY_EVENTS, familyOf } from '../content/families.js';
 import { EVENT_META, RARITY_WEIGHT } from '../content/meta.js';
+import { type Bag, grantBag } from '../content/expeditions.js';
 import { traitEventMult } from '../content/traits.js';
 import type { Ctx } from './ctx.js';
 
@@ -166,6 +167,10 @@ function handleShips(ctx: Ctx) {
     return;
   }
   if (view) {
+    if (s.pending?.eventId === 'expedition_step') {
+      grantBag(ctx, (s.pending.data?.bag ?? {}) as Bag);
+      ctx.change('info', 'Bạn vội quay ra với những gì đã có');
+    }
     if (s.pending) s.pending = null; // the ship takes priority over a minor card
     fire(ctx, EVENTS.ship_sighted);
   } else {

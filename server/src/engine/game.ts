@@ -4,6 +4,7 @@ import { ATTR_DEFS, ROUTE_DEFS, SECONDARY_POOLS, WEATHER_DEFS, WEATHER_MARKOV } 
 import { EVENTS } from '../content/events.js';
 import { ITEMS } from '../content/items.js';
 import { CONDITIONS } from '../content/conditions.js';
+import { SACRIFICES, type SacrificeDef } from '../content/sacrifice.js';
 import { MISFORTUNE } from '../content/families.js';
 import { awardXp, roll } from './check.js';
 import { Ctx, absSlot, count, countBoth, storageWaterCap, waterCount, containerCap, carryMax, weightOf } from './ctx.js';
@@ -17,6 +18,7 @@ import {
   REGIONS,
   SKILLS,
   type AttrId,
+  type CheckSpec,
   type GameState,
   type ItemStack,
   type RegionId,
@@ -349,7 +351,25 @@ function finish(ctx: Ctx): { state: GameState; result: TurnResult } {
 
 // ---------------------------------------------------------------- perform action
 
-export function performAction(prev: GameState, key: string) {
+/** resources the player may sacrifice for a bonus on this action's check (only those they carry) */
+export function sacrificesFor(s: GameState, inst: ActionInstance) {
+  const spec = inst.def.check?.(s, inst.param);
+  if (!spec) return [];
+  const mats = inst.def.materials?.(s, inst.param) ?? [];
+  return SACRIFICES.filter((x) => x.applies(inst.def.id, spec))
+    .map((x) => {
+      const have = countBoth(s, x.item);
+      const need = x.qty + (mats.find((m) => m.id === x.item)?.qty ?? 0);
+      return { def: x, have, available: have >= need, spec };
+    })
+    .filter((x) => x.have > 0);
+}
+
+export function withSacrifice(spec: CheckSpec, x: SacrificeDef): CheckSpec {
+  return { ...spec, mods: [...(spec.mods ?? []), { label: `Hy sinh: ${x.label}`, value: x.bonus }] };
+}
+
+export function performAction(prev: GameState, key: string, opts: { sacrifice?: string } = {}) {
   assertPlaying(prev);
   if (prev.pending) throw new GameError('Hãy giải quyết sự kiện đang diễn ra trước');
   if (prev.escape) throw new GameError('Bạn đang ở trên biển');
@@ -357,6 +377,8 @@ export function performAction(prev: GameState, key: string) {
   if (!inst) throw new GameError('Hành động không khả dụng');
   const unmet = unmetReasons(prev, inst);
   if (unmet.length) throw new GameError(unmet.join('; '));
+  const sac = opts.sacrifice ? sacrificesFor(prev, inst).find((x) => x.def.id === opts.sacrifice) : undefined;
+  if (opts.sacrifice && !sac?.available) throw new GameError('Không đủ vật phẩm để hy sinh');
 
   const s = begin(prev);
   const { def, param } = inst;
@@ -367,7 +389,11 @@ export function performAction(prev: GameState, key: string) {
   for (const m of def.materials?.(s, param) ?? []) ctx.removeItem(m.id, m.qty, 'both');
 
   let tier: Tier = 'success';
-  const spec = def.check?.(s, param) ?? null;
+  let spec = def.check?.(s, param) ?? null;
+  if (spec && sac) {
+    ctx.removeItem(sac.def.item, sac.def.qty, 'both');
+    spec = withSacrifice(spec, sac.def);
+  }
   const xpKey = def.xpKey ? def.xpKey(s, param) : def.id;
   if (spec) {
     const info = roll(ctx, spec);

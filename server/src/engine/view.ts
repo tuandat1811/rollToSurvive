@@ -11,7 +11,7 @@ import { absSlot, carryMax, containerCap, storageWaterCap, waterCount, weightOf 
 import { journey, stageCheck } from './escape.js';
 import { buildEscapePlan } from './escapePlan.js';
 import { traitDefs } from '../content/traits.js';
-import { actionEnergy, eventChoices, instances, materialStatus, unmetReasons } from './game.js';
+import { actionEnergy, eventChoices, instances, materialStatus, sacrificesFor, unmetReasons, withSacrifice } from './game.js';
 import { EVENT_META, actionMeta } from '../content/meta.js';
 import { OBJECT_DEFS } from '../content/objects.js';
 import { locationStateDef } from '../content/locationStates.js';
@@ -38,6 +38,8 @@ function checkView(s: GameState, spec: CheckSpec): CheckView {
     bands: b,
     successFace: successFace(b),
     crit: spec.crit ?? 'standard',
+    opposed: spec.opposed,
+    prepared: rc.prepared,
   };
 }
 
@@ -112,6 +114,19 @@ export function buildView(id: string, s: GameState): GameView {
             notes: def.notes?.(s, param) ?? [],
             priority: def.priority?.(s, param) ?? 10,
             followUp: !!def.followUp,
+            sacrifices: spec
+              ? sacrificesFor(s, inst).map((x) => ({
+                  id: x.def.id,
+                  label: x.def.label,
+                  icon: ITEMS[x.def.item].icon,
+                  itemName: ITEMS[x.def.item].name,
+                  qty: x.def.qty,
+                  have: x.have,
+                  bonus: x.def.bonus,
+                  available: x.available,
+                  check: checkView(s, withSacrifice(spec, x.def)),
+                }))
+              : [],
             code: actionMeta(inst.key)?.code,
             tier: actionMeta(inst.key)?.tier,
             untrained: def.untrained?.(s, param) || undefined,

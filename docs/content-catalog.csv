@@ -6,6 +6,9 @@ Action,ACT-EXP-004,search_ruins,Lục soát tàn tích hải đăng,Exploration,
 Action,ACT-EXP-005,object:washed_crate:pry,Cạy nắp thùng (Thùng hàng trôi dạt),Exploration,Tier 1,,,Dùng dao lách vào khe nắp và cạy từ từ — lấy được đồ nguyên vẹn.
 Action,ACT-EXP-006,object:old_cache:open,Mở gói đồ cẩn thận (Gói đồ trong hốc cây),Exploration,Tier 1,,,"Gỡ từng lớp vải dầu, kiểm tra xem có gì nguy hiểm bên trong."
 Action,ACT-EXP-007,clear_location:cave,Dọn lối vào Hang đá,Exploration,Tier 2,,,"Hang đá đang ở trạng thái “Lối vào thông thoáng”. Bẩy đá, chèn gỗ để mở lại lối vào."
+Action,ACT-EXP-008,expedition:wreck_hold,Lặn vào khoang chìm,Exploration,Tier 2,,,"Phần đuôi xác tàu chìm dưới nước, các khoang sâu chưa ai đụng tới. Càng vào sâu càng nhiều đồ quý — và càng dễ mắc kẹt. (Còn khám phá được 3 lần.)"
+Action,ACT-EXP-009,expedition:deep_cave,Thám hiểm sâu trong hang,Exploration,Tier 3,,,"Phía sau hang đá là những đường hầm tối dẫn sâu vào lòng núi. Có thể có đồ quý, nước ngầm, cả dấu vết người xưa — nếu bạn tìm được đường ra. (Còn khám phá được 2 lần.)"
+Action,ACT-EXP-010,prepare:climb,Khảo sát đường leo,Exploration,Tier 1,,,"Đi quanh chân vách, tìm chỗ bám chắc và đường lui. Lần leo trèo tiếp theo sẽ có lợi thế. (Hiệu lực khoảng 2 ngày.)"
 Action,ACT-GAT-001,collect_water,Lấy nước suối,Gathering,Tier 1,,,Đổ đầy các bình chứa bằng nước suối. Nước chưa xử lý có thể gây ngộ độc — nên đun sôi.
 Action,ACT-GAT-002,forage,Tìm kiếm thức ăn,Gathering,Tier 1,,,"Nhặt dừa, mò sò ốc, bắt cua, vớt rong biển trên bãi đá. Đồ sống nên nấu chín."
 Action,ACT-GAT-003,gather,Thu thập vật liệu,Gathering,Tier 1,,,Nhặt gỗ trôi dạt và lá cọ dọc bãi biển.
@@ -16,8 +19,10 @@ Action,ACT-GAT-007,find_alt_water,Tìm nguồn nước khác,Gathering,Tier 2,,,
 Action,ACT-HUN-001,hunt,Săn thú nhỏ,Hunting & Trapping,Tier 2,,,"Rình bắt heo rừng, thỏ, chim trong rừng. Không có vũ khí rất bất lợi. Thú sẽ cảnh giác hơn nếu bị săn liên tục."
 Action,ACT-HUN-002,set_trap:snare,Đặt bẫy thú,Hunting & Trapping,Tier 2,,,Đặt bẫy trên lối mòn của thú. Quay lại từ ngày hôm sau để thu thịt (không tốn thời gian).
 Action,ACT-HUN-003,check_traps,Thu bẫy,Hunting & Trapping,Tier 2,,,"Kiểm tra các bẫy đã đặt ở khu vực này. Việc nhanh, không tốn thời gian."
+Action,ACT-HUN-004,prepare:hunting,Theo dõi lối mòn thú,Hunting & Trapping,Tier 1,,,"Dành một buổi rình xem thú đi lối nào, ăn ở đâu, uống nước giờ nào. Lần săn bắt tiếp theo sẽ có lợi thế. (Hiệu lực khoảng 2 ngày.)"
 Action,ACT-FSH-001,fish,Đánh cá,Fishing,Tier 1,,,Bắt cá ở vùng nước nông ven bờ. Bắt bằng tay rất khó.
 Action,ACT-FSH-002,set_trap:fish_trap,Đặt bẫy cá,Fishing,Tier 2,,,Đặt lờ đón cá. Quay lại từ ngày hôm sau để thu cá (không tốn thời gian).
+Action,ACT-FSH-003,prepare:fishing,"Bắt mồi, dò chỗ cá",Fishing,Tier 1,,,"Đào giun, bắt mồi và quan sát chỗ cá hay tụ. Lần đánh cá tiếp theo sẽ có lợi thế. (Hiệu lực khoảng 2 ngày.)"
 Action,ACT-CRF-001,craft:stone_knife,Chế tạo Dao đá,Crafting,Tier 1,,,Ghè đá thành lưỡi sắc. Mở khóa nhiều công thức cần dao.
 Action,ACT-CRF-002,craft:stone_axe,Chế tạo Rìu đá,Crafting,Tier 2,,,"Thu thập gỗ nhiều hơn, tốn ít sức hơn; dọn cây đổ dễ dàng."
 Action,ACT-CRF-003,craft:spear,Chế tạo Giáo gỗ,Crafting,Tier 2,,,"Săn bắt +2, đâm cá +1."
@@ -91,6 +96,7 @@ Event,EVT-DIS-001,freshwater_seep,Cát ẩm dưới chân,discovery,unique,world
 Event,EVT-DIS-002,monkeys_lead,Bầy khỉ dẫn đường,discovery,common,persistent,,"Bầy khỉ hôm trước xuất hiện, kêu inh ỏi rồi chuyền cành về một hướng — như muốn bạn đi theo."
 Event,EVT-DIS-003,strange_rock,Hòn đá lấp lánh,discovery,uncommon,action,cooldown 5d,"Giữa đống đá vụn, một hòn đá có vân đen bóng lấp lánh dưới nắng — trông giống đá lửa, nhưng lớn hơn hẳn những viên bạn từng thấy."
 Event,EVT-DIS-004,hidden_hollow,Hốc cây bí ẩn,discovery,uncommon,action,once,"Khi kéo một dây leo, lớp vỏ cây mục bong ra để lộ một hốc cây — bên trong có một gói vải dầu được buộc cẩn thận. Ai đó đã cất giấu nó ở đây."
+Event,EVT-DIS-005,expedition_step,Đi sâu hơn hay quay ra?,discovery,common,action,,
 Event,EVT-WLD-001,bush_noise,Tiếng động trong bụi cây,wildlife,common,world,cooldown 2d,Bụi cây trước mặt rung lên sột soạt. Có thứ gì đó khá lớn đang di chuyển trong đó.
 Event,EVT-WLD-002,monkey_thief,Khỉ trộm đồ,wildlife,common,world,cooldown 3d,"Một con khỉ từ trên cây phóng xuống, giật lấy đồ ăn trong túi bạn rồi chạy biến!"
 Event,EVT-WLD-003,turtle_nesting,Rùa biển lên bờ,wildlife,uncommon,world,cooldown 3d,"Hoàng hôn buông xuống, một con rùa biển lớn chậm chạp bò lên bãi cát và bắt đầu đào ổ đẻ trứng."

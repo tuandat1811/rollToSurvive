@@ -12,6 +12,7 @@ import { CHAIN_EVENTS } from './events-chains.js';
 import { EXTRA_EVENTS } from './events-extra.js';
 import { ACTION_EVENTS } from './events-action.js';
 import { CONTROL_EVENTS } from './events-control.js';
+import { EXPEDITION_EVENTS } from './events-expedition.js';
 import { con } from '../engine/consequence.js';
 import { ITEMS } from './items.js';
 
@@ -464,6 +465,7 @@ const list: EventDef[] = [
           attr: 'AGI',
           skill: 'hunting',
           dc: 14,
+          opposed: { label: 'Con thú', icon: '🐾', bonus: 3 },
           outdoor: true,
           mods: s.inventory.some((x) => x.id === 'spear') ? [{ label: 'Giáo gỗ', value: 2 }] : [{ label: 'Tay không', value: -2 }],
         },
@@ -512,7 +514,7 @@ const list: EventDef[] = [
         desc: 'Đuổi theo con khỉ qua rừng rậm.',
         slots: 0,
         energy: 8,
-        check: { label: 'Đuổi bắt con khỉ', attr: 'AGI', skill: 'survival', dc: 13, outdoor: true },
+        check: { label: 'Đuổi bắt con khỉ', attr: 'AGI', skill: 'survival', dc: 13, outdoor: true, opposed: { label: 'Con khỉ', icon: '🐒', bonus: 2 } },
         resolve: (ctx, tier) => {
           if (isSuccess(tier)) {
             ctx.say('Bạn dồn được con khỉ vào gốc cây, nó vứt lại đồ ăn.');
@@ -781,5 +783,5 @@ const STRUCT_NAMES: Record<string, string> = {
   signal_pyre: 'Đống lửa tín hiệu',
 };
 
-export const EVENTS: Record<string, EventDef> = Object.fromEntries([...list, ...EXTRA_EVENTS, ...CHAIN_EVENTS, ...ACTION_EVENTS, ...CONTROL_EVENTS].map((e) => [e.id, e]));
+export const EVENTS: Record<string, EventDef> = Object.fromEntries([...list, ...EXTRA_EVENTS, ...CHAIN_EVENTS, ...ACTION_EVENTS, ...CONTROL_EVENTS, ...EXPEDITION_EVENTS].map((e) => [e.id, e]));
 export { SLOT_NAMES };

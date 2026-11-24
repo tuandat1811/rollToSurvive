@@ -187,8 +187,8 @@ export default function Game({ initial, onExit, onNew }: { initial: GameView; on
           action={view.actions.find((a) => a.key === selected.key) ?? selected}
           busy={busy}
           onClose={() => setSelected(null)}
-          onConfirm={async () => {
-            const ok = await act('action', { key: selected.key });
+          onConfirm={async (sacrifice) => {
+            const ok = await act('action', sacrifice ? { key: selected.key, sacrifice } : { key: selected.key });
             if (ok) setSelected(null);
           }}
         />

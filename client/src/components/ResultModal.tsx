@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { TurnResult } from '../../../shared/types.ts';
-import { Changes, D20, Formula, Modal, NoticeCard, ThresholdTable, TIER_NAMES, diceText } from './ui.tsx';
+import { Changes, D20, Formula, Modal, NoticeCard, ThresholdTable, TIER_NAMES, diceText, sign } from './ui.tsx';
 
 const ATTR_NAMES: Record<string, string> = { STR: 'Sức mạnh', AGI: 'Nhanh nhẹn', END: 'Sức bền', INT: 'Trí tuệ', PER: 'Quan sát' };
 const SKILL_NAMES: Record<string, string> = {
@@ -65,17 +65,30 @@ export default function ResultModal({ result, onClose }: { result: TurnResult; o
             </div>
             <div className="tiny faint" style={{ textAlign: 'center' }}>
               Tung {diceText(roll.dice.length, roll.adv)}
+              {roll.prepared ? ` · ⭐ ${roll.prepared}` : ''}
             </div>
+            {roll.opp && done && (
+              <div className="opp-roll">
+                <span>
+                  {roll.opp.icon} {roll.opp.label} tung
+                </span>
+                <D20 value={roll.opp.die} state="landed" />
+                <span>
+                  {sign(roll.opp.bonus)} = <b>{roll.opp.total}</b>
+                </span>
+              </div>
+            )}
             {done && (
               <>
                 <div style={{ marginTop: 10 }}>
                   <Formula
                     check={{ ...roll, attrName: ATTR_NAMES[roll.attr], skillName: roll.skill ? SKILL_NAMES[roll.skill] : undefined }}
                     natural={roll.natural}
+                    vs={roll.opp ? `${roll.opp.icon ?? ''} ${roll.opp.label} ${roll.opp.total}` : undefined}
                   />
                 </div>
                 <div className="row" style={{ justifyContent: 'center', marginTop: 8, fontSize: 15 }}>
-                  Tổng <b style={{ fontSize: 22, fontFamily: 'var(--serif)' }}>{roll.total}</b> so với DC <b>{roll.dc}</b>
+                  Tổng <b style={{ fontSize: 22, fontFamily: 'var(--serif)' }}>{roll.total}</b> so với {roll.opp ? `${roll.opp.label}` : 'DC'} <b>{roll.dc}</b>
                   {roll.natural === 20 && <span className="badge dice">Natural 20!</span>}
                   {roll.natural === 1 && <span className="badge bad">Natural 1!</span>}
                 </div>

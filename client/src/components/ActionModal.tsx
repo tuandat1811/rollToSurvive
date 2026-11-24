@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { ActionView } from '../../../shared/types.ts';
 import { CheckBox, Modal } from './ui.tsx';
 
@@ -10,8 +11,11 @@ export default function ActionModal({
   action: ActionView;
   busy: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: (sacrifice?: string) => void;
 }) {
+  const [sac, setSac] = useState<string | undefined>(undefined);
+  const chosen = a.sacrifices?.find((x) => x.id === sac && x.available);
+  const check = chosen ? chosen.check : a.check;
   const dangerous = a.group === 'escape' && a.id.startsWith('escape');
   return (
     <Modal onClose={onClose}>
@@ -60,8 +64,23 @@ export default function ActionModal({
           </ul>
         )}
 
-        {a.check ? (
-          <CheckBox check={a.check} />
+        {a.sacrifices && a.sacrifices.length > 0 && (
+          <div className="box sacrifice">
+            <div className="section-title">Hy sinh tài nguyên để tăng cơ hội (tùy chọn)</div>
+            <label className={`sac-opt ${!chosen ? 'on' : ''}`}>
+              <input type="radio" name="sac" checked={!chosen} onChange={() => setSac(undefined)} /> Không dùng gì thêm
+            </label>
+            {a.sacrifices.map((x) => (
+              <label key={x.id} className={`sac-opt ${chosen?.id === x.id ? 'on' : ''} ${x.available ? '' : 'off'}`}>
+                <input type="radio" name="sac" disabled={!x.available} checked={chosen?.id === x.id} onChange={() => setSac(x.id)} />
+                {x.icon} {x.label}: tốn {x.qty} {x.itemName} (có {x.have}) → <b>+{x.bonus}</b>
+              </label>
+            ))}
+          </div>
+        )}
+
+        {check ? (
+          <CheckBox check={check} />
         ) : (
           <div className="box small muted">Hành động này không cần tung xúc xắc.</div>
         )}
@@ -89,7 +108,7 @@ export default function ActionModal({
         <button className="btn ghost" onClick={onClose}>
           Hủy
         </button>
-        <button className={`btn ${dangerous ? 'danger' : 'primary'}`} disabled={!a.available || busy} onClick={onConfirm} autoFocus>
+        <button className={`btn ${dangerous ? 'danger' : 'primary'}`} disabled={!a.available || busy} onClick={() => onConfirm(chosen?.id)} autoFocus>
           {busy ? 'Đang thực hiện…' : a.check ? '🎲 Thực hiện' : 'Thực hiện'}
         </button>
       </div>
