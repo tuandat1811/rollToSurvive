@@ -187,7 +187,7 @@ describe('weather', () => {
 });
 
 describe('run variety', () => {
-  it('rolls different islands: traits, first weather, starting kit and story', () => {
+  it('rolls different islands: traits, day-2 weather, starting kit and story (day 1 is always clear)', () => {
     const traitSets = new Set<string>();
     const weathers = new Set<string>();
     const kits = new Set<string>();
@@ -198,7 +198,8 @@ describe('run variety', () => {
       const defs = traitDefs(s);
       expect(defs[0].conflicts?.includes(defs[1].id)).not.toBe(true);
       traitSets.add([...s.traits!].sort().join('+'));
-      weathers.add(s.world.weather);
+      expect(s.world.weather).toBe('clear');
+      weathers.add(s.world.tomorrow);
       kits.add(s.inventory.map((x) => x.id).sort().join(','));
       stories.add(s.last!.narrative[0].slice(0, 40));
     }

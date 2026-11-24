@@ -8,7 +8,7 @@ import { Ctx, absSlot, count, countBoth, storageWaterCap, waterCount, containerC
 import { escapeDecision } from './escape.js';
 import { Rng } from './rng.js';
 import { advanceSlots, checkDeath, rollWeather } from './time.js';
-import { pickTraits, traitDefs, traitWeatherMult } from '../content/traits.js';
+import { pickTraits, traitDefs } from '../content/traits.js';
 import {
   ATTRS,
   REGIONS,
@@ -133,9 +133,9 @@ export function newGame(name: string, attrs: Record<AttrId, number>, seed: numbe
   const firstRange = tdefs.find((t) => t.firstShip)?.firstShip ?? [BALANCE.ships.firstMin, BALANCE.ships.firstMax];
   const firstShipDay = rng.int(firstRange[0], firstRange[1]);
 
-  // first day: a random, non-dangerous weather shaped by the island traits
-  const startOptions: WeatherId[] = ['clear', 'cloudy', 'breezy', 'drizzle', 'fog', 'hot', 'windy'];
-  const startWeather = rng.weighted(startOptions.map((w) => [w, traitWeatherMult({ traits } as GameState, w)] as const)) ?? 'clear';
+  // day 1 is always clear so the first day is forgiving; from day 2 the weather
+  // follows the (trait-shaped) random transitions
+  const startWeather: WeatherId = 'clear';
   const tomorrow = rollWeather(rng, startWeather, 2, { traits } as GameState);
 
   // what the survivor managed to hold on to, and how the wreck left them
