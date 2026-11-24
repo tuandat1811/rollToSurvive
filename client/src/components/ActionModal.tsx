@@ -29,7 +29,6 @@ export default function ActionModal({
             {a.energy > 0 && <span className="badge energy">⚡ {a.energy} năng lượng</span>}
             {a.tier && <span className="badge" title="Bậc tiến trình của hành động (1 cơ bản → 3 nâng cao)">Bậc {a.tier}</span>}
             {a.untrained && <span className="badge warn">⚠️ Chưa thành thạo (-5)</span>}
-            {a.code && <span className="badge code">{a.code}</span>}
           </div>
         </div>
       </div>

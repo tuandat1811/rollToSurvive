@@ -93,7 +93,6 @@ p { margin: 0 0 8px; }
 .badge.energy { background: rgba(201, 214, 75, 0.14); color: var(--energy); }
 .badge.dice { background: rgba(233, 196, 106, 0.15); color: var(--sand); }
 .badge.free { background: rgba(143, 209, 106, 0.14); color: var(--good); }
-.badge.code { background: transparent; border: 1px dashed var(--line); color: var(--text-dim); font-family: ui-monospace, monospace; font-size: 11px; }
 .badge.warn { background: rgba(244, 162, 97, 0.16); color: var(--warn); }
 .badge.bad { background: rgba(239, 107, 91, 0.16); color: var(--bad); }
 .badge.good { background: rgba(143, 209, 106, 0.14); color: var(--good); }
